@@ -1,0 +1,2146 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="なかむら献立">
+<meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<title>献立管理システム | 洋食だいにんぐ なかむら</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;600;700;800&family=Zen+Kaku+Gothic+New:wght@300;400;500;700&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+/* ダークモード対策（強制ライトモード） */
+@media (prefers-color-scheme: dark) {
+  html, body { background: #eae5dc !important; color: #1c1612 !important; color-scheme: light !important; }
+}
+
+:root{
+  --ink:#1c1612;
+  --bg:#eae5dc;
+  --cream:#f8f4ed;
+  --card:#ffffff;
+  --gd:#2a5c3f;--gm:#4a8c62;--gl:#c8e6d0;--gxl:#f0f9f3;
+  --nd:#1a2e47;--nm:#2e5080;--nl:#c0d4ee;--nxl:#f0f4fa;
+  --gold:#b8902a;--gold-l:#fdf0d0;
+  --red:#c0392b;
+  --border:#ddd5c2;--line:#e8e0d0;
+  --mid:#7a6e5e;--light:#f5f0e8;
+  --shadow:rgba(28,22,18,0.10);
+}
+
+body{background:var(--bg);font-family:'Zen Kaku Gothic New',sans-serif;color:var(--ink);min-height:100vh}
+
+/* ─ ページ全体 ─ */
+.page{max-width:520px;margin:0 auto;padding:0 0 60px}
+
+/* ─ ヘッダー ─ */
+.top-bar{
+  background:var(--gd);
+  padding:18px 20px 14px;
+  display:flex;align-items:flex-end;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 3px 20px rgba(42,92,63,.4);
+}
+.top-shop{font-size:9px;color:rgba(255,255,255,.6);letter-spacing:.2em;font-family:'Shippori Mincho B1',serif;display:block;margin-bottom:2px}
+.top-title{font-family:'Shippori Mincho B1',serif;font-size:20px;font-weight:800;color:#fff;letter-spacing:.05em;line-height:1}
+.top-version{font-size:9px;color:rgba(255,255,255,.5);letter-spacing:.1em}
+
+/* ─ タブナビ ─ */
+.tab-nav{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  background:var(--cream);
+  border-bottom:2px solid var(--border);
+  position:sticky;top:62px;z-index:99;
+}
+.tab-btn{
+  padding:12px 4px 10px;
+  border:none;background:transparent;
+  font-family:'Zen Kaku Gothic New',sans-serif;
+  font-size:10px;font-weight:500;
+  color:var(--mid);letter-spacing:.06em;
+  cursor:pointer;transition:all .2s;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  border-bottom:2px solid transparent;margin-bottom:-2px;
+}
+.tab-btn .t-ico{font-size:16px}
+.tab-btn.active{color:var(--gd);border-bottom-color:var(--gd);font-weight:700}
+.tab-btn.active .t-ico{transform:scale(1.1)}
+
+/* ─ タブパネル ─ */
+.panel{display:none;padding:16px 14px;animation:fadeIn .25s ease}
+.panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ─ セクションタイトル ─ */
+.sec-title{
+  font-family:'Shippori Mincho B1',serif;
+  font-size:16px;font-weight:700;
+  color:var(--ink);letter-spacing:.06em;
+  margin-bottom:14px;
+  display:flex;align-items:center;gap:8px;
+}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ─ 共通カード ─ */
+.card{background:var(--card);border-radius:14px;overflow:hidden;box-shadow:0 2px 14px var(--shadow);margin-bottom:12px}
+
+/* ─ モード切替（ランチ/ディナー） ─ */
+.mode-switch{display:grid;grid-template-columns:1fr 1fr;gap:3px;background:var(--border);border-radius:12px;padding:3px;margin-bottom:14px}
+.mode-btn{padding:11px;border:none;border-radius:9px;background:transparent;font-family:'Shippori Mincho B1',serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .22s;color:var(--mid);display:flex;align-items:center;justify-content:center;gap:6px;letter-spacing:.08em}
+.mode-btn.active-lunch{background:var(--gd);color:#fff;box-shadow:0 2px 10px rgba(42,92,63,.35)}
+.mode-btn.active-dinner{background:var(--nd);color:#fff;box-shadow:0 2px 10px rgba(26,46,71,.35)}
+
+/* ─ 入力方法切替 ─ */
+.input-switch{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.input-method-btn{
+  padding:12px;border:1.5px solid var(--border);border-radius:12px;
+  background:var(--card);font-family:'Shippori Mincho B1',serif;
+  font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;
+  color:var(--mid);display:flex;flex-direction:column;align-items:center;gap:5px;
+  letter-spacing:.06em;
+}
+.input-method-btn .m-ico{font-size:22px}
+.input-method-btn.active{border-color:var(--gd);background:var(--gxl);color:var(--gd)}
+.dinner-mode .input-method-btn.active{border-color:var(--nd);background:var(--nxl);color:var(--nd)}
+
+/* ─ 日付エリア ─ */
+.date-card-wrap{background:var(--card);border-radius:14px;padding:14px 16px;margin-bottom:12px;box-shadow:0 2px 10px var(--shadow)}
+.date-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.date-lbl{font-size:10px;font-weight:700;color:var(--mid);letter-spacing:.14em;white-space:nowrap}
+.date-inp{flex:1;height:42px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-family:'Zen Kaku Gothic New',sans-serif;font-size:15px;color:var(--ink);background:#fff;outline:none;-webkit-appearance:none}
+.date-inp:focus{border-color:var(--gm)}
+.day-circles{display:flex;gap:5px;justify-content:center}
+.dc{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--mid);font-family:'Shippori Mincho B1',serif;cursor:pointer;transition:all .2s;user-select:none}
+.dc.on{background:var(--gd);border-color:var(--gd);color:#fff;font-weight:700}
+.dinner-mode .dc.on{background:var(--nd);border-color:var(--nd)}
+
+/* ─ フィールド ─ */
+.card-hd{display:flex;align-items:center;gap:10px;padding:12px 16px}
+.hd-green{background:var(--gd)}.hd-gm{background:var(--gm)}.hd-navy{background:var(--nd)}.hd-nm{background:var(--nm)}.hd-nalt{background:#24426a}
+.hd-num{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.22);border:1.5px solid rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;font-family:'Shippori Mincho B1',serif;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.hd-ttl{font-family:'Shippori Mincho B1',serif;font-size:13px;font-weight:700;color:#fff;letter-spacing:.1em;flex:1}
+.hd-sub{font-size:9px;color:rgba(255,255,255,.7)}
+
+.frow{display:flex;align-items:stretch;border-bottom:1px solid var(--line);min-height:50px}
+.frow:last-child{border-bottom:none}
+.flbl{width:88px;flex-shrink:0;display:flex;align-items:center;padding:9px 8px 9px 0;font-size:10px;font-weight:700;color:var(--mid);letter-spacing:.1em;border-right:1px solid var(--line)}
+.finp{flex:1;border:none;outline:none;padding:9px 12px;font-family:'Zen Kaku Gothic New',sans-serif;font-size:15px;color:var(--ink);background:transparent;-webkit-appearance:none;border-radius:0;resize:none;overflow:hidden;min-height:44px;line-height:1.5;word-break:break-all}
+.finp::placeholder{color:#c8c0b8;font-size:12px}
+.finp:focus{background:var(--gxl)}
+.dinner-mode .finp:focus{background:var(--nxl)}
+
+/* オードブル仕切り */
+.app-sec{padding:12px 16px;border-bottom:2px solid var(--gl)}
+.app-sec:last-child{border-bottom:none}
+.app-lbl{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+.app-pt{width:24px;height:24px;border-radius:50%;background:var(--gd);color:#fff;font-family:'Shippori Mincho B1',serif;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.app-pt-txt{font-size:11px;font-weight:700;color:var(--gd);letter-spacing:.08em}
+
+/* 備考 */
+.note-hd{background:var(--gold);padding:11px 16px;font-family:'Shippori Mincho B1',serif;font-size:13px;font-weight:700;color:#fff;letter-spacing:.12em}
+.note-ta{width:100%;border:none;outline:none;padding:12px 16px;font-family:'Zen Kaku Gothic New',sans-serif;font-size:15px;color:var(--ink);background:#fff;min-height:70px;resize:none;-webkit-appearance:none}
+.note-ta::placeholder{color:#c0c8c0;font-size:12px}
+
+/* ─ 写真アップロード ─ */
+.upload-zone{
+  border:2px dashed var(--border);border-radius:12px;
+  padding:28px 16px;text-align:center;cursor:pointer;
+  transition:all .3s;background:var(--light);position:relative;
+  margin-bottom:12px;
+}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--gm);background:var(--gxl)}
+.dinner-mode .upload-zone:hover{border-color:var(--nm);background:var(--nxl)}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.u-ico{font-size:32px;margin-bottom:8px}
+.u-ttl{font-family:'Shippori Mincho B1',serif;font-size:14px;font-weight:700;letter-spacing:.08em;margin-bottom:4px}
+.u-sub{font-size:11px;color:var(--mid);letter-spacing:.06em}
+.preview-wrap{margin-bottom:12px;display:none}
+.preview-img{width:100%;max-height:220px;object-fit:contain;border-radius:10px;border:1px solid var(--border)}
+
+/* ─ AIローディング ─ */
+.ai-loading{display:none;text-align:center;padding:24px;flex-direction:column;align-items:center;gap:12px}
+.spinner{width:40px;height:40px;border:3px solid var(--gl);border-top-color:var(--gd);border-radius:50%;animation:spin 1s linear infinite}
+.spinner-navy{border-color:var(--nl);border-top-color:var(--nd)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-txt{font-family:'Shippori Mincho B1',serif;font-size:13px;color:var(--mid);letter-spacing:.1em;animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+
+/* ─ ボタン ─ */
+.btn-save{
+  width:100%;padding:15px;border:none;border-radius:12px;
+  font-family:'Shippori Mincho B1',serif;font-size:15px;font-weight:700;
+  letter-spacing:.1em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-bottom:8px;transition:all .22s;
+}
+.btn-green{background:var(--gd);color:#fff;box-shadow:0 4px 16px rgba(42,92,63,.4)}
+.btn-green:active{opacity:.88;transform:scale(.98)}
+.btn-navy{background:var(--nd);color:#fff;box-shadow:0 4px 16px rgba(26,46,71,.4)}
+.btn-navy:active{opacity:.88;transform:scale(.98)}
+.btn-outline-g{background:#fff;color:var(--gd);border:1.5px solid var(--gd);padding:13px}
+.btn-outline-n{background:#fff;color:var(--nd);border:1.5px solid var(--nd);padding:13px}
+.btn-gold{background:var(--gold);color:#fff;box-shadow:0 3px 12px rgba(184,144,42,.35)}
+.btn-sm{font-size:11px;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:#fff;cursor:pointer;color:var(--ink);font-family:'Zen Kaku Gothic New',sans-serif;transition:all .18s;display:inline-flex;align-items:center;gap:5px}
+.btn-sm:hover{border-color:var(--gm);background:var(--gxl)}
+.btn-sm.danger:hover{border-color:var(--red);color:var(--red);background:#fdf0ee}
+
+/* ─ エラー表示 ─ */
+.err-box{background:#fdf0ee;border:1px solid #e8b4a8;border-radius:10px;padding:12px 16px;font-size:12px;color:var(--red);display:none;margin-bottom:10px;line-height:1.6}
+
+/* ─ 履歴タブ ─ */
+.history-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.record-count{font-size:11px;color:var(--mid);letter-spacing:.08em}
+
+.month-group{margin-bottom:20px}
+.month-label{font-family:'Shippori Mincho B1',serif;font-size:13px;font-weight:700;color:var(--mid);letter-spacing:.14em;margin-bottom:8px;padding-left:2px}
+
+.record-item{
+  background:var(--card);border-radius:12px;padding:14px 16px;
+  margin-bottom:8px;box-shadow:0 2px 10px var(--shadow);
+  display:flex;align-items:flex-start;gap:12px;
+  transition:transform .18s;
+}
+.record-item:active{transform:scale(.99)}
+.r-badge{font-size:9px;padding:3px 9px;border-radius:20px;font-weight:700;letter-spacing:.1em;white-space:nowrap;flex-shrink:0;margin-top:1px}
+.rb-lunch{background:var(--gl);color:var(--gd)}
+.rb-dinner{background:var(--nl);color:var(--nd)}
+.r-body{flex:1;min-width:0}
+.r-date{font-family:'Shippori Mincho B1',serif;font-size:14px;font-weight:700;letter-spacing:.06em}
+.r-dishes{font-size:11px;color:var(--mid);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r-note{font-size:10px;color:var(--mid);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:italic}
+.r-actions{display:flex;gap:5px;flex-shrink:0;align-items:flex-start}
+
+.history-empty{text-align:center;padding:32px 16px;color:var(--mid);font-size:12px;letter-spacing:.08em;background:var(--card);border-radius:14px;line-height:2}
+
+/* ─ 詳細モーダル ─ */
+.modal-overlay{position:fixed;inset:0;background:rgba(28,22,18,.5);z-index:200;display:none;align-items:flex-end}
+.modal-overlay.open{display:flex;animation:fadeIn .2s ease}
+.modal{background:var(--cream);border-radius:20px 20px 0 0;width:100%;max-height:85vh;overflow-y:auto;padding:20px 16px 32px}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px}
+.modal-title{font-family:'Shippori Mincho B1',serif;font-size:17px;font-weight:800;margin-bottom:16px;letter-spacing:.06em}
+.modal-section{margin-bottom:14px}
+.modal-section-ttl{font-size:10px;font-weight:700;color:var(--mid);letter-spacing:.14em;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.dish-detail{background:var(--card);border-radius:10px;padding:12px 14px;margin-bottom:8px}
+.dish-detail-num{font-family:'Shippori Mincho B1',serif;font-size:12px;font-weight:700;color:var(--gd);margin-bottom:6px}
+.dish-detail-num.navy{color:var(--nd)}
+.detail-row{display:flex;gap:8px;margin-bottom:4px;align-items:baseline}
+.detail-lbl{font-size:9px;font-weight:700;color:var(--mid);letter-spacing:.1em;min-width:40px;flex-shrink:0}
+.detail-val{font-size:13px;color:var(--ink);font-family:'Shippori Mincho B1',serif}
+.modal-close{width:100%;padding:13px;border:1.5px solid var(--border);border-radius:12px;background:#fff;font-family:'Shippori Mincho B1',serif;font-size:14px;cursor:pointer;color:var(--ink);margin-top:16px;display:flex;align-items:center;justify-content:center;gap:6px}
+
+/* ─ 統計タブ ─ */
+.stat-card{background:var(--card);border-radius:14px;padding:18px 16px;margin-bottom:12px;box-shadow:0 2px 10px var(--shadow)}
+.stat-label{font-size:10px;font-weight:700;color:var(--mid);letter-spacing:.14em;margin-bottom:8px}
+.stat-value{font-family:'Shippori Mincho B1',serif;font-size:28px;font-weight:800;color:var(--gd);line-height:1}
+.stat-sub{font-size:11px;color:var(--mid);margin-top:4px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.ingredient-list{display:flex;flex-wrap:wrap;gap:6px}
+.ing-tag{background:var(--gxl);color:var(--gd);border:1px solid var(--gl);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:500;letter-spacing:.06em}
+.ing-tag.navy{background:var(--nxl);color:var(--nd);border-color:var(--nl)}
+
+/* CSV出力 */
+.export-wrap{background:var(--card);border-radius:14px;padding:16px;box-shadow:0 2px 10px var(--shadow);margin-bottom:12px}
+.export-desc{font-size:12px;color:var(--mid);letter-spacing:.06em;margin-bottom:12px;line-height:1.7}
+/* ══ 印刷専用スタイル ══ */
+@media print {
+  @page { size: A4 portrait; margin: 0; }
+  body > *:not(#_print_layer) { display: none !important; }
+  #_print_layer {
+    display: block !important;
+    position: fixed !important;
+    top: 0; left: 0;
+    width: 210mm; height: 297mm;
+    overflow: hidden;
+  }
+}
+#_print_layer { display: none; }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- トップバー -->
+  <div class="top-bar">
+    <div>
+      <span class="top-shop">洋食だいにんぐ なかむら</span>
+      <div class="top-title">献立管理システム</div>
+    </div>
+    <button onclick="openGasSettings()" style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:20px;padding:5px 12px;font-size:10px;cursor:pointer;letter-spacing:.1em;font-family:'Shippori Mincho B1',serif">
+      ☁️ クラウド設定
+    </button>
+  </div>
+
+  <!-- タブナビ -->
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('input')">
+      <span class="t-ico">✏️</span>入力
+    </button>
+    <button class="tab-btn" onclick="switchTab('ai')">
+      <span class="t-ico">📷</span>AI読み取り
+    </button>
+    <button class="tab-btn" onclick="switchTab('history')">
+      <span class="t-ico">📚</span>履歴
+    </button>
+    <button class="tab-btn" onclick="switchTab('stats')">
+      <span class="t-ico">📊</span>集計
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════
+       TAB 1: 直接入力
+  ═══════════════════════════ -->
+  <div class="panel active" id="panel-input">
+
+    <div class="mode-switch">
+      <button class="mode-btn active-lunch" id="mode-lunch-btn" onclick="setMode('lunch')">☀ ランチ</button>
+      <button class="mode-btn" id="mode-dinner-btn" onclick="setMode('dinner')">🌙 ディナー</button>
+    </div>
+
+    <!-- 日付 -->
+    <div class="date-card-wrap">
+      <div class="date-row">
+        <span class="date-lbl">📅 日付</span>
+        <input type="date" class="date-inp" id="inp-date">
+      </div>
+      <div class="day-circles" id="inp-days">
+        <div class="dc" data-d="1">月</div><div class="dc" data-d="2">火</div>
+        <div class="dc" data-d="3">水</div><div class="dc" data-d="4">木</div>
+        <div class="dc" data-d="5">金</div><div class="dc" data-d="6">土</div>
+        <div class="dc" data-d="0">日</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+        <span class="date-lbl">👤 お客様名</span>
+        <input type="text" class="date-inp" id="inp-customer" placeholder="例：田中様 / 4名様" style="flex:1">
+      </div>
+    </div>
+
+    <!-- 皿入力エリア -->
+    <div id="inp-dishes"></div>
+
+    <!-- 備考 -->
+    <div class="card">
+      <div class="note-hd">📝 備考・こだわりポイント</div>
+      <textarea class="note-ta" id="inp-note" placeholder="例：地元熊野の春野菜を使用。ワインペアリングのご提案あり。"></textarea>
+    </div>
+
+    <div class="err-box" id="inp-err"></div>
+
+    <button class="btn-save btn-green" id="inp-save-btn" onclick="saveRecord('input')">
+      💾 この献立を保存する
+    </button>
+    <button class="btn-save" id="inp-print-btn" onclick="printCurrent()" style="background:var(--gold);color:#fff;box-shadow:0 4px 16px rgba(184,144,42,.35);margin-bottom:8px">
+      🖨 印刷 / PDF保存
+    </button>
+    <button class="btn-save btn-outline-g" onclick="clearInput()" style="font-size:13px;padding:12px">
+      🔄 入力をリセット
+    </button>
+
+  </div>
+
+  <!-- ═══════════════════════════
+       TAB 2: AI写真読み取り
+  ═══════════════════════════ -->
+  <div class="panel" id="panel-ai">
+
+    <div class="mode-switch">
+      <button class="mode-btn active-lunch" id="ai-mode-lunch-btn" onclick="setAiMode('lunch')">☀ ランチ</button>
+      <button class="mode-btn" id="ai-mode-dinner-btn" onclick="setAiMode('dinner')">🌙 ディナー</button>
+    </div>
+
+    <div class="date-card-wrap">
+      <div class="date-row">
+        <span class="date-lbl">📅 日付</span>
+        <input type="date" class="date-inp" id="ai-date">
+      </div>
+      <div class="day-circles" id="ai-days">
+        <div class="dc" data-d="1">月</div><div class="dc" data-d="2">火</div>
+        <div class="dc" data-d="3">水</div><div class="dc" data-d="4">木</div>
+        <div class="dc" data-d="5">金</div><div class="dc" data-d="6">土</div>
+        <div class="dc" data-d="0">日</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+        <span class="date-lbl">👤 お客様名</span>
+        <input type="text" class="date-inp" id="ai-customer" placeholder="例：田中様 / 4名様" style="flex:1">
+      </div>
+    </div>
+
+    <div class="upload-zone" id="ai-drop"
+      ondragover="event.preventDefault();this.classList.add('drag')"
+      ondragleave="this.classList.remove('drag')"
+      ondrop="handleDrop(event)">
+      <div class="u-ico">📋</div>
+      <div class="u-ttl">手書きメモの写真をアップロード</div>
+      <div class="u-sub">タップして選択 ／ カメラ撮影も可</div>
+      <input type="file" accept="image/*" capture="environment" id="ai-file" onchange="handleFile(event)">
+    </div>
+
+    <div class="preview-wrap" id="ai-preview">
+      <img class="preview-img" id="ai-img" src="" alt="プレビュー">
+    </div>
+
+    <div class="err-box" id="ai-err"></div>
+
+    <button class="btn-save btn-green" id="ai-analyze-btn" onclick="analyzeImage()" disabled style="opacity:.5">
+      🤖 AIで献立を読み取る
+    </button>
+
+    <div class="ai-loading" id="ai-loading">
+      <div class="spinner" id="ai-spinner"></div>
+      <div class="loading-txt">AIが手書きメモを解析中…</div>
+    </div>
+
+    <!-- AI結果プレビュー -->
+    <div id="ai-result-wrap" style="display:none">
+      <div class="sec-title" style="margin-top:4px">読み取り結果</div>
+      <div id="ai-result-dishes"></div>
+      <div class="card" style="margin-bottom:12px">
+        <div class="note-hd">📝 備考</div>
+        <textarea class="note-ta" id="ai-note" placeholder="備考があれば追記してください"></textarea>
+      </div>
+      <button class="btn-save btn-green" onclick="saveRecord('ai')">💾 この献立を保存する</button>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════
+       TAB 3: 履歴
+  ═══════════════════════════ -->
+  <div class="panel" id="panel-history">
+    <div class="history-top">
+      <div class="sec-title" style="margin-bottom:0;flex:1">保存済み献立</div>
+      <span class="record-count" id="rec-count">0件</span>
+    </div>
+    <!-- ソートボタン -->
+    <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+      <button class="btn-sm" id="sort-new" onclick="setSort('new')" style="border-color:var(--gd);color:var(--gd);font-weight:700">
+        🕐 新しい順
+      </button>
+      <button class="btn-sm" id="sort-old" onclick="setSort('old')">
+        📅 古い順
+      </button>
+      <button class="btn-sm" id="sort-lunch" onclick="setSort('lunch')">
+        ☀ ランチのみ
+      </button>
+      <button class="btn-sm" id="sort-dinner" onclick="setSort('dinner')">
+        🌙 ディナーのみ
+      </button>
+    </div>
+    <div id="history-list"></div>
+  </div>
+
+  <!-- ═══════════════════════════
+       TAB 4: 集計
+  ═══════════════════════════ -->
+  <div class="panel" id="panel-stats">
+    <div class="sec-title">データ集計</div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-label">総記録数</div>
+        <div class="stat-value" id="stat-total">0</div>
+        <div class="stat-sub">件</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">ランチ</div>
+        <div class="stat-value" id="stat-lunch" style="color:var(--gd)">0</div>
+        <div class="stat-sub">件</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">ディナー</div>
+        <div class="stat-value" id="stat-dinner" style="color:var(--nd)">0</div>
+        <div class="stat-sub">件</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">今月の記録</div>
+        <div class="stat-value" id="stat-month">0</div>
+        <div class="stat-sub">件</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">よく使う食材 TOP10</div>
+      <div class="ingredient-list" id="stat-ingredients">
+        <span style="font-size:12px;color:var(--mid)">記録が増えると表示されます</span>
+      </div>
+    </div>
+
+    <div class="export-wrap">
+      <div class="stat-label" style="margin-bottom:8px">CSV エクスポート</div>
+      <div class="export-desc">保存した献立データをCSVファイルとしてダウンロードできます。Excelで開いて集計・分析に活用してください。</div>
+      <button class="btn-save btn-gold" onclick="exportCSV()" style="font-size:13px;padding:13px;margin-bottom:0">
+        📥 CSVダウンロード
+      </button>
+    </div>
+
+    <div class="export-wrap">
+      <div class="stat-label" style="margin-bottom:8px">☁️ クラウド同期設定</div>
+      <div class="export-desc">Google Apps ScriptのURLを登録すると、iPhone・PCのどちらからでも同じデータにアクセスできます。</div>
+      <button class="btn-save btn-gold" onclick="openGasSettings()" style="font-size:13px;padding:13px;margin-bottom:8px">
+        ⚙️ URLを設定 / 変更する
+      </button>
+      <button class="btn-save" style="background:#fff;color:var(--gd);border:1.5px solid var(--gd);padding:12px;margin-bottom:8px;font-size:13px" onclick="loadFromGAS().then(()=>showToast('🔄 最新データを取得しました'))">
+        🔄 今すぐ同期する
+      </button>
+      <button class="btn-save" style="background:#fff;color:var(--red);border:1.5px solid var(--red);padding:12px;margin-bottom:0;font-size:13px" onclick="clearAllData()">
+        🗑 全データを削除する
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- 詳細モーダル -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-title"></div>
+    <div id="modal-body"></div>
+    <button class="modal-close" onclick="closeModal()">✕ 閉じる</button>
+  </div>
+</div>
+
+<!-- 編集モーダル -->
+<div class="modal-overlay" id="edit-modal" onclick="if(event.target===this)closeEditModal()">
+  <div class="modal" style="max-height:92vh">
+    <div class="modal-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div class="modal-title" id="edit-modal-title" style="margin-bottom:0"></div>
+      <button onclick="closeEditModal()" style="background:none;border:none;font-size:20px;color:var(--mid);cursor:pointer;padding:4px">✕</button>
+    </div>
+    <div id="edit-modal-body"></div>
+    <button class="btn-save btn-green" onclick="saveEdit()" style="margin-bottom:8px">
+      💾 上書き保存する
+    </button>
+    <button onclick="closeEditModal()"
+      style="width:100%;padding:12px;border:1.5px solid var(--border);border-radius:12px;background:#fff;font-family:'Shippori Mincho B1',serif;font-size:14px;cursor:pointer;color:var(--mid);display:flex;align-items:center;justify-content:center">
+      キャンセル
+    </button>
+  </div>
+</div>
+
+<!-- 印刷レイヤーはJSで動的生成 -->
+
+<script>
+// ═══════════════════════════════════
+// Google Apps Script 連携設定
+// ここにデプロイしたURLを貼り付けてください
+// ═══════════════════════════════════
+let GAS_URL = localStorage.getItem('gas_url') || '';
+
+// ═══════════════════════════════════
+// データストア（Google Apps Script + localStorageバックアップ）
+// ═══════════════════════════════════
+let _memoryStore = null; // メモリキャッシュ
+
+function loadStore(){
+  // メモリキャッシュがあればそれを返す
+  if(_memoryStore !== null) return _memoryStore;
+  // localStorageから読む（GASから読み込む前の暫定）
+  try{ return JSON.parse(localStorage.getItem('nakamura_menu_v1')||'[]'); }
+  catch(e){ return []; }
+}
+
+async function saveStore(data){
+  _memoryStore = data;
+  // localStorageにバックアップ
+  try{ localStorage.setItem('nakamura_menu_v1', JSON.stringify(data)); } catch(e){}
+  // GASに保存
+  if(GAS_URL){
+    try{
+      const res = await fetch(GAS_URL, {
+        method: 'POST',
+        mode: 'no-cors',   // CORSを回避（レスポンスは読めないがPOSTは通る）
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'save', data }),
+      });
+      showSyncBadge('ok');
+    } catch(e){
+      console.warn('GAS保存失敗:', e.message);
+      showSyncBadge('err');
+    }
+  }
+}
+
+// GASからデータを読み込む（GETはCORS問題なし）
+async function loadFromGAS(){
+  if(!GAS_URL) return;
+  try{
+    showSyncBadge('sync');
+    const res = await fetch(GAS_URL + '?t=' + Date.now(), {
+      method: 'GET',
+      mode: 'cors',
+    });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    if(json.ok && Array.isArray(json.data) && json.data.length > 0){
+      // GASのデータとlocalStorageを合成して重複排除
+      const local = JSON.parse(localStorage.getItem('nakamura_menu_v1')||'[]');
+      const merged = mergeData(json.data, local);
+      _memoryStore = merged;
+      localStorage.setItem('nakamura_menu_v1', JSON.stringify(merged));
+      // 合成データをGASに書き戻す
+      pushToGAS(merged);
+      showSyncBadge('ok');
+      renderHistory();
+      renderStats();
+    } else if(json.ok && Array.isArray(json.data)){
+      // GASが空 → localのデータをGASに送る
+      const local = JSON.parse(localStorage.getItem('nakamura_menu_v1')||'[]');
+      if(local.length > 0){
+        _memoryStore = local;
+        pushToGAS(local);
+      }
+      showSyncBadge('ok');
+    } else {
+      throw new Error(json.error || '不明なエラー');
+    }
+  } catch(e){
+    // CORSエラーの場合はlocalStorageのデータを使う
+    showSyncBadge('err');
+    console.warn('GAS読み込み失敗:', e.message);
+  }
+}
+
+// IDベースで重複排除してマージ（新しいものを優先）
+function mergeData(a, b){
+  const map = new Map();
+  [...b, ...a].forEach(r => map.set(r.id, r)); // aが後なのでaを優先
+  return [...map.values()].sort((x,y)=> y.id - x.id);
+}
+
+// GASにデータをPUSH（no-cors）
+async function pushToGAS(data){
+  if(!GAS_URL) return;
+  try{
+    await fetch(GAS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'save', data }),
+    });
+  } catch(e){
+    console.warn('GAS push失敗:', e.message);
+  }
+}
+
+// 同期ステータスバッジ
+function showSyncBadge(status){
+  const msgs = { sync:'🔄 同期中…', ok:'☁️ 同期済み', err:'⚠️ オフライン' };
+  const colors = { sync:'#b89040', ok:'#3a6b45', err:'#c0392b' };
+  let badge = document.getElementById('sync-badge');
+  if(!badge){
+    badge = document.createElement('div');
+    badge.id = 'sync-badge';
+    badge.style.cssText = `position:fixed;top:8px;right:12px;z-index:300;
+      font-size:10px;padding:3px 10px;border-radius:20px;color:#fff;
+      font-family:'Shippori Mincho B1',serif;letter-spacing:.08em;
+      transition:all .3s;pointer-events:none`;
+    document.body.appendChild(badge);
+  }
+  badge.textContent = msgs[status];
+  badge.style.background = colors[status];
+  badge.style.opacity = '1';
+  if(status === 'ok'){
+    setTimeout(()=>{ badge.style.opacity='0'; }, 3000);
+  }
+}
+
+// GAS URL設定ダイアログ
+function openGasSettings(){
+  const current = GAS_URL;
+  const url = prompt(
+    '【Google Apps Script URLの設定】\n\nApps Scriptをデプロイして発行されたURLを\n下の欄に貼り付けてください。\n\n設定済みURL：\n' + (current||'（未設定）'),
+    current
+  );
+  if(url === null) return; // キャンセル
+  GAS_URL = url.trim();
+  localStorage.setItem('gas_url', GAS_URL);
+  if(GAS_URL){
+    showToast('✅ URLを設定しました。データを同期中…');
+    loadFromGAS();
+  } else {
+    showToast('URLをクリアしました');
+  }
+}
+
+// ═══════════════════════════════════
+// タブ切替
+// ═══════════════════════════════════
+function switchTab(name){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  const tabs=['input','ai','history','stats'];
+  document.querySelectorAll('.tab-btn')[tabs.indexOf(name)].classList.add('active');
+  if(name==='history') renderHistory();
+  if(name==='stats') renderStats();
+}
+
+// ═══════════════════════════════════
+// モード（ランチ/ディナー）
+// ═══════════════════════════════════
+let currentMode = 'lunch';
+let currentAiMode = 'lunch';
+
+// 皿の種類定義（皿番号ラベルなし）
+const lunchDishDefs=[
+  {type:'appetizer', key:'app',  label:'オードブル盛り合わせ', sub:'3点盛り'},
+  {type:'normal',    key:'d1',   label:'料理'},
+  {type:'normal',    key:'d2',   label:'料理'},
+  {type:'normal',    key:'d3',   label:'料理'},
+  {type:'normal',    key:'d4',   label:'料理'},
+  {type:'normal',    key:'d5',   label:'料理'},
+  {type:'normal',    key:'d6',   label:'料理'},
+];
+const dinnerDishDefs=[
+  {type:'normal',    key:'d1',   label:'料理'},
+  {type:'normal',    key:'d2',   label:'料理'},
+  {type:'normal',    key:'d3',   label:'料理'},
+  {type:'normal',    key:'d4',   label:'料理'},
+  {type:'normal',    key:'d5',   label:'料理'},
+  {type:'normal',    key:'d6',   label:'料理'},
+  {type:'normal',    key:'d7',   label:'料理'},
+  {type:'normal',    key:'d8',   label:'料理'},
+  {type:'normal',    key:'d9',   label:'料理'},
+  {type:'meat',      key:'meat', label:'肉料理セレクト', sub:'4種類から選択'},
+];
+
+const normalFields=[
+  {id:'nm',lb:'料理名',ph:'例：真鯛のポワレ'},
+  {id:'ig',lb:'食材',ph:'例：真鯛'},
+  {id:'mt',lb:'調理法',ph:'例：ポワレ'},
+  {id:'sc',lb:'ソース',ph:'例：ブールブラン'},
+  {id:'tp',lb:'トッピング',ph:'ベビーリーフ'},
+];
+const selectFields=[
+  {id:'nm',lb:'料理名'},{id:'ig',lb:'食材'},
+  {id:'mt',lb:'調理法'},{id:'sc',lb:'ソース'},
+];
+
+function setMode(mode){
+  currentMode=mode;
+  const isL=mode==='lunch';
+  document.getElementById('mode-lunch-btn').className='mode-btn'+(isL?' active-lunch':'');
+  document.getElementById('mode-dinner-btn').className='mode-btn'+(isL?'':' active-dinner');
+  document.getElementById('inp-save-btn').className='btn-save '+(isL?'btn-green':'btn-navy');
+  document.getElementById('inp-print-btn').style.display='';
+  renderInputDishes();
+  updateDayStyle('inp-days', mode);
+}
+
+function setAiMode(mode){
+  currentAiMode=mode;
+  const isL=mode==='lunch';
+  document.getElementById('ai-mode-lunch-btn').className='mode-btn'+(isL?' active-lunch':'');
+  document.getElementById('ai-mode-dinner-btn').className='mode-btn'+(isL?'':' active-dinner');
+  document.getElementById('ai-analyze-btn').className='btn-save '+(isL?'btn-green':'btn-navy')+(aiState.b64?'':' ');
+  updateDayStyle('ai-days', mode);
+}
+
+function updateDayStyle(containerId, mode){
+  document.querySelectorAll(`#${containerId} .dc`).forEach(el=>{
+    if(el.classList.contains('on')){
+      el.style.background = mode==='lunch'?'var(--gd)':'var(--nd)';
+      el.style.borderColor = mode==='lunch'?'var(--gd)':'var(--nd)';
+    }
+  });
+}
+
+// ═══════════════════════════════════
+// 入力フォーム 皿生成（ドラッグ&ドロップ対応）
+// ═══════════════════════════════════
+let dragSrc = null;
+
+function renderInputDishes(savedOrder){
+  const wrap=document.getElementById('inp-dishes');
+  wrap.innerHTML='';
+  const isL=currentMode==='lunch';
+  const defs=isL?lunchDishDefs:dinnerDishDefs;
+  const order=savedOrder||defs.map(d=>d.key);
+
+  order.forEach(key=>{
+    const d=defs.find(x=>x.key===key);
+    if(!d) return;
+    const card=document.createElement('div');
+    card.className='card dish-card';
+    card.dataset.key=key;
+    card.style.marginBottom='10px';
+    card.style.cursor='grab';
+    card.draggable=true;
+
+    const hdCls=isL?'hd-green':'hd-navy';
+    const hdClsSub=isL?'hd-gm':'hd-nm';
+
+    if(d.type==='appetizer'){
+      // ランチ：オードブル
+      const pts=['①','②','③'].map((pt,pi)=>{
+        const rows=selectFields.map((f,fi)=>`<div class="frow"${fi===selectFields.length-1?' style="border-bottom:none"':''}>
+          <div class="flbl">${f.lb}</div>
+          <textarea class="finp" inputmode="text" rows="1" id="i-a${pi+1}${f.id}" oninput="autoResize(this)"></textarea>
+        </div>`).join('');
+        return `<div class="app-sec">
+          <div class="app-lbl">
+            <div class="app-pt">${pt}</div>
+            <span class="app-pt-txt">${['一点目','二点目','三点目'][pi]}</span>
+          </div>${rows}
+        </div>`;
+      }).join('');
+      card.innerHTML=`
+        <div class="card-hd ${hdCls}" style="cursor:grab">
+          <span style="font-size:16px;margin-right:2px;opacity:.6">⠿</span>
+          <span class="hd-ttl">${d.label}</span>
+          <span class="hd-sub">${d.sub}</span>
+        </div>${pts}`;
+
+    } else if(d.type==='meat'){
+      // ディナー：肉料理セレクト（4種類）
+      const pts=['①','②','③','④'].map((pt,pi)=>{
+        const rows=selectFields.map((f,fi)=>`<div class="frow"${fi===selectFields.length-1?' style="border-bottom:none"':''}>
+          <div class="flbl">${f.lb}</div>
+          <textarea class="finp" inputmode="text" rows="1" id="i-m${pi+1}${f.id}" oninput="autoResize(this)"></textarea>
+        </div>`).join('');
+        return `<div class="app-sec" style="border-bottom:${pi<3?'2px solid var(--nl)':'none'}">
+          <div class="app-lbl">
+            <div class="app-pt" style="background:var(--nd)">${pt}</div>
+            <span class="app-pt-txt" style="color:var(--nd)">${['選択肢A','選択肢B','選択肢C','選択肢D'][pi]}</span>
+          </div>${rows}
+        </div>`;
+      }).join('');
+      card.innerHTML=`
+        <div class="card-hd ${hdCls}" style="cursor:grab">
+          <span style="font-size:16px;margin-right:2px;opacity:.6">⠿</span>
+          <span class="hd-ttl">${d.label}</span>
+          <span class="hd-sub">${d.sub}</span>
+        </div>${pts}`;
+
+    } else {
+      // 通常皿：料理名をリアルタイムでヘッダーに反映
+      const headId = `hd-${key}`;
+      const rows=normalFields.map((f,fi)=>`<div class="frow"${fi===normalFields.length-1?' style="border-bottom:none"':''}>
+        <div class="flbl">${f.lb}</div>
+        <textarea class="finp" inputmode="text" rows="1" id="i-${key}${f.id}"
+          ${f.id==='nm'?`oninput="updateDishHead('${headId}',this.value);autoResize(this)"`:'oninput="autoResize(this)"'}></textarea>
+      </div>`).join('');
+      card.innerHTML=`
+        <div class="card-hd ${hdClsSub}" style="cursor:grab">
+          <span style="font-size:16px;margin-right:2px;opacity:.6">⠿</span>
+          <span class="hd-ttl" id="${headId}" style="color:rgba(255,255,255,${isL?'1':'1'})">料理名を入力してください</span>
+        </div>${rows}`;
+    }
+
+    // ドラッグ&ドロップ イベント
+    card.addEventListener('dragstart', e=>{
+      dragSrc=card;
+      setTimeout(()=>card.style.opacity='.4',0);
+      e.dataTransfer.effectAllowed='move';
+    });
+    card.addEventListener('dragend', ()=>{
+      card.style.opacity='1';
+      dragSrc=null;
+      document.querySelectorAll('.dish-card').forEach(c=>c.style.border='');
+    });
+    card.addEventListener('dragover', e=>{
+      e.preventDefault();
+      if(card!==dragSrc){
+        card.style.border=`2px solid ${isL?'var(--gm)':'var(--nm)'}`;
+      }
+      e.dataTransfer.dropEffect='move';
+    });
+    card.addEventListener('dragleave', ()=>card.style.border='');
+    card.addEventListener('drop', e=>{
+      e.preventDefault();
+      card.style.border='';
+      if(dragSrc && dragSrc!==card){
+        const allCards=[...wrap.querySelectorAll('.dish-card')];
+        const srcIdx=allCards.indexOf(dragSrc);
+        const tgtIdx=allCards.indexOf(card);
+        if(srcIdx<tgtIdx) wrap.insertBefore(dragSrc, card.nextSibling);
+        else wrap.insertBefore(dragSrc, card);
+      }
+    });
+
+    // タッチ対応（iPhone）
+    let touchStartY=0, touchEl=null;
+    card.addEventListener('touchstart',e=>{
+      touchStartY=e.touches[0].clientY;
+      touchEl=card;
+      card.style.opacity='.7';
+    },{passive:true});
+    card.addEventListener('touchmove',e=>{
+      e.preventDefault();
+      const y=e.touches[0].clientY;
+      const els=document.elementsFromPoint(e.touches[0].clientX, y);
+      const target=els.find(el=>el.classList.contains('dish-card')&&el!==card);
+      document.querySelectorAll('.dish-card').forEach(c=>c.style.border='');
+      if(target) target.style.border=`2px solid ${isL?'var(--gm)':'var(--nm)'}`;
+    },{passive:false});
+    card.addEventListener('touchend',e=>{
+      card.style.opacity='1';
+      const y=e.changedTouches[0].clientY;
+      const els=document.elementsFromPoint(e.changedTouches[0].clientX, y);
+      const target=els.find(el=>el.classList.contains('dish-card')&&el!==card);
+      document.querySelectorAll('.dish-card').forEach(c=>c.style.border='');
+      if(target){
+        const allCards=[...wrap.querySelectorAll('.dish-card')];
+        const srcIdx=allCards.indexOf(card);
+        const tgtIdx=allCards.indexOf(target);
+        if(srcIdx<tgtIdx) wrap.insertBefore(card, target.nextSibling);
+        else wrap.insertBefore(card, target);
+      }
+    },{passive:true});
+
+    wrap.appendChild(card);
+  });
+}
+
+// ═══════════════════════════════════
+// 日付・曜日
+// ═══════════════════════════════════
+function initDate(inputId, circlesId){
+  const inp=document.getElementById(inputId);
+  const today=new Date();
+  inp.value=today.toISOString().split('T')[0];
+
+  function setDay(n, cid){
+    document.querySelectorAll(`#${cid} .dc`).forEach(e=>{
+      const active=parseInt(e.dataset.d)===n;
+      e.classList.toggle('on',active);
+      if(active){
+        e.style.background=currentMode==='lunch'?'var(--gd)':'var(--nd)';
+        e.style.borderColor=currentMode==='lunch'?'var(--gd)':'var(--nd)';
+      } else {
+        e.style.background='';e.style.borderColor='';
+      }
+    });
+  }
+
+  setDay(today.getDay(), circlesId);
+  inp.addEventListener('change',()=>{
+    if(!inp.value) return;
+    const d=new Date(inp.value+'T00:00:00');
+    setDay(d.getDay(), circlesId);
+  });
+  document.querySelectorAll(`#${circlesId} .dc`).forEach(e=>{
+    e.addEventListener('click',()=>{
+      document.querySelectorAll(`#${circlesId} .dc`).forEach(x=>{x.classList.remove('on');x.style.background='';x.style.borderColor=''});
+      e.classList.add('on');
+      e.style.background=currentMode==='lunch'?'var(--gd)':'var(--nd)';
+      e.style.borderColor=currentMode==='lunch'?'var(--gd)':'var(--nd)';
+    });
+  });
+}
+
+// 料理名入力でヘッダーをリアルタイム更新
+function updateDishHead(headId, val){
+  const el = document.getElementById(headId);
+  if(!el) return;
+  el.textContent = val.trim() || '料理名を入力してください';
+  el.style.opacity = val.trim() ? '1' : '0.5';
+}
+
+// textareaの高さを内容に合わせて自動拡張
+function autoResize(el){
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+
+// 全てのfinpにautoResizeを適用
+function applyAutoResize(){
+  document.querySelectorAll('.finp').forEach(el=>{
+    el.addEventListener('input', ()=> autoResize(el));
+    autoResize(el);
+  });
+}
+function collectInputData(){
+  const mode=currentMode;
+  const isL=mode==='lunch';
+  const defs=isL?lunchDishDefs:dinnerDishDefs;
+  const dishes=[];
+  let dishNum=1;
+
+  // 現在の表示順序を取得
+  const currentOrder=[...document.querySelectorAll('#inp-dishes .dish-card')]
+    .map(c=>c.dataset.key);
+
+  currentOrder.forEach(key=>{
+    const d=defs.find(x=>x.key===key);
+    if(!d) return;
+
+    if(d.type==='appetizer'){
+      const items=[1,2,3].map(pi=>({
+        point:['①','②','③'][pi-1],
+        name:(document.getElementById(`i-a${pi}nm`)?.value||'').trim(),
+        ingredient:(document.getElementById(`i-a${pi}ig`)?.value||'').trim(),
+        method:(document.getElementById(`i-a${pi}mt`)?.value||'').trim(),
+        sauce:(document.getElementById(`i-a${pi}sc`)?.value||'').trim(),
+      }));
+      dishes.push({num:dishNum++,name:'オードブル盛り合わせ',isApp:true,key,items});
+
+    } else if(d.type==='meat'){
+      const items=[1,2,3,4].map(pi=>({
+        point:['①','②','③','④'][pi-1],
+        name:(document.getElementById(`i-m${pi}nm`)?.value||'').trim(),
+        ingredient:(document.getElementById(`i-m${pi}ig`)?.value||'').trim(),
+        method:(document.getElementById(`i-m${pi}mt`)?.value||'').trim(),
+        sauce:(document.getElementById(`i-m${pi}sc`)?.value||'').trim(),
+      }));
+      dishes.push({num:dishNum++,name:'肉料理セレクト',isMeat:true,key,items});
+
+    } else {
+      dishes.push({
+        num:dishNum++,
+        key,
+        name:(document.getElementById(`i-${key}nm`)?.value||'').trim(),
+        ingredient:(document.getElementById(`i-${key}ig`)?.value||'').trim(),
+        method:(document.getElementById(`i-${key}mt`)?.value||'').trim(),
+        sauce:(document.getElementById(`i-${key}sc`)?.value||'').trim(),
+        garnish:(document.getElementById(`i-${key}ga`)?.value||'').trim(),
+        topping:(document.getElementById(`i-${key}tp`)?.value||'').trim(),
+      });
+    }
+  });
+  return dishes;
+}
+
+// ═══════════════════════════════════
+// 保存
+// ═══════════════════════════════════
+function saveRecord(source){
+  let date, note, dishes, mode, customer;
+
+  if(source==='input'){
+    date=document.getElementById('inp-date').value;
+    note=(document.getElementById('inp-note').value||'').trim();
+    customer=(document.getElementById('inp-customer').value||'').trim();
+    dishes=collectInputData();
+    mode=currentMode;
+  } else {
+    date=document.getElementById('ai-date').value;
+    note=(document.getElementById('ai-note').value||'').trim();
+    customer=(document.getElementById('ai-customer').value||'').trim();
+    dishes=aiState.result?.dishes||[];
+    mode=currentAiMode;
+  }
+
+  if(!date){ showErr(source,'日付を入力してください'); return; }
+
+  const record={
+    id:Date.now(),
+    date, mode, note, customer, dishes,
+    source,
+    savedAt:new Date().toLocaleString('ja-JP'),
+  };
+
+  const store=loadStore();
+  store.unshift(record);  // 上書きせず、常に新規追加
+  saveStore(store);
+
+  showToast(`✅ ${date}の${mode==='lunch'?'ランチ':'ディナー'}献立を保存しました`);
+
+  if(source==='input') clearInput();
+  else { aiState={};document.getElementById('ai-result-wrap').style.display='none'; }
+  switchTab('history');
+}
+
+function showErr(source, msg){
+  const el=document.getElementById(source+'-err');
+  el.textContent=msg;el.style.display=msg?'block':'none';
+}
+
+function clearInput(){
+  document.querySelectorAll('#inp-dishes .finp').forEach(e=>e.value='');
+  document.getElementById('inp-note').value='';
+  document.getElementById('inp-customer').value='';
+  // ヘッダーもリセット
+  document.querySelectorAll('#inp-dishes .hd-ttl[id^="hd-"]').forEach(el=>{
+    el.textContent='料理名を入力してください';
+    el.style.opacity='0.5';
+  });
+}
+
+// ═══════════════════════════════════
+// AI 写真読み取り
+// ═══════════════════════════════════
+let aiState={};
+
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('ai-drop').classList.remove('drag');
+  const f=e.dataTransfer.files[0];
+  if(f) processFile(f);
+}
+function handleFile(e){ const f=e.target.files[0]; if(f) processFile(f); }
+
+function processFile(file){
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    aiState.b64=ev.target.result;
+    aiState.mime=file.type||'image/jpeg';
+    document.getElementById('ai-img').src=ev.target.result;
+    document.getElementById('ai-preview').style.display='block';
+    const btn=document.getElementById('ai-analyze-btn');
+    btn.disabled=false; btn.style.opacity='1';
+    showErr('ai','');
+  };
+  reader.readAsDataURL(file);
+}
+
+async function analyzeImage(){
+  if(!aiState.b64) return;
+  const btn=document.getElementById('ai-analyze-btn');
+  const loading=document.getElementById('ai-loading');
+  btn.disabled=true; btn.style.opacity='.5';
+  loading.style.display='flex';
+  document.getElementById('ai-result-wrap').style.display='none';
+  showErr('ai','');
+
+  const isL=currentAiMode==='lunch';
+  document.getElementById('ai-spinner').className='spinner'+(isL?'':' spinner-navy');
+
+  const sys=isL
+    ?`あなたは飲食店の献立メモを解析するAIです。ランチコース（1皿目：オードブル3点盛り、全7皿）の手書きメモを読み取り、JSONのみで返してください。コードブロック不要。
+{"type":"lunch","dishes":[{"num":1,"name":"オードブル盛り合わせ","isApp":true,"items":[{"point":"①","name":"","ingredient":"","method":"","sauce":""},{"point":"②","name":"","ingredient":"","method":"","sauce":""},{"point":"③","name":"","ingredient":"","method":"","sauce":""}]},{"num":2,"name":"","ingredient":"","method":"","sauce":"","garnish":"","topping":""}]}`
+    :`あなたは飲食店の献立メモを解析するAIです。ディナーコース（全8〜9皿）の手書きメモを読み取り、JSONのみで返してください。コードブロック不要。
+{"type":"dinner","dishes":[{"num":1,"name":"","ingredient":"","method":"","sauce":"","garnish":"","topping":""}]}`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:2000,
+        system:sys,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:aiState.mime,data:aiState.b64.split(',')[1]}},
+          {type:'text',text:'この献立メモを読み取ってJSONで返してください。'}
+        ]}]
+      })
+    });
+    const data=await res.json();
+    if(data.error) throw new Error(data.error.message);
+    const raw=data.content?.[0]?.text||'';
+    const parsed=JSON.parse(raw.replace(/```json?/g,'').replace(/```/g,'').trim());
+    aiState.result=parsed;
+    renderAiResult(parsed);
+  } catch(err){
+    showErr('ai',`読み取りエラー：${err.message}\n画像が鮮明かご確認ください。`);
+  } finally{
+    btn.disabled=false; btn.style.opacity='1';
+    loading.style.display='none';
+  }
+}
+
+function renderAiResult(data){
+  const wrap=document.getElementById('ai-result-dishes');
+  wrap.innerHTML='';
+  const isL=data.type==='lunch';
+
+  data.dishes.forEach(dish=>{
+    const card=document.createElement('div');
+    card.className='card'; card.style.marginBottom='10px';
+
+    if(dish.isApp && dish.items){
+      const items=dish.items.map(it=>`
+        <div class="app-sec">
+          <div class="app-lbl"><div class="app-pt">${it.point}</div><span class="app-pt-txt">${it.point==='①'?'一点目':it.point==='②'?'二点目':'三点目'}</span></div>
+          <div class="frow"><div class="flbl">料理名</div><textarea class="finp" rows="1" oninput="autoResize(this)" id="air-a${it.point}-nm">${it.name||''}</textarea></div>
+          <div class="frow"><div class="flbl">食材</div><textarea class="finp" rows="1" oninput="autoResize(this)" id="air-a${it.point}-ig">${it.ingredient||''}</textarea></div>
+          <div class="frow"><div class="flbl">調理法</div><textarea class="finp" rows="1" oninput="autoResize(this)" id="air-a${it.point}-mt">${it.method||''}</textarea></div>
+          <div class="frow" style="border-bottom:none"><div class="flbl">ソース</div><textarea class="finp" rows="1" oninput="autoResize(this)" id="air-a${it.point}-sc">${it.sauce||''}</textarea></div>
+        </div>`).join('');
+      card.innerHTML=`<div class="card-hd hd-green"><div class="hd-num">1</div><span class="hd-ttl">オードブル盛り合わせ</span><span class="hd-sub">3点盛り</span></div>${items}`;
+    } else {
+      const cls=isL?'hd-gm':'hd-nm';
+      const fs=normalFields.map((f,i)=>`<div class="frow"${i===normalFields.length-1?' style="border-bottom:none"':''}>
+        <div class="flbl">${f.lb}</div>
+        <textarea class="finp" rows="1" oninput="autoResize(this)" id="air-d${dish.num}-${f.id}">${dish[f.id==='nm'?'name':f.id==='ig'?'ingredient':f.id==='mt'?'method':f.id==='sc'?'sauce':'topping']||''}</textarea>
+      </div>`).join('');
+      card.innerHTML=`<div class="card-hd ${cls}"><div class="hd-num">${dish.num}</div><span class="hd-ttl">${['','一','二','三','四','五','六','七','八','九'][dish.num]||dish.num}皿目</span></div>${fs}`;
+    }
+    wrap.appendChild(card);
+  });
+
+  // 入力値の更新をaiState.resultに反映させるため参照を保持
+  document.getElementById('ai-result-wrap').style.display='block';
+}
+
+// ═══════════════════════════════════
+// 履歴レンダリング
+// ═══════════════════════════════════
+// 現在のソート状態
+let currentSort = 'new';
+
+function setSort(mode){
+  currentSort = mode;
+  // ボタンのアクティブ状態更新
+  ['new','old','lunch','dinner'].forEach(m=>{
+    const btn = document.getElementById(`sort-${m}`);
+    if(!btn) return;
+    if(m === mode){
+      btn.style.borderColor = 'var(--gd)';
+      btn.style.color = 'var(--gd)';
+      btn.style.fontWeight = '700';
+    } else {
+      btn.style.borderColor = 'var(--border)';
+      btn.style.color = 'var(--ink)';
+      btn.style.fontWeight = '400';
+    }
+  });
+  renderHistory();
+}
+
+function renderHistory(){
+  let store = loadStore();
+  const list = document.getElementById('history-list');
+  document.getElementById('rec-count').textContent = `${store.length}件`;
+
+  if(store.length === 0){
+    list.innerHTML = `<div class="history-empty">まだ記録がありません🌿<br>入力またはAI読み取りで<br>最初の献立を記録しましょう</div>`;
+    return;
+  }
+
+  // フィルター
+  let filtered = store;
+  if(currentSort === 'lunch')  filtered = store.filter(r => r.mode === 'lunch');
+  if(currentSort === 'dinner') filtered = store.filter(r => r.mode === 'dinner');
+
+  // ソート
+  if(currentSort === 'old'){
+    filtered = [...filtered].sort((a,b) => {
+      if(a.date !== b.date) return a.date.localeCompare(b.date);
+      return a.id - b.id;
+    });
+  } else {
+    // new・lunch・dinnerは新しい順（日付降順）
+    filtered = [...filtered].sort((a,b) => {
+      if(a.date !== b.date) return b.date.localeCompare(a.date);
+      return b.id - a.id;
+    });
+  }
+
+  if(filtered.length === 0){
+    list.innerHTML = `<div class="history-empty">該当する記録がありません</div>`;
+    return;
+  }
+
+  // 月ごとにグループ化
+  const groups = {};
+  filtered.forEach(r => {
+    const ym = r.date.slice(0,7);
+    if(!groups[ym]) groups[ym] = [];
+    groups[ym].push(r);
+  });
+
+  list.innerHTML = '';
+  const sortedKeys = Object.keys(groups).sort();
+  if(currentSort !== 'old') sortedKeys.reverse();
+
+  sortedKeys.forEach(ym => {
+    const [y,m] = ym.split('-');
+    const grp = document.createElement('div');
+    grp.className = 'month-group';
+    grp.innerHTML = `<div class="month-label">${y}年${parseInt(m)}月</div>`;
+
+    groups[ym].forEach(r => {
+      const d = new Date(r.date + 'T00:00:00');
+      const days = ['日','月','火','水','木','金','土'];
+      const dateStr = `${parseInt(r.date.slice(5,7))}月${parseInt(r.date.slice(8,10))}日（${days[d.getDay()]}）`;
+      const isL = r.mode === 'lunch';
+      const dishNames = r.dishes
+        .filter(d => !d.isApp && !d.isMeat && d.name && d.name !== 'オードブル盛り合わせ' && d.name !== '肉料理セレクト')
+        .map(d => d.name).slice(0,3).join(' / ');
+
+      const item = document.createElement('div');
+      item.className = 'record-item';
+      item.dataset.id = r.id;
+      const customerHtml = r.customer
+        ? `<span style="font-family:'Shippori Mincho B1',serif;font-size:12px;color:${isL?'var(--gd)':'var(--nd)'};font-weight:700;margin-left:6px">👤 ${esc(r.customer)}</span>`
+        : '';
+      item.innerHTML = `
+        <span class="r-badge ${isL?'rb-lunch':'rb-dinner'}">${isL?'☀ ランチ':'🌙 ディナー'}</span>
+        <div class="r-body">
+          <div style="display:flex;align-items:baseline;flex-wrap:wrap">
+            <div class="r-date">${dateStr}</div>
+            ${customerHtml}
+          </div>
+          <div class="r-dishes">${dishNames||'（料理名未入力）'}</div>
+          ${r.note ? `<div class="r-note">${esc(r.note)}</div>` : ''}
+        </div>
+        <div class="r-actions" style="flex-wrap:wrap;gap:4px;justify-content:flex-end;max-width:140px">
+          <button class="btn-sm" onclick="showDetail(${r.id})">詳細</button>
+          <button class="btn-sm" style="border-color:var(--gm);color:var(--gd)" onclick="openEdit(${r.id})">✏️ 編集</button>
+          <button class="btn-sm" style="border-color:var(--nm);color:var(--nm)" onclick="copyRecord(${r.id})">📋 コピー</button>
+          <button class="btn-sm" style="border-color:var(--gold);color:var(--gold)" onclick="printRecord(${r.id})">🖨 印刷</button>
+          <button class="btn-sm" style="border-color:#8b4513;color:#8b4513;font-weight:700" onclick="printOshinagaki(${r.id})">📜 お品書き</button>
+          <button class="btn-sm danger" onclick="deleteRecord(${r.id})">削除</button>
+        </div>`;
+      grp.appendChild(item);
+    });
+    list.appendChild(grp);
+  });
+}
+
+// ═══════════════════════════════════
+// ═══════════════════════════════════
+// お品書き生成
+// A4縦1枚・上下2席分・縦書き・和風
+// ═══════════════════════════════════
+function printOshinagaki(id){
+  const r = loadStore().find(x => x.id === id);
+  if(!r) return;
+
+  const d = new Date(r.date + 'T00:00:00');
+  const weekChars = ['日','月','火','水','木','金','土'];
+  const dateJP = `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${weekChars[d.getDay()]}）`;
+
+  // 料理リスト（前菜は1点ずつ・肉料理は各選択肢・通常皿）
+  const items = [];
+  r.dishes.forEach(dish => {
+    const isApp  = dish.isApp  || dish.key==='app'  || dish.name==='オードブル盛り合わせ';
+    const isMeat = dish.isMeat || dish.key==='meat' || dish.name==='肉料理セレクト';
+    if(isApp && dish.items){
+      // 前菜は1点ずつ個別に表示
+      dish.items.forEach(it=>{ if(it.name) items.push({name:it.name, ing:it.ingredient||''}); });
+    } else if(isMeat && dish.items){
+      // 肉料理セレクト → 4択を全部個別に表示
+      dish.items.forEach(it=>{ if(it.name) items.push({name:it.name, ing:it.ingredient||''}); });
+    } else {
+      if(dish.name) items.push({name:dish.name, ing:dish.ingredient||''});
+    }
+  });
+
+  if(items.length === 0){
+    alert('料理名が入力されていません。献立を編集してから再度お試しください。');
+    return;
+  }
+
+  const n = items.length;
+  const namePt = n <= 4  ? 15
+               : n <= 6  ? 13
+               : n <= 9  ? 11
+               : n <= 12 ? 9
+               : n <= 16 ? 8
+               : 7;
+  const ingPt  = n <= 6  ? 7.5
+               : n <= 12 ? 6.5
+               : 6;
+  const padPx  = n <= 4  ? 18
+               : n <= 6  ? 14
+               : n <= 9  ? 10
+               : n <= 12 ? 7
+               : n <= 16 ? 5
+               : 3;
+
+  function makeBlock(height){
+    const cols = items.map((item, i) => `
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;
+        padding:0 ${padPx}px;overflow:hidden;
+        ${i > 0 ? 'border-left:0.8px solid rgba(80,40,10,0.18);' : ''}">
+        <div style="font-family:'Shippori Mincho B1',serif;font-size:${namePt}pt;font-weight:700;
+          color:#1a1008;letter-spacing:.18em;writing-mode:vertical-rl;text-orientation:mixed;
+          flex:1;line-height:1.9;padding-top:2mm;">${item.name}</div>
+        ${item.ing ? `
+        <div style="font-family:'Shippori Mincho B1',serif;font-size:${ingPt}pt;color:#6b4c2a;
+          letter-spacing:.1em;writing-mode:vertical-rl;text-orientation:mixed;
+          margin-top:5px;padding-top:5px;border-top:0.8px solid rgba(80,40,10,0.2);
+          line-height:1.7;max-height:${height*0.38}mm;overflow:hidden;">${item.ing}</div>` : ''}
+      </div>`).join('');
+
+    return `
+    <div style="position:relative;width:210mm;height:${height}mm;overflow:hidden;
+      background:linear-gradient(160deg,#fdf9f0 0%,#f6edd8 60%,#fdf9f0 100%);">
+      <div style="position:absolute;inset:0;pointer-events:none;
+        background-image:
+          repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(139,101,60,0.025) 3px,rgba(139,101,60,0.025) 4px),
+          repeating-linear-gradient(90deg,transparent,transparent 3px,rgba(139,101,60,0.025) 3px,rgba(139,101,60,0.025) 4px);"></div>
+      <div style="position:absolute;top:5mm;left:5mm;right:5mm;bottom:5mm;
+        border:1.8px solid rgba(80,40,10,0.55);pointer-events:none;"></div>
+      <div style="position:absolute;top:6.5mm;left:6.5mm;right:6.5mm;bottom:6.5mm;
+        border:0.8px solid rgba(80,40,10,0.28);pointer-events:none;"></div>
+      <!-- 右帯：お品書き -->
+      <div style="position:absolute;top:7mm;right:7mm;bottom:7mm;width:22mm;
+        display:flex;flex-direction:column;align-items:center;justify-content:center;
+        border-left:0.8px solid rgba(80,40,10,0.3);">
+        <div style="writing-mode:vertical-rl;font-size:17pt;font-weight:800;color:#3a2010;
+          letter-spacing:.35em;margin-bottom:10px;">お品書き</div>
+        ${r.customer ? `
+        <div style="writing-mode:vertical-rl;font-size:7pt;color:#8b6540;
+          letter-spacing:.15em;margin-top:8px;padding-top:6px;
+          border-top:0.8px solid rgba(80,40,10,0.2);">${r.customer}　様</div>` : ''}
+      </div>
+      <!-- 左帯：店名・日付 -->
+      <div style="position:absolute;top:7mm;left:7mm;bottom:7mm;width:22mm;
+        display:flex;flex-direction:column;align-items:center;justify-content:center;
+        border-right:0.8px solid rgba(80,40,10,0.3);">
+        <div style="writing-mode:vertical-rl;font-size:7pt;color:#8b6540;
+          letter-spacing:.2em;margin-bottom:6px;">洋食だいにんぐ</div>
+        <div style="writing-mode:vertical-rl;font-size:12pt;font-weight:800;color:#3a2010;
+          letter-spacing:.25em;margin-bottom:10px;">なかむら</div>
+        <div style="writing-mode:vertical-rl;font-size:6.5pt;color:#8b6540;
+          letter-spacing:.12em;">${dateJP}</div>
+      </div>
+      <!-- 中央：料理カラム（右から左） -->
+      <div style="position:absolute;top:8mm;left:31mm;right:31mm;bottom:9mm;
+        display:flex;flex-direction:row-reverse;align-items:stretch;overflow:hidden;">
+        ${cols}
+      </div>
+      <!-- 下部一言 -->
+      <div style="position:absolute;bottom:6mm;left:50%;transform:translateX(-50%);
+        font-size:6pt;color:rgba(80,40,10,0.4);letter-spacing:.18em;white-space:nowrap;">
+        旬の食材を丁寧に　ごゆるりとお召し上がりください
+      </div>
+    </div>`;
+  }
+
+  const html = `<!DOCTYPE html>
+<html lang="ja"><head><meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;600;700;800&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  @page{size:A4 portrait;margin:0}
+  html,body{width:210mm;height:297mm;overflow:hidden;font-family:'Shippori Mincho B1',serif;}
+</style>
+</head><body>
+  ${makeBlock(148)}
+  <div style="width:210mm;height:1px;
+    background:repeating-linear-gradient(to right,rgba(80,40,10,0.3) 0,rgba(80,40,10,0.3) 5px,transparent 5px,transparent 10px);
+    position:relative;">
+    <span style="position:absolute;left:50%;transform:translateX(-50%);
+      font-size:6pt;color:rgba(80,40,10,0.4);letter-spacing:.15em;top:-7px;
+      background:#fff;padding:0 4px;">✂ 切り取り</span>
+  </div>
+  ${makeBlock(148)}
+<script>window.onload=function(){window.print()}<\/script>
+</body></html>`;
+
+  const oldF = document.getElementById('_oshinagaki_frame');
+  if(oldF) oldF.remove();
+  const iframe = document.createElement('iframe');
+  iframe.id = '_oshinagaki_frame';
+  iframe.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;border:none;z-index:9999;opacity:0;pointer-events:none';
+  document.body.appendChild(iframe);
+  iframe.onload = function(){
+    setTimeout(()=>{
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+      setTimeout(()=>iframe.remove(), 2500);
+    }, 700);
+  };
+  const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+  iframe.src = URL.createObjectURL(blob);
+}
+
+function copyRecord(id){
+  const orig = loadStore().find(r => r.id === id);
+  if(!orig) return;
+
+  const newCustomer = prompt(
+    `「${orig.customer || '（お客様名なし）'}」をコピーします。\n\n新しいお客様名を入力してください：`,
+    ''
+  );
+  if(newCustomer === null) return; // キャンセル
+
+  const copied = {
+    ...JSON.parse(JSON.stringify(orig)),  // 完全コピー
+    id: Date.now(),
+    customer: newCustomer.trim(),
+    savedAt: new Date().toLocaleString('ja-JP'),
+  };
+
+  const store = loadStore();
+  store.unshift(copied);
+  saveStore(store);
+  renderHistory();
+  renderStats();
+  showToast('✅ コピーして保存しました');
+}
+
+function deleteRecord(id){
+  if(!confirm('この献立を削除しますか？')) return;
+  const store=loadStore().filter(r=>r.id!==id);
+  saveStore(store);
+  renderHistory();
+  renderStats();
+}
+
+// ═══════════════════════════════════
+// 詳細モーダル
+// ═══════════════════════════════════
+function showDetail(id){
+  const r=loadStore().find(r=>r.id===id);
+  if(!r) return;
+  const d=new Date(r.date+'T00:00:00');
+  const days=['日','月','火','水','木','金','土'];
+  const isL=r.mode==='lunch';
+  const cls=isL?'':'navy';
+
+  document.getElementById('modal-title').textContent=
+    `${r.date.slice(5,7).replace(/^0/,'')}月${r.date.slice(8,10).replace(/^0/,'')}日（${days[d.getDay()]}）${isL?'ランチ':'ディナー'}${r.customer?'　'+r.customer:''}`;
+
+  let html='';
+  r.dishes.forEach(dish=>{
+    const isAppDish  = dish.isApp  || dish.key==='app'  || dish.name==='オードブル盛り合わせ';
+    const isMeatDish = dish.isMeat || dish.key==='meat' || dish.name==='肉料理セレクト';
+    if(isAppDish && dish.items){
+      html+=`<div class="modal-section">
+        <div class="modal-section-ttl">${dish.num}皿目 オードブル盛り合わせ</div>
+        ${dish.items.map(it=>`
+          <div class="dish-detail">
+            <div class="dish-detail-num ${cls}">${it.point} ${it.point==='①'?'一点目':it.point==='②'?'二点目':'三点目'}</div>
+            ${it.name?`<div class="detail-row"><span class="detail-lbl">料理名</span><span class="detail-val">${it.name}</span></div>`:''}
+            ${it.ingredient?`<div class="detail-row"><span class="detail-lbl">食材</span><span class="detail-val">${it.ingredient}</span></div>`:''}
+            ${it.method?`<div class="detail-row"><span class="detail-lbl">調理法</span><span class="detail-val">${it.method}</span></div>`:''}
+            ${it.sauce?`<div class="detail-row"><span class="detail-lbl">ソース</span><span class="detail-val">${it.sauce}</span></div>`:''}
+          </div>`).join('')}
+      </div>`;
+    } else if(isMeatDish && dish.items){
+      html+=`<div class="modal-section">
+        <div class="modal-section-ttl">${dish.num}皿目 肉料理セレクト</div>
+        ${dish.items.map((it,i)=>`
+          <div class="dish-detail">
+            <div class="dish-detail-num ${cls}">${it.point} 選択肢${'ABCD'[i]}</div>
+            ${it.name?`<div class="detail-row"><span class="detail-lbl">料理名</span><span class="detail-val">${it.name}</span></div>`:''}
+            ${it.ingredient?`<div class="detail-row"><span class="detail-lbl">食材</span><span class="detail-val">${it.ingredient}</span></div>`:''}
+            ${it.method?`<div class="detail-row"><span class="detail-lbl">調理法</span><span class="detail-val">${it.method}</span></div>`:''}
+            ${it.sauce?`<div class="detail-row"><span class="detail-lbl">ソース</span><span class="detail-val">${it.sauce}</span></div>`:''}
+          </div>`).join('')}
+      </div>`;
+    } else if(dish.name||dish.ingredient){
+      html+=`<div class="dish-detail">
+        <div class="dish-detail-num ${cls}">${dish.num}皿目${dish.name?'　'+dish.name:''}</div>
+        ${dish.ingredient?`<div class="detail-row"><span class="detail-lbl">食材</span><span class="detail-val">${dish.ingredient}</span></div>`:''}
+        ${dish.method?`<div class="detail-row"><span class="detail-lbl">調理法</span><span class="detail-val">${dish.method}</span></div>`:''}
+        ${dish.sauce?`<div class="detail-row"><span class="detail-lbl">ソース</span><span class="detail-val">${dish.sauce}</span></div>`:''}
+        ${dish.garnish?`<div class="detail-row"><span class="detail-lbl">付け合わせ</span><span class="detail-val">${dish.garnish}</span></div>`:''}
+        ${dish.topping?`<div class="detail-row"><span class="detail-lbl">トッピング</span><span class="detail-val">${dish.topping}</span></div>`:''}
+      </div>`;
+    }
+  });
+
+  if(r.note) html+=`<div class="modal-section"><div class="modal-section-ttl">備考</div><div class="dish-detail" style="font-size:13px">${r.note}</div></div>`;
+  html+=`<div style="font-size:10px;color:var(--mid);text-align:right;margin-top:8px">登録：${r.savedAt}</div>`;
+
+  document.getElementById('modal-body').innerHTML=html;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal(){ document.getElementById('modal').classList.remove('open') }
+
+// ═══════════════════════════════════
+// 編集モーダル
+// ═══════════════════════════════════
+let editingId = null;
+
+function openEdit(id){
+  const r = loadStore().find(r => r.id === id);
+  if(!r) return;
+  editingId = id;
+
+  const isL = r.mode === 'lunch';
+  const d = new Date(r.date + 'T00:00:00');
+  const days = ['日','月','火','水','木','金','土'];
+  const dateStr = `${parseInt(r.date.slice(5,7))}月${parseInt(r.date.slice(8,10))}日（${days[d.getDay()]}）`;
+  const hdMain = isL ? 'hd-green' : 'hd-navy';
+  const hdSub  = isL ? 'hd-gm'   : 'hd-nm';
+  const lineCol = isL ? 'var(--gl)' : 'var(--nl)';
+  const dragCol = isL ? 'var(--gm)' : 'var(--nm)';
+
+  document.getElementById('edit-modal-title').textContent =
+    `✏️ ${dateStr} ${isL ? 'ランチ' : 'ディナー'}`;
+
+  // ディナーで肉料理セレクトがない場合は自動追加（古いデータ対応）
+  if(!isL){
+    const hasMeat = r.dishes.some(d =>
+      d.isMeat || d.key==='meat' || d.name==='肉料理セレクト'
+    );
+    if(!hasMeat){
+      r.dishes.push({
+        num: r.dishes.length + 1,
+        name: '肉料理セレクト',
+        isMeat: true,
+        key: 'meat',
+        items: [
+          {point:'①',name:'',ingredient:'',method:'',sauce:''},
+          {point:'②',name:'',ingredient:'',method:'',sauce:''},
+          {point:'③',name:'',ingredient:'',method:'',sauce:''},
+          {point:'④',name:'',ingredient:'',method:'',sauce:''},
+        ]
+      });
+    }
+  }
+
+  const wrap = document.getElementById('edit-modal-body');
+  wrap.innerHTML = '';
+
+  // ── 日付行 ──
+  const dateWrap = document.createElement('div');
+  dateWrap.style.cssText = 'background:#fff;border-radius:12px;padding:13px 15px;margin-bottom:12px;box-shadow:0 2px 8px var(--shadow)';
+  dateWrap.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <span style="font-size:10px;font-weight:700;color:var(--mid);letter-spacing:.14em;white-space:nowrap">📅 日付</span>
+      <input type="date" id="edit-date" value="${r.date}"
+        style="flex:1;height:40px;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;font-size:15px;color:var(--ink);background:#fff;outline:none;-webkit-appearance:none">
+    </div>
+    <div style="display:flex;gap:4px;justify-content:center;margin-bottom:10px" id="edit-day-circles">
+      ${['月','火','水','木','金','土','日'].map((l,i)=>{
+        const dv=[1,2,3,4,5,6,0][i];
+        const on = dv === d.getDay();
+        const col = isL ? 'var(--gd)' : 'var(--nd)';
+        return `<div class="dc${on?' on':''}" data-d="${dv}"
+          style="${on?`background:${col};border-color:${col};color:#fff`:''}"
+          onclick="editDayClick(this,'${isL?'lunch':'dinner'}')">${l}</div>`;
+      }).join('')}
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding-top:10px;border-top:1px solid var(--border)">
+      <span style="font-size:10px;font-weight:700;color:var(--mid);letter-spacing:.14em;white-space:nowrap">👤 お客様名</span>
+      <input type="text" id="edit-customer" value="${esc(r.customer||'')}" placeholder="例：田中様 / 4名様"
+        style="flex:1;height:40px;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;font-size:15px;color:var(--ink);background:#fff;outline:none;-webkit-appearance:none">
+    </div>`;
+  wrap.appendChild(dateWrap);
+
+  // ── 並び替えヒント ──
+  const hint = document.createElement('div');
+  hint.style.cssText = 'font-size:10px;color:var(--mid);text-align:center;margin-bottom:10px;letter-spacing:.08em';
+  hint.textContent = '⠿ カードを長押し・ドラッグで順番を入れ替えられます';
+  wrap.appendChild(hint);
+
+  // ── 各皿カード（ドラッグ対応） ──
+  let editDragSrc = null;
+
+  r.dishes.forEach((dish, idx) => {
+    const card = document.createElement('div');
+    card.className = 'card edit-dish-card';
+    card.dataset.idx = idx;
+    card.style.cssText = 'margin-bottom:10px;cursor:grab';
+    card.draggable = true;
+
+    // isApp・isMeat は名前やkeyでも判定（古いデータとの互換）
+    const isAppDish  = dish.isApp  || dish.key==='app'  || dish.name==='オードブル盛り合わせ';
+    const isMeatDish = dish.isMeat || dish.key==='meat' || dish.name==='肉料理セレクト';
+
+    // 古いデータ用：itemsがない場合は空のitemsを生成
+    if(isAppDish && !dish.items){
+      dish.items = [
+        {point:'①',name:'',ingredient:'',method:'',sauce:''},
+        {point:'②',name:'',ingredient:'',method:'',sauce:''},
+        {point:'③',name:'',ingredient:'',method:'',sauce:''},
+      ];
+    }
+    if(isMeatDish && !dish.items){
+      dish.items = [
+        {point:'①',name:'',ingredient:'',method:'',sauce:''},
+        {point:'②',name:'',ingredient:'',method:'',sauce:''},
+        {point:'③',name:'',ingredient:'',method:'',sauce:''},
+        {point:'④',name:'',ingredient:'',method:'',sauce:''},
+      ];
+    }
+
+    if(isAppDish && dish.items){
+      const pts = dish.items.map((it,pi) => `
+        <div class="app-sec" style="border-bottom:${pi<dish.items.length-1?`2px solid ${lineCol}`:'none'}">
+          <div class="app-lbl">
+            <div class="app-pt">${it.point}</div>
+            <span class="app-pt-txt">${['一点目','二点目','三点目'][pi]}</span>
+          </div>
+          <div class="frow"><div class="flbl">料理名</div><textarea class="finp" inputmode="text" rows="1" oninput="autoResize(this)" id="e-a${pi+1}nm">${esc(it.name)}</textarea></div>
+          <div class="frow"><div class="flbl">食材</div><textarea class="finp" inputmode="text" rows="1" oninput="autoResize(this)" id="e-a${pi+1}ig">${esc(it.ingredient)}</textarea></div>
+          <div class="frow"><div class="flbl">調理法</div><textarea class="finp" inputmode="text" rows="1" oninput="autoResize(this)" id="e-a${pi+1}mt">${esc(it.method)}</textarea></div>
+          <div class="frow" style="border-bottom:none"><div class="flbl">ソース</div><textarea class="finp" inputmode="text" rows="1" oninput="autoResize(this)" id="e-a${pi+1}sc">${esc(it.sauce)}</textarea></div>
+        </div>`).join('');
+      card.innerHTML = `<div class="card-hd ${hdMain}" style="cursor:grab">
+        <span style="font-size:16px;margin-right:4px;opacity:.6">⠿</span>
+        <span class="hd-ttl">オードブル盛り合わせ</span>
+        <span class="hd-sub">3点盛り</span>
+      </div>${pts}`;
+
+    } else if(isMeatDish && dish.items){
+      // 肉料理セレクト（4種類）
+      const pts = dish.items.map((it,pi) => `
+        <div class="app-sec" style="border-bottom:${pi<dish.items.length-1?`2px solid ${lineCol}`:'none'}">
+          <div class="app-lbl">
+            <div class="app-pt" style="background:var(--nd)">${it.point}</div>
+            <span class="app-pt-txt" style="color:var(--nd)">選択肢${'ABCD'[pi]}</span>
+          </div>
+          <div class="frow"><div class="flbl">料理名</div><textarea class="finp" inputmode="text" rows="1" oninput="autoResize(this)" id="e-m${pi+1}nm">${esc(it.name)}</textarea></div>
+          <div class="frow"><div class="flbl">食材</div><textarea class="finp" inputmode="text" rows="1" oninput="autoResize(this)" id="e-m${pi+1}ig">${esc(it.ingredient)}</textarea></div>
+          <div class="frow"><div class="flbl">調理法</div><textarea class="finp" inputmode="text" rows="1" oninput="autoResize(this)" id="e-m${pi+1}mt">${esc(it.method)}</textarea></div>
+          <div class="frow" style="border-bottom:none"><div class="flbl">ソース</div><textarea class="finp" inputmode="text" rows="1" oninput="autoResize(this)" id="e-m${pi+1}sc">${esc(it.sauce)}</textarea></div>
+        </div>`).join('');
+      card.innerHTML = `<div class="card-hd ${hdMain}" style="cursor:grab">
+        <span style="font-size:16px;margin-right:4px;opacity:.6">⠿</span>
+        <span class="hd-ttl">肉料理セレクト</span>
+        <span class="hd-sub">4種類から選択</span>
+      </div>${pts}`;
+
+    } else {
+      // 通常皿（key方式に対応、なければ番号で後方互換）
+      const dishKey = dish.key || `d${dish.num}`;
+      const rows = [
+        {id:'nm',lb:'料理名',val:dish.name},
+        {id:'ig',lb:'食材',val:dish.ingredient},
+        {id:'mt',lb:'調理法',val:dish.method},
+        {id:'sc',lb:'ソース',val:dish.sauce},
+        {id:'tp',lb:'トッピング',val:dish.topping},
+      ].map((f,fi,arr) => `
+        <div class="frow"${fi===arr.length-1?' style="border-bottom:none"':''}>
+          <div class="flbl">${f.lb}</div>
+          <textarea class="finp" inputmode="text" rows="1" oninput="autoResize(this)" id="e-${dishKey}${f.id}">${esc(f.val)}</textarea>
+        </div>`).join('');
+      card.innerHTML = `<div class="card-hd ${hdSub}" style="cursor:grab">
+        <span style="font-size:16px;margin-right:4px;opacity:.6">⠿</span>
+        <span class="hd-ttl">${dish.name||'料理'}</span>
+      </div>${rows}`;
+    }
+
+    // ── ドラッグ&ドロップ ──
+    card.addEventListener('dragstart', e => {
+      editDragSrc = card;
+      setTimeout(()=>card.style.opacity='.4', 0);
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    card.addEventListener('dragend', () => {
+      card.style.opacity = '1';
+      editDragSrc = null;
+      document.querySelectorAll('.edit-dish-card').forEach(c=>c.style.border='');
+    });
+    card.addEventListener('dragover', e => {
+      e.preventDefault();
+      if(card !== editDragSrc) card.style.border = `2px solid ${dragCol}`;
+    });
+    card.addEventListener('dragleave', () => card.style.border = '');
+    card.addEventListener('drop', e => {
+      e.preventDefault();
+      card.style.border = '';
+      if(editDragSrc && editDragSrc !== card){
+        const all = [...wrap.querySelectorAll('.edit-dish-card')];
+        const si = all.indexOf(editDragSrc);
+        const ti = all.indexOf(card);
+        if(si < ti) wrap.insertBefore(editDragSrc, card.nextSibling);
+        else wrap.insertBefore(editDragSrc, card);
+      }
+    });
+
+    // ── タッチ（iPhone） ──
+    card.addEventListener('touchstart', e=>{
+      editDragSrc = card;
+      card.style.opacity = '.7';
+    },{passive:true});
+    card.addEventListener('touchmove', e=>{
+      e.preventDefault();
+      const t = e.touches[0];
+      const els = document.elementsFromPoint(t.clientX, t.clientY);
+      const target = els.find(el=>el.classList.contains('edit-dish-card')&&el!==card);
+      document.querySelectorAll('.edit-dish-card').forEach(c=>c.style.border='');
+      if(target) target.style.border = `2px solid ${dragCol}`;
+    },{passive:false});
+    card.addEventListener('touchend', e=>{
+      card.style.opacity = '1';
+      const t = e.changedTouches[0];
+      const els = document.elementsFromPoint(t.clientX, t.clientY);
+      const target = els.find(el=>el.classList.contains('edit-dish-card')&&el!==card);
+      document.querySelectorAll('.edit-dish-card').forEach(c=>c.style.border='');
+      if(target){
+        const all = [...wrap.querySelectorAll('.edit-dish-card')];
+        const si = all.indexOf(card);
+        const ti = all.indexOf(target);
+        if(si < ti) wrap.insertBefore(card, target.nextSibling);
+        else wrap.insertBefore(card, target);
+      }
+    },{passive:true});
+
+    wrap.appendChild(card);
+  });
+
+  // ── 備考 ──
+  const noteCard = document.createElement('div');
+  noteCard.className = 'card';
+  noteCard.style.marginBottom = '14px';
+  noteCard.innerHTML = `<div class="note-hd">📝 備考・こだわりポイント</div>
+    <textarea class="note-ta" id="edit-note" placeholder="備考">${esc(r.note||'')}</textarea>`;
+  wrap.appendChild(noteCard);
+
+  document.getElementById('edit-modal').classList.add('open');
+  document.querySelector('#edit-modal .modal').scrollTop = 0;
+}
+
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
+function editDayClick(el, mode){
+  document.querySelectorAll('#edit-day-circles .dc').forEach(e=>{
+    e.classList.remove('on');
+    e.style.background=''; e.style.borderColor=''; e.style.color='';
+  });
+  el.classList.add('on');
+  const col = mode==='lunch' ? 'var(--gd)' : 'var(--nd)';
+  el.style.background = col; el.style.borderColor = col; el.style.color = '#fff';
+}
+
+function saveEdit(){
+  if(!editingId) return;
+  const store = loadStore();
+  const idx = store.findIndex(r => r.id === editingId);
+  if(idx < 0) return;
+
+  const r = store[idx];
+  const newDate = document.getElementById('edit-date').value;
+  if(!newDate){ alert('日付を入力してください'); return; }
+
+  // 現在の表示順でカードを収集
+  const editCards = [...document.querySelectorAll('#edit-modal-body .edit-dish-card')];
+  let dishNum = 1;
+  const dishes = [];
+
+  editCards.forEach(card => {
+    const origIdx = parseInt(card.dataset.idx);
+    const orig = r.dishes[origIdx];
+    if(!orig) return;
+
+    const isAppDish  = orig.isApp  || orig.key==='app'  || orig.name==='オードブル盛り合わせ';
+    const isMeatDish = orig.isMeat || orig.key==='meat' || orig.name==='肉料理セレクト';
+
+    if(isAppDish && orig.items){
+      dishes.push({
+        ...orig,
+        num: dishNum++,
+        items: orig.items.map((it,pi) => ({
+          ...it,
+          name: (document.getElementById(`e-a${pi+1}nm`)?.value||'').trim(),
+          ingredient: (document.getElementById(`e-a${pi+1}ig`)?.value||'').trim(),
+          method: (document.getElementById(`e-a${pi+1}mt`)?.value||'').trim(),
+          sauce: (document.getElementById(`e-a${pi+1}sc`)?.value||'').trim(),
+        }))
+      });
+    } else if(isMeatDish && orig.items){
+      dishes.push({
+        ...orig,
+        num: dishNum++,
+        items: orig.items.map((it,pi) => ({
+          ...it,
+          name: (document.getElementById(`e-m${pi+1}nm`)?.value||'').trim(),
+          ingredient: (document.getElementById(`e-m${pi+1}ig`)?.value||'').trim(),
+          method: (document.getElementById(`e-m${pi+1}mt`)?.value||'').trim(),
+          sauce: (document.getElementById(`e-m${pi+1}sc`)?.value||'').trim(),
+        }))
+      });
+    } else {
+      const dishKey = orig.key || `d${orig.num}`;
+      dishes.push({
+        ...orig,
+        num: dishNum++,
+        name: (document.getElementById(`e-${dishKey}nm`)?.value||'').trim(),
+        ingredient: (document.getElementById(`e-${dishKey}ig`)?.value||'').trim(),
+        method: (document.getElementById(`e-${dishKey}mt`)?.value||'').trim(),
+        sauce: (document.getElementById(`e-${dishKey}sc`)?.value||'').trim(),
+        topping: (document.getElementById(`e-${dishKey}tp`)?.value||'').trim(),
+      });
+    }
+  });
+
+  store[idx] = {
+    ...r,
+    date: newDate,
+    dishes,
+    note: (document.getElementById('edit-note')?.value||'').trim(),
+    customer: (document.getElementById('edit-customer')?.value||'').trim(),
+    updatedAt: new Date().toLocaleString('ja-JP'),
+  };
+
+  saveStore(store);
+  closeEditModal();
+  renderHistory();
+  renderStats();
+  showToast('✅ 保存しました');
+}
+
+function closeEditModal(){
+  document.getElementById('edit-modal').classList.remove('open');
+  editingId = null;
+}
+
+function showToast(msg){
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+    background:#2a5c3f;color:#fff;padding:10px 20px;border-radius:24px;
+    font-family:'Shippori Mincho B1',serif;font-size:13px;letter-spacing:.1em;
+    box-shadow:0 4px 16px rgba(0,0,0,.25);z-index:500;
+    animation:fadeIn .25s ease;`;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 2200);
+}
+
+// ═══════════════════════════════════
+// 印刷（新ウィンドウ方式・iPhone対応）
+// ═══════════════════════════════════
+
+function printCurrent(){
+  const date     = document.getElementById('inp-date').value;
+  const note     = (document.getElementById('inp-note').value||'').trim();
+  const customer = (document.getElementById('inp-customer').value||'').trim();
+  const dishes   = collectInputData();
+  const mode     = currentMode;
+  openPrintWindow({ date, mode, note, customer, dishes });
+}
+
+function printRecord(id){
+  const r = loadStore().find(r => r.id === id);
+  if(!r) return;
+  openPrintWindow(r);
+}
+
+// 印刷（iframe方式・iPhone Safari対応）
+function openPrintWindow(r){
+  // buildPrintHTMLからposition:fixedとz-indexを除去
+  let sheetHtml = buildPrintHTML(r);
+  sheetHtml = sheetHtml.replace('position:fixed;top:0;left:0;', 'position:relative;');
+  sheetHtml = sheetHtml.replace(';z-index:9999;', ';');
+
+  const fullHtml = `<!DOCTYPE html>
+<html lang="ja"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=210mm,initial-scale=1">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;600;700;800&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  @page{size:A4 portrait;margin:0}
+  html,body{
+    width:210mm;
+    height:297mm;
+    margin:0;
+    padding:0;
+    background:#f9f6f0;
+    font-family:'Shippori Mincho B1',serif;
+    overflow:hidden;
+  }
+</style>
+</head><body>
+${sheetHtml}
+<script>
+  window.onload=function(){
+    // フォントロード後に印刷
+    if(document.fonts && document.fonts.ready){
+      document.fonts.ready.then(function(){
+        setTimeout(function(){window.print()}, 800);
+      });
+    } else {
+      setTimeout(function(){window.print()}, 1200);
+    }
+  }
+<\/script>
+</body></html>`;
+
+  const oldF = document.getElementById('_print_iframe');
+  if(oldF) oldF.remove();
+
+  // iframeを画面外に置いて常駐させる（削除しない）
+  const iframe = document.createElement('iframe');
+  iframe.id = '_print_iframe';
+  iframe.style.cssText = 'position:fixed;top:-10000px;left:-10000px;width:210mm;height:297mm;border:none;z-index:-1;visibility:hidden';
+  document.body.appendChild(iframe);
+
+  // iframeはそのまま残す（次回印刷時に置き換える）
+  // 印刷後に閉じない → プレビューが消えなくなる
+  const blob = new Blob([fullHtml], {type:'text/html;charset=utf-8'});
+  iframe.src = URL.createObjectURL(blob);
+}
+
+// A4印刷用HTMLを生成（divのみ・同一ページ内に挿入）
+function buildPrintHTML(r){
+  const isL    = r.mode === 'lunch';
+  const col    = isL ? '#3a6b45' : '#1e3352';
+  const colM   = isL ? '#5a9468' : '#2e5080';
+  const bg     = isL ? '#eef7f0' : '#edf2f9';
+  const borderC= isL ? '#b8d4bc' : '#b8cce0';
+  const lineC  = isL ? '#d0e8d4' : '#d4e2f0';
+  const label  = isL ? '☀ Lunch' : '🌙 Dinner';
+
+  const days = ['日','月','火','水','木','金','土'];
+  let dateStr = '', activeDayN = -1;
+  if(r.date){
+    const d = new Date(r.date + 'T00:00:00');
+    activeDayN = d.getDay();
+    dateStr = `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${days[activeDayN]}）`;
+  }
+  const dayLabels = [{l:'月',v:1},{l:'火',v:2},{l:'水',v:3},{l:'木',v:4},{l:'金',v:5},{l:'土',v:6},{l:'日',v:0}];
+  const daysHtml = dayLabels.map(d=>`<div style="width:14px;height:14px;border-radius:50%;border:1pt solid ${d.v===activeDayN?col:borderC};background:${d.v===activeDayN?col:'transparent'};color:${d.v===activeDayN?'#fff':'#7a7a7a'};display:flex;align-items:center;justify-content:center;font-size:5pt;font-family:serif;font-weight:${d.v===activeDayN?700:400}">${d.l}</div>`).join('');
+
+  function pField(lb, val){
+    return `<div style="display:flex;align-items:center;flex:1;border-bottom:0.5pt solid ${lineC};padding:0.3mm 0;gap:2px;min-height:0"><span style="font-size:4.8pt;font-weight:700;color:#777;white-space:nowrap;min-width:28px">${lb}</span><span style="font-size:8.5pt;color:#1a1a1a;flex:1;word-break:break-all;line-height:1.1">${val||''}</span></div>`;
+  }
+  function dishHead(label, hcol){
+    return `<div style="flex-shrink:0;background:${hcol};padding:1.6mm 2.5mm"><span style="font-size:7.5pt;font-weight:700;color:#fff;letter-spacing:.06em;display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${label}</span></div>`;
+  }
+  function normalFields(dish){
+    return [['料理名',dish.name],['食材',dish.ingredient],['調理法',dish.method],['ソース',dish.sauce],['トッピング',dish.topping]].map(([l,v])=>pField(l,v)).join('');
+  }
+
+  let body = '';
+
+  if(isL){
+    // ランチ：オードブル（固定高） + 6皿（2列×3行）
+    const app     = r.dishes.find(d=> d.isApp || d.key==='app' || d.name==='オードブル盛り合わせ');
+    const normals = r.dishes.filter(d=>!d.isApp && d.key!=='app' && d.name!=='オードブル盛り合わせ');
+
+    if(app){
+      const pts = (app.items||[]).map((it,i)=>`<div style="background:#f4fbf4;padding:2mm 2.5mm;display:flex;flex-direction:column;border-right:0.5pt solid ${borderC}"><div style="font-size:5.5pt;font-weight:700;color:${col};margin-bottom:1mm">${it.point||['①','②','③'][i]} ${['一点目','二点目','三点目'][i]}</div>${['料理名','食材','調理法','ソース'].map((lb,j)=>pField(lb,[it.name,it.ingredient,it.method,it.sauce][j])).join('')}</div>`).join('');
+      body += `<div style="flex-shrink:0;height:60mm;border:1pt solid ${borderC};border-radius:3pt;overflow:hidden;display:flex;flex-direction:column;margin-bottom:2mm"><div style="flex-shrink:0;background:${col};padding:2mm 3mm;display:flex;align-items:center;gap:6px"><span style="font-size:8.5pt;font-weight:700;color:#fff;flex:1">オードブル盛り合わせ</span><span style="font-size:5.5pt;color:rgba(255,255,255,.7)">3点盛り</span></div><div style="flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;overflow:hidden">${pts}</div></div>`;
+    }
+    body += `<div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:1.5mm;min-height:0">`;
+    normals.forEach((dish,i)=>{
+      body += `<div style="border:1pt solid ${borderC};border-radius:3pt;overflow:hidden;display:flex;flex-direction:column;min-height:0">${dishHead(dish.name||'料理',i%2===0?colM:col)}<div style="flex:1;padding:1mm 2mm;display:flex;flex-direction:column;justify-content:space-between;background:#fff;min-height:0">${normalFields(dish)}</div></div>`;
+    });
+    body += `</div>`;
+
+  } else {
+    // ディナー：9皿（3列×3行） + 肉料理セレクト（4列）
+    const normals = r.dishes.filter(d=>!d.isMeat && d.key!=='meat' && d.name!=='肉料理セレクト');
+    const meat    = r.dishes.find(d=> d.isMeat || d.key==='meat' || d.name==='肉料理セレクト');
+    const hCols   = [colM,col,'#24426a',colM,col,'#24426a',colM,col,'#24426a'];
+
+    body += `<div style="flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:repeat(3,1fr);gap:1.5mm;min-height:0;margin-bottom:1.5mm">`;
+    normals.forEach((dish,i)=>{
+      body += `<div style="border:1pt solid ${borderC};border-radius:3pt;overflow:hidden;display:flex;flex-direction:column;min-height:0">${dishHead(dish.name||'料理',hCols[i]||colM)}<div style="flex:1;padding:1mm 2mm;display:flex;flex-direction:column;justify-content:space-between;background:#fff;min-height:0">${normalFields(dish)}</div></div>`;
+    });
+    body += `</div>`;
+
+    if(meat && meat.items){
+      const mpts = meat.items.map((it,i)=>`<div style="flex:1;background:${i%2===0?'#f4f6fb':'#eef2f8'};padding:1.5mm 2mm;display:flex;flex-direction:column;border-right:${i<3?`0.5pt solid ${borderC}`:'none'}"><div style="font-size:5pt;font-weight:700;color:${col};margin-bottom:1mm">${it.point} 選択肢${'ABCD'[i]}</div>${['料理名','食材','調理法','ソース'].map((lb,j)=>pField(lb,[it.name,it.ingredient,it.method,it.sauce][j])).join('')}</div>`).join('');
+      body += `<div style="flex-shrink:0;height:34mm;border:1pt solid ${borderC};border-radius:3pt;overflow:hidden;display:flex;flex-direction:column"><div style="flex-shrink:0;background:${col};padding:1.5mm 3mm;display:flex;align-items:center;gap:6px"><span style="font-size:8pt;font-weight:700;color:#fff;flex:1">🥩 肉料理セレクト</span><span style="font-size:5.5pt;color:rgba(255,255,255,.7)">4種類から選択</span></div><div style="flex:1;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;overflow:hidden">${mpts}</div></div>`;
+    }
+  }
+
+  const noteHtml = `<div style="flex-shrink:0;border:1pt solid ${borderC};border-radius:3pt;overflow:hidden;margin-top:1.5mm"><div style="background:#b89040;padding:1.2mm 3mm;font-size:7pt;font-weight:700;color:#fff;letter-spacing:.1em">📝 備考</div><div style="padding:1.5mm 3mm;font-size:8.5pt;color:#1a1a1a;min-height:7mm">${r.note||''}</div></div>`;
+
+  return `<div style="position:fixed;top:0;left:0;width:210mm;height:297mm;overflow:hidden;background:#f9f6f0;z-index:9999;font-family:'Shippori Mincho B1',serif">
+  <div style="position:absolute;left:0;top:0;bottom:0;width:5mm;background:linear-gradient(180deg,${col},${colM})"></div>
+  <div style="position:absolute;top:0;left:0;right:0;height:19mm;padding:4mm 8mm 3mm 12mm;background:${bg};border-bottom:2pt solid ${col};display:flex;align-items:flex-end;justify-content:space-between">
+    <div>
+      <div style="font-size:6.5pt;color:${colM};letter-spacing:.18em;margin-bottom:1mm">YOUSHOKU DINING NAKAMURA</div>
+      <div style="font-size:17pt;font-weight:800;color:${col};letter-spacing:.06em;display:flex;align-items:center;gap:6px;line-height:1">献立メモ<span style="font-size:8pt;background:${col};color:#fff;padding:1px 8px;border-radius:20px;letter-spacing:.1em;font-weight:500">${label}</span></div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
+      <div style="font-size:9.5pt;font-weight:700;color:#1a1a1a;border-bottom:1pt solid #1a1a1a;min-width:48mm;padding-bottom:1px;text-align:right">${dateStr}</div>
+      ${r.customer?`<div style="font-size:9pt;font-weight:700;color:${col}">👤 ${r.customer}</div>`:''}
+      <div style="display:flex;gap:2px">${daysHtml}</div>
+    </div>
+  </div>
+  <div style="position:absolute;top:19mm;left:12mm;right:7mm;bottom:7mm;display:flex;flex-direction:column">
+    ${body}
+    ${noteHtml}
+  </div>
+  <div style="position:absolute;bottom:0;left:12mm;right:7mm;height:6.5mm;border-top:0.5pt solid ${borderC};display:flex;justify-content:space-between;align-items:center">
+    <span style="font-size:5.5pt;color:#777;letter-spacing:.12em">洋食だいにんぐ なかむら ／ 熊野町</span>
+    <span style="font-size:5pt;color:#777;letter-spacing:.08em">地元食材 · 無添加 · 手作り調味料 · 1回転制</span>
+  </div>
+</div>`;
+} // end buildPrintHTML
+
+
+// ═══════════════════════════════════
+// 集計
+// ═══════════════════════════════════
+function renderStats(){
+  const store=loadStore();
+  const now=new Date();
+  const thisYM=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+
+  document.getElementById('stat-total').textContent=store.length;
+  document.getElementById('stat-lunch').textContent=store.filter(r=>r.mode==='lunch').length;
+  document.getElementById('stat-dinner').textContent=store.filter(r=>r.mode==='dinner').length;
+  document.getElementById('stat-month').textContent=store.filter(r=>r.date.startsWith(thisYM)).length;
+
+  // 食材カウント
+  const ingCount={};
+  store.forEach(r=>{
+    r.dishes.forEach(d=>{
+      if(d.isApp && d.items){
+        d.items.forEach(it=>{ if(it.ingredient) it.ingredient.split(/[・、,，]/).forEach(i=>{const t=i.trim();if(t) ingCount[t]=(ingCount[t]||0)+1}) });
+      } else {
+        if(d.ingredient) d.ingredient.split(/[・、,，]/).forEach(i=>{const t=i.trim();if(t) ingCount[t]=(ingCount[t]||0)+1});
+      }
+    });
+  });
+
+  const sorted=Object.entries(ingCount).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const ingEl=document.getElementById('stat-ingredients');
+  if(sorted.length===0){
+    ingEl.innerHTML='<span style="font-size:12px;color:var(--mid)">記録が増えると表示されます</span>';
+  } else {
+    ingEl.innerHTML=sorted.map((e,i)=>`<span class="ing-tag${i%2===1?' navy':''}">${e[0]} <small style="opacity:.7">${e[1]}</small></span>`).join('');
+  }
+}
+
+// ═══════════════════════════════════
+// CSV エクスポート
+// ═══════════════════════════════════
+function exportCSV(){
+  const store=loadStore();
+  if(store.length===0){ alert('保存されたデータがありません'); return; }
+
+  const rows=[['日付','曜日','区分','お客様名','皿番号','皿名称','料理名','食材','調理法','ソース','トッピング','備考','登録日時']];
+  const days=['日','月','火','水','木','金','土'];
+
+  store.forEach(r=>{
+    const d=new Date(r.date+'T00:00:00');
+    const dayStr=days[d.getDay()];
+    const mode=r.mode==='lunch'?'ランチ':'ディナー';
+    const customer=r.customer||'';
+
+    r.dishes.forEach(dish=>{
+      const isAppDish  = dish.isApp  || dish.key==='app'  || dish.name==='オードブル盛り合わせ';
+      const isMeatDish = dish.isMeat || dish.key==='meat' || dish.name==='肉料理セレクト';
+
+      if(isAppDish && dish.items){
+        dish.items.forEach(it=>{
+          rows.push([r.date,dayStr,mode,customer,dish.num,`オードブル${it.point}`,it.name||'',it.ingredient||'',it.method||'',it.sauce||'','','',r.note||'',r.savedAt]);
+        });
+      } else if(isMeatDish && dish.items){
+        dish.items.forEach((it,i)=>{
+          rows.push([r.date,dayStr,mode,customer,dish.num,`肉料理${it.point}選択肢${'ABCD'[i]||''}`,it.name||'',it.ingredient||'',it.method||'',it.sauce||'','','',r.note||'',r.savedAt]);
+        });
+      } else {
+        rows.push([r.date,dayStr,mode,customer,dish.num,`${dish.num}皿目`,dish.name||'',dish.ingredient||'',dish.method||'',dish.sauce||'',dish.topping||'',r.note||'',r.savedAt]);
+      }
+    });
+  });
+
+  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const bom='\uFEFF';
+  const blob=new Blob([bom+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url;
+  a.download=`献立データ_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+// ═══════════════════════════════════
+// 全削除
+// ═══════════════════════════════════
+function clearAllData(){
+  if(!confirm('全ての献立データを削除します。この操作は取り消せません。\n本当によろしいですか？')) return;
+  if(!confirm('本当に削除しますか？')) return;
+  saveStore([]);
+  renderStats();
+  alert('データを削除しました');
+}
+
+// ═══════════════════════════════════
+// 初期化
+// ═══════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  renderInputDishes();
+  initDate('inp-date','inp-days');
+  initDate('ai-date','ai-days');
+  renderStats();
+  applyAutoResize();
+  if(GAS_URL){ loadFromGAS(); }
+});
+</script>
+</body>
+</html>
