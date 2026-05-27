@@ -4,21 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="なかむら献立">
-<meta name="color-scheme" content="light only">
-<meta name="supported-color-schemes" content="light">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <title>献立管理システム | 洋食だいにんぐ なかむら</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;600;700;800&family=Zen+Kaku+Gothic+New:wght@300;400;500;700&display=swap');
 
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-
-/* ダークモード対策（強制ライトモード） */
-@media (prefers-color-scheme: dark) {
-  html, body { background: #eae5dc !important; color: #1c1612 !important; color-scheme: light !important; }
-}
 
 :root{
   --ink:#1c1612;
@@ -791,12 +781,24 @@ function renderInputDishes(savedOrder){
           </div>${rows}
         </div>`;
       }).join('');
+      const appImgId = `img-app`;
+      const appImgRow = `<div class="frow" style="border-bottom:none;align-items:center;padding:10px 0;background:#f7faf7">
+        <div class="flbl">📷 画像</div>
+        <div style="flex:1;display:flex;gap:8px;align-items:center;padding:0 12px">
+          <label style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px dashed var(--gm);border-radius:8px;cursor:pointer;font-size:12px;color:var(--gd);background:#fff;">
+            <span>📷</span><span>盛り合わせ画像</span>
+            <input type="file" accept="image/*" capture="environment" style="display:none" onchange="handleDishImage(event,'${appImgId}')">
+          </label>
+          <img id="${appImgId}-preview" style="display:none;max-width:60px;max-height:60px;border-radius:6px;border:1px solid var(--border);cursor:pointer" onclick="removeDishImage('${appImgId}')">
+          <input type="hidden" id="${appImgId}" value="">
+        </div>
+      </div>`;
       card.innerHTML=`
         <div class="card-hd ${hdCls}" style="cursor:grab">
           <span style="font-size:16px;margin-right:2px;opacity:.6">⠿</span>
           <span class="hd-ttl">${d.label}</span>
           <span class="hd-sub">${d.sub}</span>
-        </div>${pts}`;
+        </div>${pts}${appImgRow}`;
 
     } else if(d.type==='meat'){
       // ディナー：肉料理セレクト（4種類）
@@ -812,26 +814,50 @@ function renderInputDishes(savedOrder){
           </div>${rows}
         </div>`;
       }).join('');
+      const meatImgId = `img-meat`;
+      const meatImgRow = `<div class="frow" style="border-bottom:none;align-items:center;padding:10px 0;background:#f5f7fa">
+        <div class="flbl">📷 画像</div>
+        <div style="flex:1;display:flex;gap:8px;align-items:center;padding:0 12px">
+          <label style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px dashed var(--nm);border-radius:8px;cursor:pointer;font-size:12px;color:var(--nd);background:#fff;">
+            <span>📷</span><span>肉料理画像</span>
+            <input type="file" accept="image/*" capture="environment" style="display:none" onchange="handleDishImage(event,'${meatImgId}')">
+          </label>
+          <img id="${meatImgId}-preview" style="display:none;max-width:60px;max-height:60px;border-radius:6px;border:1px solid var(--border);cursor:pointer" onclick="removeDishImage('${meatImgId}')">
+          <input type="hidden" id="${meatImgId}" value="">
+        </div>
+      </div>`;
       card.innerHTML=`
         <div class="card-hd ${hdCls}" style="cursor:grab">
           <span style="font-size:16px;margin-right:2px;opacity:.6">⠿</span>
           <span class="hd-ttl">${d.label}</span>
           <span class="hd-sub">${d.sub}</span>
-        </div>${pts}`;
+        </div>${pts}${meatImgRow}`;
 
     } else {
       // 通常皿：料理名をリアルタイムでヘッダーに反映
       const headId = `hd-${key}`;
-      const rows=normalFields.map((f,fi)=>`<div class="frow"${fi===normalFields.length-1?' style="border-bottom:none"':''}>
+      const imgId = `img-${key}`;
+      const rows=normalFields.map((f,fi)=>`<div class="frow">
         <div class="flbl">${f.lb}</div>
         <textarea class="finp" inputmode="text" rows="1" id="i-${key}${f.id}"
           ${f.id==='nm'?`oninput="updateDishHead('${headId}',this.value);autoResize(this)"`:'oninput="autoResize(this)"'}></textarea>
       </div>`).join('');
+      const imgRow = `<div class="frow" style="border-bottom:none;align-items:center;padding:8px 0">
+        <div class="flbl">📷 画像</div>
+        <div style="flex:1;display:flex;gap:8px;align-items:center;padding:0 12px">
+          <label style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px dashed var(--mid);border-radius:8px;cursor:pointer;font-size:12px;color:var(--mid);background:#fff;">
+            <span>📷</span><span>選択 / 撮影</span>
+            <input type="file" accept="image/*" capture="environment" style="display:none" onchange="handleDishImage(event,'${imgId}')">
+          </label>
+          <img id="${imgId}-preview" style="display:none;max-width:60px;max-height:60px;border-radius:6px;border:1px solid var(--border);cursor:pointer" onclick="removeDishImage('${imgId}')">
+          <input type="hidden" id="${imgId}" value="">
+        </div>
+      </div>`;
       card.innerHTML=`
         <div class="card-hd ${hdClsSub}" style="cursor:grab">
           <span style="font-size:16px;margin-right:2px;opacity:.6">⠿</span>
           <span class="hd-ttl" id="${headId}" style="color:rgba(255,255,255,${isL?'1':'1'})">料理名を入力してください</span>
-        </div>${rows}`;
+        </div>${rows}${imgRow}`;
     }
 
     // ドラッグ&ドロップ イベント
@@ -957,6 +983,63 @@ function applyAutoResize(){
     autoResize(el);
   });
 }
+
+// ═══════════════════════════════════
+// 画像処理（圧縮・プレビュー・削除）
+// ═══════════════════════════════════
+function handleDishImage(event, imgId){
+  const file = event.target.files[0];
+  if(!file) return;
+  compressImage(file, 400, 0.75, (dataUrl)=>{
+    document.getElementById(imgId).value = dataUrl;
+    const preview = document.getElementById(imgId+'-preview');
+    preview.src = dataUrl;
+    preview.style.display = '';
+  });
+}
+
+function removeDishImage(imgId){
+  if(!confirm('この画像を削除しますか？')) return;
+  document.getElementById(imgId).value = '';
+  const preview = document.getElementById(imgId+'-preview');
+  preview.src = '';
+  preview.style.display = 'none';
+}
+
+// 画像を指定サイズ・品質に圧縮してBase64で返す
+function compressImage(file, maxSize, quality, callback){
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      let w = img.width, h = img.height;
+      if(w > h){
+        if(w > maxSize){ h = h * (maxSize / w); w = maxSize; }
+      } else {
+        if(h > maxSize){ w = w * (maxSize / h); h = maxSize; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      callback(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// 既存画像をプレビューに表示
+function showDishImagePreview(imgId, dataUrl){
+  if(!dataUrl) return;
+  const input = document.getElementById(imgId);
+  const preview = document.getElementById(imgId+'-preview');
+  if(input && preview){
+    input.value = dataUrl;
+    preview.src = dataUrl;
+    preview.style.display = '';
+  }
+}
 function collectInputData(){
   const mode=currentMode;
   const isL=mode==='lunch';
@@ -980,7 +1063,10 @@ function collectInputData(){
         method:(document.getElementById(`i-a${pi}mt`)?.value||'').trim(),
         sauce:(document.getElementById(`i-a${pi}sc`)?.value||'').trim(),
       }));
-      dishes.push({num:dishNum++,name:'オードブル盛り合わせ',isApp:true,key,items});
+      dishes.push({
+        num:dishNum++,name:'オードブル盛り合わせ',isApp:true,key,items,
+        image:(document.getElementById('img-app')?.value||'')
+      });
 
     } else if(d.type==='meat'){
       const items=[1,2,3,4].map(pi=>({
@@ -990,7 +1076,10 @@ function collectInputData(){
         method:(document.getElementById(`i-m${pi}mt`)?.value||'').trim(),
         sauce:(document.getElementById(`i-m${pi}sc`)?.value||'').trim(),
       }));
-      dishes.push({num:dishNum++,name:'肉料理セレクト',isMeat:true,key,items});
+      dishes.push({
+        num:dishNum++,name:'肉料理セレクト',isMeat:true,key,items,
+        image:(document.getElementById('img-meat')?.value||'')
+      });
 
     } else {
       dishes.push({
@@ -1002,6 +1091,7 @@ function collectInputData(){
         sauce:(document.getElementById(`i-${key}sc`)?.value||'').trim(),
         garnish:(document.getElementById(`i-${key}ga`)?.value||'').trim(),
         topping:(document.getElementById(`i-${key}tp`)?.value||'').trim(),
+        image:(document.getElementById(`img-${key}`)?.value||''),
       });
     }
   });
@@ -1322,78 +1412,106 @@ function printOshinagaki(id){
   }
 
   const n = items.length;
-  const namePt = n <= 4  ? 15
-               : n <= 6  ? 13
-               : n <= 9  ? 11
-               : n <= 12 ? 9
-               : n <= 16 ? 8
-               : 7;
-  const ingPt  = n <= 6  ? 7.5
-               : n <= 12 ? 6.5
-               : 6;
-  const padPx  = n <= 4  ? 18
-               : n <= 6  ? 14
-               : n <= 9  ? 10
-               : n <= 12 ? 7
-               : n <= 16 ? 5
-               : 3;
+  // 横書き用：料理数に応じて行間とフォントサイズ調整
+  const namePt  = n <= 5  ? 16
+                : n <= 8  ? 14
+                : n <= 11 ? 12
+                : n <= 14 ? 10
+                : 9;
+  const ingPt   = n <= 5  ? 10
+                : n <= 8  ? 9
+                : n <= 11 ? 8
+                : 7;
+  const rowPad  = n <= 5  ? 8
+                : n <= 8  ? 6
+                : n <= 11 ? 5
+                : 4;
 
   function makeBlock(height){
-    const cols = items.map((item, i) => `
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;
-        padding:0 ${padPx}px;overflow:hidden;
-        ${i > 0 ? 'border-left:0.8px solid rgba(80,40,10,0.18);' : ''}">
-        <div style="font-family:'Shippori Mincho B1',serif;font-size:${namePt}pt;font-weight:700;
-          color:#1a1008;letter-spacing:.18em;writing-mode:vertical-rl;text-orientation:mixed;
-          flex:1;line-height:1.9;padding-top:2mm;">${item.name}</div>
-        ${item.ing ? `
-        <div style="font-family:'Shippori Mincho B1',serif;font-size:${ingPt}pt;color:#6b4c2a;
-          letter-spacing:.1em;writing-mode:vertical-rl;text-orientation:mixed;
-          margin-top:5px;padding-top:5px;border-top:0.8px solid rgba(80,40,10,0.2);
-          line-height:1.7;max-height:${height*0.38}mm;overflow:hidden;">${item.ing}</div>` : ''}
+    // 横書き・上から順番に番号付きで並べる
+    const rows = items.map((item, i) => `
+      <div style="
+        display:flex;align-items:baseline;
+        padding:${rowPad}px 0;
+        ${i < items.length - 1 ? 'border-bottom:0.8px solid rgba(60,30,5,0.15);' : ''}
+      ">
+        <div style="
+          font-family:'Shippori Mincho B1',serif;
+          font-size:${namePt - 2}pt;
+          font-weight:700;
+          color:#1a0c00;
+          min-width:22px;
+          letter-spacing:.05em;
+        ">${i + 1}.</div>
+        <div style="flex:1;min-width:0;">
+          <div style="
+            font-family:'Shippori Mincho B1',serif;
+            font-size:${namePt}pt;
+            font-weight:700;
+            color:#1a0c00;
+            letter-spacing:.08em;
+            line-height:1.3;
+          ">${item.name}</div>
+          ${item.ing ? `
+          <div style="
+            font-family:'Shippori Mincho B1',serif;
+            font-size:${ingPt}pt;
+            color:#3a2010;
+            letter-spacing:.05em;
+            line-height:1.4;
+            margin-top:2px;
+          ">${item.ing}</div>` : ''}
+        </div>
       </div>`).join('');
 
     return `
     <div style="position:relative;width:210mm;height:${height}mm;overflow:hidden;
       background:linear-gradient(160deg,#fdf9f0 0%,#f6edd8 60%,#fdf9f0 100%);">
+
+      <!-- 和紙ノイズ -->
       <div style="position:absolute;inset:0;pointer-events:none;
         background-image:
-          repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(139,101,60,0.025) 3px,rgba(139,101,60,0.025) 4px),
-          repeating-linear-gradient(90deg,transparent,transparent 3px,rgba(139,101,60,0.025) 3px,rgba(139,101,60,0.025) 4px);"></div>
+          repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(139,101,60,0.03) 3px,rgba(139,101,60,0.03) 4px),
+          repeating-linear-gradient(90deg,transparent,transparent 3px,rgba(139,101,60,0.03) 3px,rgba(139,101,60,0.03) 4px);"></div>
+
+      <!-- 外枠二重 -->
       <div style="position:absolute;top:5mm;left:5mm;right:5mm;bottom:5mm;
-        border:1.8px solid rgba(80,40,10,0.55);pointer-events:none;"></div>
+        border:2px solid #5a3a1a;pointer-events:none;"></div>
       <div style="position:absolute;top:6.5mm;left:6.5mm;right:6.5mm;bottom:6.5mm;
-        border:0.8px solid rgba(80,40,10,0.28);pointer-events:none;"></div>
-      <!-- 右帯：お品書き -->
-      <div style="position:absolute;top:7mm;right:7mm;bottom:7mm;width:22mm;
-        display:flex;flex-direction:column;align-items:center;justify-content:center;
-        border-left:0.8px solid rgba(80,40,10,0.3);">
-        <div style="writing-mode:vertical-rl;font-size:17pt;font-weight:800;color:#3a2010;
-          letter-spacing:.35em;margin-bottom:10px;">お品書き</div>
-        ${r.customer ? `
-        <div style="writing-mode:vertical-rl;font-size:7pt;color:#8b6540;
-          letter-spacing:.15em;margin-top:8px;padding-top:6px;
-          border-top:0.8px solid rgba(80,40,10,0.2);">${r.customer}　様</div>` : ''}
+        border:0.8px solid rgba(80,40,10,0.35);pointer-events:none;"></div>
+
+      <!-- ヘッダー：店名・日付・お客様名 -->
+      <div style="position:absolute;top:9mm;left:10mm;right:10mm;
+        display:flex;justify-content:space-between;align-items:flex-end;
+        padding-bottom:5mm;border-bottom:1.5px solid rgba(60,30,5,0.4);">
+        <div>
+          <div style="font-size:8pt;color:#5a3a1a;letter-spacing:.18em;margin-bottom:2px;">
+            洋食だいにんぐ なかむら
+          </div>
+          <div style="font-size:18pt;font-weight:800;color:#1a0c00;letter-spacing:.2em;line-height:1;">
+            お 品 書 き
+          </div>
+        </div>
+        <div style="text-align:right;">
+          ${r.customer ? `
+          <div style="font-size:11pt;font-weight:700;color:#1a0c00;letter-spacing:.1em;margin-bottom:3px;">
+            ${r.customer}　様
+          </div>` : ''}
+          <div style="font-size:9pt;color:#3a2010;letter-spacing:.1em;">
+            ${dateJP}
+          </div>
+        </div>
       </div>
-      <!-- 左帯：店名・日付 -->
-      <div style="position:absolute;top:7mm;left:7mm;bottom:7mm;width:22mm;
-        display:flex;flex-direction:column;align-items:center;justify-content:center;
-        border-right:0.8px solid rgba(80,40,10,0.3);">
-        <div style="writing-mode:vertical-rl;font-size:7pt;color:#8b6540;
-          letter-spacing:.2em;margin-bottom:6px;">洋食だいにんぐ</div>
-        <div style="writing-mode:vertical-rl;font-size:12pt;font-weight:800;color:#3a2010;
-          letter-spacing:.25em;margin-bottom:10px;">なかむら</div>
-        <div style="writing-mode:vertical-rl;font-size:6.5pt;color:#8b6540;
-          letter-spacing:.12em;">${dateJP}</div>
+
+      <!-- 中央：料理一覧（横書き・上から順番） -->
+      <div style="position:absolute;top:30mm;left:12mm;right:12mm;bottom:12mm;
+        overflow:hidden;">
+        ${rows}
       </div>
-      <!-- 中央：料理カラム（右から左） -->
-      <div style="position:absolute;top:8mm;left:31mm;right:31mm;bottom:9mm;
-        display:flex;flex-direction:row-reverse;align-items:stretch;overflow:hidden;">
-        ${cols}
-      </div>
+
       <!-- 下部一言 -->
-      <div style="position:absolute;bottom:6mm;left:50%;transform:translateX(-50%);
-        font-size:6pt;color:rgba(80,40,10,0.4);letter-spacing:.18em;white-space:nowrap;">
+      <div style="position:absolute;bottom:7mm;left:50%;transform:translateX(-50%);
+        font-size:7pt;color:#5a3a1a;letter-spacing:.18em;white-space:nowrap;">
         旬の食材を丁寧に　ごゆるりとお召し上がりください
       </div>
     </div>`;
@@ -1491,6 +1609,7 @@ function showDetail(id){
     if(isAppDish && dish.items){
       html+=`<div class="modal-section">
         <div class="modal-section-ttl">${dish.num}皿目 オードブル盛り合わせ</div>
+        ${dish.image?`<div style="text-align:center;margin:8px 0"><img src="${dish.image}" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid var(--border)"></div>`:''}
         ${dish.items.map(it=>`
           <div class="dish-detail">
             <div class="dish-detail-num ${cls}">${it.point} ${it.point==='①'?'一点目':it.point==='②'?'二点目':'三点目'}</div>
@@ -1503,6 +1622,7 @@ function showDetail(id){
     } else if(isMeatDish && dish.items){
       html+=`<div class="modal-section">
         <div class="modal-section-ttl">${dish.num}皿目 肉料理セレクト</div>
+        ${dish.image?`<div style="text-align:center;margin:8px 0"><img src="${dish.image}" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid var(--border)"></div>`:''}
         ${dish.items.map((it,i)=>`
           <div class="dish-detail">
             <div class="dish-detail-num ${cls}">${it.point} 選択肢${'ABCD'[i]}</div>
@@ -1512,9 +1632,10 @@ function showDetail(id){
             ${it.sauce?`<div class="detail-row"><span class="detail-lbl">ソース</span><span class="detail-val">${it.sauce}</span></div>`:''}
           </div>`).join('')}
       </div>`;
-    } else if(dish.name||dish.ingredient){
+    } else if(dish.name||dish.ingredient||dish.image){
       html+=`<div class="dish-detail">
         <div class="dish-detail-num ${cls}">${dish.num}皿目${dish.name?'　'+dish.name:''}</div>
+        ${dish.image?`<div style="text-align:center;margin:8px 0"><img src="${dish.image}" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid var(--border)"></div>`:''}
         ${dish.ingredient?`<div class="detail-row"><span class="detail-lbl">食材</span><span class="detail-val">${dish.ingredient}</span></div>`:''}
         ${dish.method?`<div class="detail-row"><span class="detail-lbl">調理法</span><span class="detail-val">${dish.method}</span></div>`:''}
         ${dish.sauce?`<div class="detail-row"><span class="detail-lbl">ソース</span><span class="detail-val">${dish.sauce}</span></div>`:''}
@@ -1654,11 +1775,22 @@ function openEdit(id){
           <div class="frow"><div class="flbl">調理法</div><textarea class="finp" inputmode="text" rows="1" oninput="autoResize(this)" id="e-a${pi+1}mt">${esc(it.method)}</textarea></div>
           <div class="frow" style="border-bottom:none"><div class="flbl">ソース</div><textarea class="finp" inputmode="text" rows="1" oninput="autoResize(this)" id="e-a${pi+1}sc">${esc(it.sauce)}</textarea></div>
         </div>`).join('');
+      const appImgRow = `<div class="frow" style="border-bottom:none;align-items:center;padding:10px 0;background:#f7faf7">
+        <div class="flbl">📷 画像</div>
+        <div style="flex:1;display:flex;gap:8px;align-items:center;padding:0 12px">
+          <label style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px dashed var(--gm);border-radius:8px;cursor:pointer;font-size:12px;color:var(--gd);background:#fff;">
+            <span>📷</span><span>盛り合わせ画像</span>
+            <input type="file" accept="image/*" capture="environment" style="display:none" onchange="handleDishImage(event,'e-img-app')">
+          </label>
+          <img id="e-img-app-preview" src="${dish.image||''}" style="${dish.image?'':'display:none;'}max-width:60px;max-height:60px;border-radius:6px;border:1px solid var(--border);cursor:pointer" onclick="removeDishImage('e-img-app')">
+          <input type="hidden" id="e-img-app" value="${dish.image||''}">
+        </div>
+      </div>`;
       card.innerHTML = `<div class="card-hd ${hdMain}" style="cursor:grab">
         <span style="font-size:16px;margin-right:4px;opacity:.6">⠿</span>
         <span class="hd-ttl">オードブル盛り合わせ</span>
         <span class="hd-sub">3点盛り</span>
-      </div>${pts}`;
+      </div>${pts}${appImgRow}`;
 
     } else if(isMeatDish && dish.items){
       // 肉料理セレクト（4種類）
@@ -1673,15 +1805,27 @@ function openEdit(id){
           <div class="frow"><div class="flbl">調理法</div><textarea class="finp" inputmode="text" rows="1" oninput="autoResize(this)" id="e-m${pi+1}mt">${esc(it.method)}</textarea></div>
           <div class="frow" style="border-bottom:none"><div class="flbl">ソース</div><textarea class="finp" inputmode="text" rows="1" oninput="autoResize(this)" id="e-m${pi+1}sc">${esc(it.sauce)}</textarea></div>
         </div>`).join('');
+      const meatImgRow = `<div class="frow" style="border-bottom:none;align-items:center;padding:10px 0;background:#f5f7fa">
+        <div class="flbl">📷 画像</div>
+        <div style="flex:1;display:flex;gap:8px;align-items:center;padding:0 12px">
+          <label style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px dashed var(--nm);border-radius:8px;cursor:pointer;font-size:12px;color:var(--nd);background:#fff;">
+            <span>📷</span><span>肉料理画像</span>
+            <input type="file" accept="image/*" capture="environment" style="display:none" onchange="handleDishImage(event,'e-img-meat')">
+          </label>
+          <img id="e-img-meat-preview" src="${dish.image||''}" style="${dish.image?'':'display:none;'}max-width:60px;max-height:60px;border-radius:6px;border:1px solid var(--border);cursor:pointer" onclick="removeDishImage('e-img-meat')">
+          <input type="hidden" id="e-img-meat" value="${dish.image||''}">
+        </div>
+      </div>`;
       card.innerHTML = `<div class="card-hd ${hdMain}" style="cursor:grab">
         <span style="font-size:16px;margin-right:4px;opacity:.6">⠿</span>
         <span class="hd-ttl">肉料理セレクト</span>
         <span class="hd-sub">4種類から選択</span>
-      </div>${pts}`;
+      </div>${pts}${meatImgRow}`;
 
     } else {
       // 通常皿（key方式に対応、なければ番号で後方互換）
       const dishKey = dish.key || `d${dish.num}`;
+      const imgId = `e-img-${dishKey}`;
       const rows = [
         {id:'nm',lb:'料理名',val:dish.name},
         {id:'ig',lb:'食材',val:dish.ingredient},
@@ -1689,14 +1833,25 @@ function openEdit(id){
         {id:'sc',lb:'ソース',val:dish.sauce},
         {id:'tp',lb:'トッピング',val:dish.topping},
       ].map((f,fi,arr) => `
-        <div class="frow"${fi===arr.length-1?' style="border-bottom:none"':''}>
+        <div class="frow">
           <div class="flbl">${f.lb}</div>
           <textarea class="finp" inputmode="text" rows="1" oninput="autoResize(this)" id="e-${dishKey}${f.id}">${esc(f.val)}</textarea>
         </div>`).join('');
+      const imgRow = `<div class="frow" style="border-bottom:none;align-items:center;padding:8px 0">
+        <div class="flbl">📷 画像</div>
+        <div style="flex:1;display:flex;gap:8px;align-items:center;padding:0 12px">
+          <label style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px dashed var(--mid);border-radius:8px;cursor:pointer;font-size:12px;color:var(--mid);background:#fff;">
+            <span>📷</span><span>選択 / 撮影</span>
+            <input type="file" accept="image/*" capture="environment" style="display:none" onchange="handleDishImage(event,'${imgId}')">
+          </label>
+          <img id="${imgId}-preview" src="${dish.image||''}" style="${dish.image?'':'display:none;'}max-width:60px;max-height:60px;border-radius:6px;border:1px solid var(--border);cursor:pointer" onclick="removeDishImage('${imgId}')">
+          <input type="hidden" id="${imgId}" value="${dish.image||''}">
+        </div>
+      </div>`;
       card.innerHTML = `<div class="card-hd ${hdSub}" style="cursor:grab">
         <span style="font-size:16px;margin-right:4px;opacity:.6">⠿</span>
         <span class="hd-ttl">${dish.name||'料理'}</span>
-      </div>${rows}`;
+      </div>${rows}${imgRow}`;
     }
 
     // ── ドラッグ&ドロップ ──
@@ -1815,7 +1970,8 @@ function saveEdit(){
           ingredient: (document.getElementById(`e-a${pi+1}ig`)?.value||'').trim(),
           method: (document.getElementById(`e-a${pi+1}mt`)?.value||'').trim(),
           sauce: (document.getElementById(`e-a${pi+1}sc`)?.value||'').trim(),
-        }))
+        })),
+        image: (document.getElementById('e-img-app')?.value||''),
       });
     } else if(isMeatDish && orig.items){
       dishes.push({
@@ -1827,7 +1983,8 @@ function saveEdit(){
           ingredient: (document.getElementById(`e-m${pi+1}ig`)?.value||'').trim(),
           method: (document.getElementById(`e-m${pi+1}mt`)?.value||'').trim(),
           sauce: (document.getElementById(`e-m${pi+1}sc`)?.value||'').trim(),
-        }))
+        })),
+        image: (document.getElementById('e-img-meat')?.value||''),
       });
     } else {
       const dishKey = orig.key || `d${orig.num}`;
@@ -1839,6 +1996,7 @@ function saveEdit(){
         method: (document.getElementById(`e-${dishKey}mt`)?.value||'').trim(),
         sauce: (document.getElementById(`e-${dishKey}sc`)?.value||'').trim(),
         topping: (document.getElementById(`e-${dishKey}tp`)?.value||'').trim(),
+        image: (document.getElementById(`e-img-${dishKey}`)?.value||''),
       });
     }
   });
