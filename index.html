@@ -2128,50 +2128,85 @@ function buildPrintHTML(r){
   const dayLabels = [{l:'月',v:1},{l:'火',v:2},{l:'水',v:3},{l:'木',v:4},{l:'金',v:5},{l:'土',v:6},{l:'日',v:0}];
   const daysHtml = dayLabels.map(d=>`<div style="width:14px;height:14px;border-radius:50%;border:1pt solid ${d.v===activeDayN?col:borderC};background:${d.v===activeDayN?col:'transparent'};color:${d.v===activeDayN?'#fff':'#7a7a7a'};display:flex;align-items:center;justify-content:center;font-size:5pt;font-family:serif;font-weight:${d.v===activeDayN?700:400}">${d.l}</div>`).join('');
 
-  function pField(lb, val){
-    return `<div style="display:flex;align-items:center;flex:1;border-bottom:0.5pt solid ${lineC};padding:0.3mm 0;gap:2px;min-height:0"><span style="font-size:4.8pt;font-weight:700;color:#777;white-space:nowrap;min-width:28px">${lb}</span><span style="font-size:8.5pt;color:#1a1a1a;flex:1;word-break:break-all;line-height:1.1">${val||''}</span></div>`;
-  }
-  function dishHead(label, hcol){
-    return `<div style="flex-shrink:0;background:${hcol};padding:1.6mm 2.5mm"><span style="font-size:7.5pt;font-weight:700;color:#fff;letter-spacing:.06em;display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${label}</span></div>`;
-  }
-  function normalFields(dish){
-    return [['料理名',dish.name],['食材',dish.ingredient],['調理法',dish.method],['ソース',dish.sauce],['トッピング',dish.topping]].map(([l,v])=>pField(l,v)).join('');
+  // 全皿数の計算（フォントサイズ調整用）
+  const allDishes = r.dishes;
+  const normalCount = allDishes.filter(d => !d.isApp && !d.isMeat && d.key!=='app' && d.key!=='meat' && d.name!=='オードブル盛り合わせ' && d.name!=='肉料理セレクト').length;
+  const hasApp  = allDishes.some(d=> d.isApp || d.key==='app' || d.name==='オードブル盛り合わせ');
+  const hasMeat = allDishes.some(d=> d.isMeat || d.key==='meat' || d.name==='肉料理セレクト');
+  // 通常皿1行=約18mm、オードブル/肉料理=約28mm、ヘッダー20mm、フッター10mm、備考15mm、本体は約230mm
+  const totalNeeded = normalCount * 18 + (hasApp ? 28 : 0) + (hasMeat ? 28 : 0);
+  const scale = totalNeeded > 230 ? 230 / totalNeeded : 1;
+  const rowH = Math.max(10, Math.floor(18 * scale));
+  const wideH = Math.max(20, Math.floor(28 * scale));
+  const nameSize = scale < 0.8 ? 8 : 9;
+  const valueSize = scale < 0.8 ? 7.5 : 8.5;
+
+  // 通常皿の横長行
+  function normalRow(dish, hcol){
+    return `<div style="display:flex;border:1pt solid ${borderC};border-radius:3pt;overflow:hidden;height:${rowH}mm;flex-shrink:0">
+      <!-- 左：料理名（カラーバー付き） -->
+      <div style="width:38mm;background:${hcol};color:#fff;padding:1.5mm 2.5mm;display:flex;align-items:center;flex-shrink:0">
+        <span style="font-size:${nameSize+0.5}pt;font-weight:700;line-height:1.2;letter-spacing:.05em;word-break:break-all">${dish.name||'料理'}</span>
+      </div>
+      <!-- 右：食材～トッピング横並び -->
+      <div style="flex:1;display:flex;background:#fff;min-width:0">
+        ${[['食材',dish.ingredient],['調理法',dish.method],['ソース',dish.sauce],['ﾄｯﾋﾟﾝｸﾞ',dish.topping]].map(([lb,v],i)=>`
+        <div style="flex:1;padding:1mm 2mm;border-left:${i>0?`0.5pt solid ${lineC}`:'none'};display:flex;flex-direction:column;justify-content:center;min-width:0;overflow:hidden">
+          <div style="font-size:5pt;font-weight:700;color:#888;letter-spacing:.1em;margin-bottom:0.5mm">${lb}</div>
+          <div style="font-size:${valueSize}pt;color:#1a1a1a;line-height:1.2;word-break:break-all;overflow:hidden">${v||''}</div>
+        </div>`).join('')}
+      </div>
+    </div>`;
   }
 
-  let body = '';
+  // オードブルの横長行（3点を横並び）
+  function appRow(app){
+    const items = (app.items||[]).map((it,i)=>`
+      <div style="flex:1;padding:1.5mm 2mm;border-left:${i>0?`0.5pt solid ${lineC}`:'none'};background:#f4fbf4;min-width:0;overflow:hidden">
+        <div style="font-size:5.5pt;font-weight:700;color:${col};margin-bottom:0.8mm">${it.point||['①','②','③'][i]} ${['一点目','二点目','三点目'][i]}</div>
+        <div style="font-size:${valueSize}pt;font-weight:700;color:#1a1a1a;line-height:1.2;margin-bottom:0.5mm;word-break:break-all">${it.name||''}</div>
+        <div style="font-size:${valueSize-1.5}pt;color:#555;line-height:1.2;word-break:break-all">${it.ingredient||''}</div>
+      </div>`).join('');
+    return `<div style="display:flex;border:1pt solid ${borderC};border-radius:3pt;overflow:hidden;height:${wideH}mm;flex-shrink:0">
+      <div style="width:38mm;background:${col};color:#fff;padding:1.5mm 2.5mm;display:flex;flex-direction:column;justify-content:center;flex-shrink:0">
+        <span style="font-size:${nameSize+0.5}pt;font-weight:700;letter-spacing:.05em">オードブル</span>
+        <span style="font-size:6pt;opacity:.75;margin-top:1mm">3点盛り合わせ</span>
+      </div>
+      <div style="flex:1;display:flex;min-width:0">${items}</div>
+    </div>`;
+  }
 
-  if(isL){
-    // ランチ：オードブル（固定高） + 6皿（2列×3行）
-    const app     = r.dishes.find(d=> d.isApp || d.key==='app' || d.name==='オードブル盛り合わせ');
-    const normals = r.dishes.filter(d=>!d.isApp && d.key!=='app' && d.name!=='オードブル盛り合わせ');
+  // 肉料理セレクトの横長行（4択を横並び）
+  function meatRow(meat){
+    const items = (meat.items||[]).map((it,i)=>`
+      <div style="flex:1;padding:1.5mm 2mm;border-left:${i>0?`0.5pt solid ${lineC}`:'none'};background:${i%2===0?'#f4f6fb':'#eef2f8'};min-width:0;overflow:hidden">
+        <div style="font-size:5.5pt;font-weight:700;color:${col};margin-bottom:0.8mm">${it.point||['①','②','③','④'][i]} 選択${'ABCD'[i]}</div>
+        <div style="font-size:${valueSize}pt;font-weight:700;color:#1a1a1a;line-height:1.2;margin-bottom:0.5mm;word-break:break-all">${it.name||''}</div>
+        <div style="font-size:${valueSize-1.5}pt;color:#555;line-height:1.2;word-break:break-all">${it.ingredient||''}</div>
+      </div>`).join('');
+    return `<div style="display:flex;border:1pt solid ${borderC};border-radius:3pt;overflow:hidden;height:${wideH}mm;flex-shrink:0">
+      <div style="width:38mm;background:${col};color:#fff;padding:1.5mm 2.5mm;display:flex;flex-direction:column;justify-content:center;flex-shrink:0">
+        <span style="font-size:${nameSize+0.5}pt;font-weight:700;letter-spacing:.05em">🥩 肉料理</span>
+        <span style="font-size:6pt;opacity:.75;margin-top:1mm">4種類から選択</span>
+      </div>
+      <div style="flex:1;display:flex;min-width:0">${items}</div>
+    </div>`;
+  }
 
-    if(app){
-      const pts = (app.items||[]).map((it,i)=>`<div style="background:#f4fbf4;padding:2mm 2.5mm;display:flex;flex-direction:column;border-right:0.5pt solid ${borderC}"><div style="font-size:5.5pt;font-weight:700;color:${col};margin-bottom:1mm">${it.point||['①','②','③'][i]} ${['一点目','二点目','三点目'][i]}</div>${['料理名','食材','調理法','ソース'].map((lb,j)=>pField(lb,[it.name,it.ingredient,it.method,it.sauce][j])).join('')}</div>`).join('');
-      body += `<div style="flex-shrink:0;height:60mm;border:1pt solid ${borderC};border-radius:3pt;overflow:hidden;display:flex;flex-direction:column;margin-bottom:2mm"><div style="flex-shrink:0;background:${col};padding:2mm 3mm;display:flex;align-items:center;gap:6px"><span style="font-size:8.5pt;font-weight:700;color:#fff;flex:1">オードブル盛り合わせ</span><span style="font-size:5.5pt;color:rgba(255,255,255,.7)">3点盛り</span></div><div style="flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;overflow:hidden">${pts}</div></div>`;
+  // 全皿を保存された順番通りに上から並べる
+  let body = '<div style="display:flex;flex-direction:column;gap:1.2mm;flex:1;overflow:hidden">';
+  allDishes.forEach((dish,i) => {
+    const isAppDish  = dish.isApp  || dish.key==='app'  || dish.name==='オードブル盛り合わせ';
+    const isMeatDish = dish.isMeat || dish.key==='meat' || dish.name==='肉料理セレクト';
+    if(isAppDish){
+      body += appRow(dish);
+    } else if(isMeatDish){
+      body += meatRow(dish);
+    } else {
+      body += normalRow(dish, i%2===0 ? colM : col);
     }
-    body += `<div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:1.5mm;min-height:0">`;
-    normals.forEach((dish,i)=>{
-      body += `<div style="border:1pt solid ${borderC};border-radius:3pt;overflow:hidden;display:flex;flex-direction:column;min-height:0">${dishHead(dish.name||'料理',i%2===0?colM:col)}<div style="flex:1;padding:1mm 2mm;display:flex;flex-direction:column;justify-content:space-between;background:#fff;min-height:0">${normalFields(dish)}</div></div>`;
-    });
-    body += `</div>`;
-
-  } else {
-    // ディナー：9皿（3列×3行） + 肉料理セレクト（4列）
-    const normals = r.dishes.filter(d=>!d.isMeat && d.key!=='meat' && d.name!=='肉料理セレクト');
-    const meat    = r.dishes.find(d=> d.isMeat || d.key==='meat' || d.name==='肉料理セレクト');
-    const hCols   = [colM,col,'#24426a',colM,col,'#24426a',colM,col,'#24426a'];
-
-    body += `<div style="flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:repeat(3,1fr);gap:1.5mm;min-height:0;margin-bottom:1.5mm">`;
-    normals.forEach((dish,i)=>{
-      body += `<div style="border:1pt solid ${borderC};border-radius:3pt;overflow:hidden;display:flex;flex-direction:column;min-height:0">${dishHead(dish.name||'料理',hCols[i]||colM)}<div style="flex:1;padding:1mm 2mm;display:flex;flex-direction:column;justify-content:space-between;background:#fff;min-height:0">${normalFields(dish)}</div></div>`;
-    });
-    body += `</div>`;
-
-    if(meat && meat.items){
-      const mpts = meat.items.map((it,i)=>`<div style="flex:1;background:${i%2===0?'#f4f6fb':'#eef2f8'};padding:1.5mm 2mm;display:flex;flex-direction:column;border-right:${i<3?`0.5pt solid ${borderC}`:'none'}"><div style="font-size:5pt;font-weight:700;color:${col};margin-bottom:1mm">${it.point} 選択肢${'ABCD'[i]}</div>${['料理名','食材','調理法','ソース'].map((lb,j)=>pField(lb,[it.name,it.ingredient,it.method,it.sauce][j])).join('')}</div>`).join('');
-      body += `<div style="flex-shrink:0;height:34mm;border:1pt solid ${borderC};border-radius:3pt;overflow:hidden;display:flex;flex-direction:column"><div style="flex-shrink:0;background:${col};padding:1.5mm 3mm;display:flex;align-items:center;gap:6px"><span style="font-size:8pt;font-weight:700;color:#fff;flex:1">🥩 肉料理セレクト</span><span style="font-size:5.5pt;color:rgba(255,255,255,.7)">4種類から選択</span></div><div style="flex:1;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;overflow:hidden">${mpts}</div></div>`;
-    }
-  }
+  });
+  body += '</div>';
 
   const noteHtml = `<div style="flex-shrink:0;border:1pt solid ${borderC};border-radius:3pt;overflow:hidden;margin-top:1.5mm"><div style="background:#b89040;padding:1.2mm 3mm;font-size:7pt;font-weight:700;color:#fff;letter-spacing:.1em">📝 備考</div><div style="padding:1.5mm 3mm;font-size:8.5pt;color:#1a1a1a;min-height:7mm">${r.note||''}</div></div>`;
 
