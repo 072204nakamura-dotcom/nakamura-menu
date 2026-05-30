@@ -2133,27 +2133,31 @@ function buildPrintHTML(r){
   const normalCount = allDishes.filter(d => !d.isApp && !d.isMeat && d.key!=='app' && d.key!=='meat' && d.name!=='オードブル盛り合わせ' && d.name!=='肉料理セレクト').length;
   const hasApp  = allDishes.some(d=> d.isApp || d.key==='app' || d.name==='オードブル盛り合わせ');
   const hasMeat = allDishes.some(d=> d.isMeat || d.key==='meat' || d.name==='肉料理セレクト');
-  // 通常皿1行=約18mm、オードブル/肉料理=約28mm、ヘッダー20mm、フッター10mm、備考15mm、本体は約230mm
-  const totalNeeded = normalCount * 18 + (hasApp ? 28 : 0) + (hasMeat ? 28 : 0);
+  // 通常皿1行=約20mm、オードブル/肉料理=約30mm、ヘッダー20mm、フッター10mm、備考15mm、本体は約230mm
+  const totalNeeded = normalCount * 20 + (hasApp ? 30 : 0) + (hasMeat ? 30 : 0);
   const scale = totalNeeded > 230 ? 230 / totalNeeded : 1;
-  const rowH = Math.max(10, Math.floor(18 * scale));
-  const wideH = Math.max(20, Math.floor(28 * scale));
-  const nameSize = scale < 0.8 ? 8 : 9;
-  const valueSize = scale < 0.8 ? 7.5 : 8.5;
+  const rowH = Math.max(12, Math.floor(20 * scale));
+  const wideH = Math.max(22, Math.floor(30 * scale));
+  // 文字サイズを大きく＆色を濃く
+  const nameSize = scale < 0.75 ? 9.5 : scale < 0.9 ? 10.5 : 11.5;
+  const valueSize = scale < 0.75 ? 9 : scale < 0.9 ? 10 : 11;
+  const labelSize = scale < 0.85 ? 5.5 : 6;
+  // 区切り線を太く・濃く
+  const dividerC = isL ? '#7ab088' : '#5878a8';
 
   // 通常皿の横長行
   function normalRow(dish, hcol){
-    return `<div style="display:flex;border:1pt solid ${borderC};border-radius:3pt;overflow:hidden;height:${rowH}mm;flex-shrink:0">
+    return `<div style="display:flex;border:1.2pt solid ${dividerC};border-radius:3pt;overflow:hidden;height:${rowH}mm;flex-shrink:0;background:#fff">
       <!-- 左：料理名（カラーバー付き） -->
-      <div style="width:38mm;background:${hcol};color:#fff;padding:1.5mm 2.5mm;display:flex;align-items:center;flex-shrink:0">
-        <span style="font-size:${nameSize+0.5}pt;font-weight:700;line-height:1.2;letter-spacing:.05em;word-break:break-all">${dish.name||'料理'}</span>
+      <div style="width:42mm;background:${hcol};color:#fff;padding:1.5mm 3mm;display:flex;align-items:center;flex-shrink:0;border-right:1.5pt solid ${dividerC}">
+        <span style="font-size:${nameSize}pt;font-weight:700;line-height:1.25;letter-spacing:.04em;word-break:break-all">${dish.name||'料理'}</span>
       </div>
       <!-- 右：食材～トッピング横並び -->
-      <div style="flex:1;display:flex;background:#fff;min-width:0">
+      <div style="flex:1;display:flex;min-width:0">
         ${[['食材',dish.ingredient],['調理法',dish.method],['ソース',dish.sauce],['ﾄｯﾋﾟﾝｸﾞ',dish.topping]].map(([lb,v],i)=>`
-        <div style="flex:1;padding:1mm 2mm;border-left:${i>0?`0.5pt solid ${lineC}`:'none'};display:flex;flex-direction:column;justify-content:center;min-width:0;overflow:hidden">
-          <div style="font-size:5pt;font-weight:700;color:#888;letter-spacing:.1em;margin-bottom:0.5mm">${lb}</div>
-          <div style="font-size:${valueSize}pt;color:#1a1a1a;line-height:1.2;word-break:break-all;overflow:hidden">${v||''}</div>
+        <div style="flex:1;padding:1.2mm 2.5mm;border-left:${i>0?`1pt solid ${dividerC}`:'none'};display:flex;flex-direction:column;justify-content:center;min-width:0;overflow:hidden">
+          <div style="font-size:${labelSize}pt;font-weight:700;color:${hcol};letter-spacing:.1em;margin-bottom:0.8mm">${lb}</div>
+          <div style="font-size:${valueSize}pt;color:#000;font-weight:500;line-height:1.25;word-break:break-all;overflow:hidden">${v||''}</div>
         </div>`).join('')}
       </div>
     </div>`;
@@ -2162,15 +2166,15 @@ function buildPrintHTML(r){
   // オードブルの横長行（3点を横並び）
   function appRow(app){
     const items = (app.items||[]).map((it,i)=>`
-      <div style="flex:1;padding:1.5mm 2mm;border-left:${i>0?`0.5pt solid ${lineC}`:'none'};background:#f4fbf4;min-width:0;overflow:hidden">
-        <div style="font-size:5.5pt;font-weight:700;color:${col};margin-bottom:0.8mm">${it.point||['①','②','③'][i]} ${['一点目','二点目','三点目'][i]}</div>
-        <div style="font-size:${valueSize}pt;font-weight:700;color:#1a1a1a;line-height:1.2;margin-bottom:0.5mm;word-break:break-all">${it.name||''}</div>
-        <div style="font-size:${valueSize-1.5}pt;color:#555;line-height:1.2;word-break:break-all">${it.ingredient||''}</div>
+      <div style="flex:1;padding:1.5mm 2.5mm;border-left:${i>0?`1pt solid ${dividerC}`:'none'};background:#f4fbf4;min-width:0;overflow:hidden">
+        <div style="font-size:${labelSize+0.5}pt;font-weight:700;color:${col};margin-bottom:1mm">${it.point||['①','②','③'][i]} ${['一点目','二点目','三点目'][i]}</div>
+        <div style="font-size:${valueSize}pt;font-weight:700;color:#000;line-height:1.25;margin-bottom:0.8mm;word-break:break-all">${it.name||''}</div>
+        <div style="font-size:${valueSize-1}pt;color:#3a3a3a;line-height:1.25;word-break:break-all">${it.ingredient||''}</div>
       </div>`).join('');
-    return `<div style="display:flex;border:1pt solid ${borderC};border-radius:3pt;overflow:hidden;height:${wideH}mm;flex-shrink:0">
-      <div style="width:38mm;background:${col};color:#fff;padding:1.5mm 2.5mm;display:flex;flex-direction:column;justify-content:center;flex-shrink:0">
-        <span style="font-size:${nameSize+0.5}pt;font-weight:700;letter-spacing:.05em">オードブル</span>
-        <span style="font-size:6pt;opacity:.75;margin-top:1mm">3点盛り合わせ</span>
+    return `<div style="display:flex;border:1.2pt solid ${dividerC};border-radius:3pt;overflow:hidden;height:${wideH}mm;flex-shrink:0">
+      <div style="width:42mm;background:${col};color:#fff;padding:2mm 3mm;display:flex;flex-direction:column;justify-content:center;flex-shrink:0;border-right:1.5pt solid ${dividerC}">
+        <span style="font-size:${nameSize}pt;font-weight:700;letter-spacing:.05em">オードブル</span>
+        <span style="font-size:${labelSize+1}pt;opacity:.8;margin-top:1mm">3点盛り合わせ</span>
       </div>
       <div style="flex:1;display:flex;min-width:0">${items}</div>
     </div>`;
@@ -2179,15 +2183,15 @@ function buildPrintHTML(r){
   // 肉料理セレクトの横長行（4択を横並び）
   function meatRow(meat){
     const items = (meat.items||[]).map((it,i)=>`
-      <div style="flex:1;padding:1.5mm 2mm;border-left:${i>0?`0.5pt solid ${lineC}`:'none'};background:${i%2===0?'#f4f6fb':'#eef2f8'};min-width:0;overflow:hidden">
-        <div style="font-size:5.5pt;font-weight:700;color:${col};margin-bottom:0.8mm">${it.point||['①','②','③','④'][i]} 選択${'ABCD'[i]}</div>
-        <div style="font-size:${valueSize}pt;font-weight:700;color:#1a1a1a;line-height:1.2;margin-bottom:0.5mm;word-break:break-all">${it.name||''}</div>
-        <div style="font-size:${valueSize-1.5}pt;color:#555;line-height:1.2;word-break:break-all">${it.ingredient||''}</div>
+      <div style="flex:1;padding:1.5mm 2.5mm;border-left:${i>0?`1pt solid ${dividerC}`:'none'};background:${i%2===0?'#f4f6fb':'#eef2f8'};min-width:0;overflow:hidden">
+        <div style="font-size:${labelSize+0.5}pt;font-weight:700;color:${col};margin-bottom:1mm">${it.point||['①','②','③','④'][i]} 選択${'ABCD'[i]}</div>
+        <div style="font-size:${valueSize}pt;font-weight:700;color:#000;line-height:1.25;margin-bottom:0.8mm;word-break:break-all">${it.name||''}</div>
+        <div style="font-size:${valueSize-1}pt;color:#3a3a3a;line-height:1.25;word-break:break-all">${it.ingredient||''}</div>
       </div>`).join('');
-    return `<div style="display:flex;border:1pt solid ${borderC};border-radius:3pt;overflow:hidden;height:${wideH}mm;flex-shrink:0">
-      <div style="width:38mm;background:${col};color:#fff;padding:1.5mm 2.5mm;display:flex;flex-direction:column;justify-content:center;flex-shrink:0">
-        <span style="font-size:${nameSize+0.5}pt;font-weight:700;letter-spacing:.05em">🥩 肉料理</span>
-        <span style="font-size:6pt;opacity:.75;margin-top:1mm">4種類から選択</span>
+    return `<div style="display:flex;border:1.2pt solid ${dividerC};border-radius:3pt;overflow:hidden;height:${wideH}mm;flex-shrink:0">
+      <div style="width:42mm;background:${col};color:#fff;padding:2mm 3mm;display:flex;flex-direction:column;justify-content:center;flex-shrink:0;border-right:1.5pt solid ${dividerC}">
+        <span style="font-size:${nameSize}pt;font-weight:700;letter-spacing:.05em">🥩 肉料理</span>
+        <span style="font-size:${labelSize+1}pt;opacity:.8;margin-top:1mm">4種類から選択</span>
       </div>
       <div style="flex:1;display:flex;min-width:0">${items}</div>
     </div>`;
