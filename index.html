@@ -1369,6 +1369,7 @@ function renderHistory(){
           <button class="btn-sm" style="border-color:var(--nm);color:var(--nm)" onclick="copyRecord(${r.id})">📋 コピー</button>
           <button class="btn-sm" style="border-color:var(--gold);color:var(--gold)" onclick="printRecord(${r.id})">🖨 印刷</button>
           <button class="btn-sm" style="border-color:#8b4513;color:#8b4513;font-weight:700" onclick="printOshinagaki(${r.id})">📜 お品書き</button>
+          <button class="btn-sm" style="border-color:#8b4513;color:#8b4513" onclick="saveOshinagakiImage(${r.id})">🖼 画像</button>
           <button class="btn-sm danger" onclick="deleteRecord(${r.id})">削除</button>
         </div>`;
       grp.appendChild(item);
@@ -1382,9 +1383,12 @@ function renderHistory(){
 // お品書き生成
 // A4縦1枚・上下2席分・縦書き・和風
 // ═══════════════════════════════════
-function printOshinagaki(id){
+// ═══════════════════════════════════
+// お品書き：共通データ抽出
+// ═══════════════════════════════════
+function getOshinagakiData(id){
   const r = loadStore().find(x => x.id === id);
-  if(!r) return;
+  if(!r) return null;
 
   const d = new Date(r.date + 'T00:00:00');
   const weekChars = ['日','月','火','水','木','金','土'];
@@ -1396,10 +1400,8 @@ function printOshinagaki(id){
     const isApp  = dish.isApp  || dish.key==='app'  || dish.name==='オードブル盛り合わせ';
     const isMeat = dish.isMeat || dish.key==='meat' || dish.name==='肉料理セレクト';
     if(isApp && dish.items){
-      // 前菜は1点ずつ個別に表示
       dish.items.forEach(it=>{ if(it.name) items.push({name:it.name, ing:it.ingredient||''}); });
     } else if(isMeat && dish.items){
-      // 肉料理セレクト → 4択を全部個別に表示
       dish.items.forEach(it=>{ if(it.name) items.push({name:it.name, ing:it.ingredient||''}); });
     } else {
       if(dish.name) items.push({name:dish.name, ing:dish.ingredient||''});
@@ -1408,114 +1410,83 @@ function printOshinagaki(id){
 
   if(items.length === 0){
     alert('料理名が入力されていません。献立を編集してから再度お試しください。');
-    return;
+    return null;
   }
+  return { r, items, dateJP };
+}
 
+// ═══════════════════════════════════
+// お品書き：1ブロックのHTML生成（共通）
+// ═══════════════════════════════════
+function buildOshinagakiBlock(r, items, dateJP, height){
   const n = items.length;
-  // 横書き用：料理数に応じて行間とフォントサイズ調整
-  const namePt  = n <= 5  ? 16
-                : n <= 8  ? 14
-                : n <= 11 ? 12
-                : n <= 14 ? 10
-                : 9;
-  const ingPt   = n <= 5  ? 10
-                : n <= 8  ? 9
-                : n <= 11 ? 8
-                : 7;
-  const rowPad  = n <= 5  ? 8
-                : n <= 8  ? 6
-                : n <= 11 ? 5
-                : 4;
+  const namePt  = n <= 5  ? 16 : n <= 8  ? 14 : n <= 11 ? 12 : n <= 14 ? 10 : 9;
+  const ingPt   = n <= 5  ? 10 : n <= 8  ? 9  : n <= 11 ? 8  : 7;
+  const rowPad  = n <= 5  ? 8  : n <= 8  ? 6  : n <= 11 ? 5  : 4;
 
-  function makeBlock(height){
-    // 横書き・上から順番に番号付きで並べる
-    const rows = items.map((item, i) => `
-      <div style="
-        display:flex;align-items:baseline;
-        padding:${rowPad}px 0;
-        ${i < items.length - 1 ? 'border-bottom:0.8px solid rgba(60,30,5,0.15);' : ''}
-      ">
-        <div style="
-          font-family:'Shippori Mincho B1',serif;
-          font-size:${namePt - 2}pt;
-          font-weight:700;
-          color:#1a0c00;
-          min-width:22px;
-          letter-spacing:.05em;
-        ">${i + 1}.</div>
-        <div style="flex:1;min-width:0;">
-          <div style="
-            font-family:'Shippori Mincho B1',serif;
-            font-size:${namePt}pt;
-            font-weight:700;
-            color:#1a0c00;
-            letter-spacing:.08em;
-            line-height:1.3;
-          ">${item.name}</div>
-          ${item.ing ? `
-          <div style="
-            font-family:'Shippori Mincho B1',serif;
-            font-size:${ingPt}pt;
-            color:#3a2010;
-            letter-spacing:.05em;
-            line-height:1.4;
-            margin-top:2px;
-          ">${item.ing}</div>` : ''}
+  const rows = items.map((item, i) => `
+    <div style="display:flex;align-items:baseline;padding:${rowPad}px 0;
+      ${i < items.length - 1 ? 'border-bottom:0.8px solid rgba(60,30,5,0.15);' : ''}">
+      <div style="font-family:'Shippori Mincho B1',serif;font-size:${namePt - 2}pt;font-weight:700;
+        color:#1a0c00;min-width:22px;letter-spacing:.05em;">${i + 1}.</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-family:'Shippori Mincho B1',serif;font-size:${namePt}pt;font-weight:700;
+          color:#1a0c00;letter-spacing:.08em;line-height:1.3;">${item.name}</div>
+        ${item.ing ? `
+        <div style="font-family:'Shippori Mincho B1',serif;font-size:${ingPt}pt;color:#3a2010;
+          letter-spacing:.05em;line-height:1.4;margin-top:2px;">${item.ing}</div>` : ''}
+      </div>
+    </div>`).join('');
+
+  return `
+  <div style="position:relative;width:210mm;height:${height}mm;overflow:hidden;
+    background:linear-gradient(160deg,#fdf9f0 0%,#f6edd8 60%,#fdf9f0 100%);font-family:'Shippori Mincho B1',serif;">
+    <div style="position:absolute;inset:0;pointer-events:none;
+      background-image:
+        repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(139,101,60,0.03) 3px,rgba(139,101,60,0.03) 4px),
+        repeating-linear-gradient(90deg,transparent,transparent 3px,rgba(139,101,60,0.03) 3px,rgba(139,101,60,0.03) 4px);"></div>
+    <div style="position:absolute;top:5mm;left:5mm;right:5mm;bottom:5mm;
+      border:2px solid #5a3a1a;pointer-events:none;"></div>
+    <div style="position:absolute;top:6.5mm;left:6.5mm;right:6.5mm;bottom:6.5mm;
+      border:0.8px solid rgba(80,40,10,0.35);pointer-events:none;"></div>
+    <div style="position:absolute;top:9mm;left:10mm;right:10mm;
+      display:flex;justify-content:space-between;align-items:flex-end;
+      padding-bottom:5mm;border-bottom:1.5px solid rgba(60,30,5,0.4);">
+      <div>
+        <div style="font-size:8pt;color:#5a3a1a;letter-spacing:.18em;margin-bottom:2px;">
+          洋食だいにんぐ なかむら
         </div>
-      </div>`).join('');
-
-    return `
-    <div style="position:relative;width:210mm;height:${height}mm;overflow:hidden;
-      background:linear-gradient(160deg,#fdf9f0 0%,#f6edd8 60%,#fdf9f0 100%);">
-
-      <!-- 和紙ノイズ -->
-      <div style="position:absolute;inset:0;pointer-events:none;
-        background-image:
-          repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(139,101,60,0.03) 3px,rgba(139,101,60,0.03) 4px),
-          repeating-linear-gradient(90deg,transparent,transparent 3px,rgba(139,101,60,0.03) 3px,rgba(139,101,60,0.03) 4px);"></div>
-
-      <!-- 外枠二重 -->
-      <div style="position:absolute;top:5mm;left:5mm;right:5mm;bottom:5mm;
-        border:2px solid #5a3a1a;pointer-events:none;"></div>
-      <div style="position:absolute;top:6.5mm;left:6.5mm;right:6.5mm;bottom:6.5mm;
-        border:0.8px solid rgba(80,40,10,0.35);pointer-events:none;"></div>
-
-      <!-- ヘッダー：店名・日付・お客様名 -->
-      <div style="position:absolute;top:9mm;left:10mm;right:10mm;
-        display:flex;justify-content:space-between;align-items:flex-end;
-        padding-bottom:5mm;border-bottom:1.5px solid rgba(60,30,5,0.4);">
-        <div>
-          <div style="font-size:8pt;color:#5a3a1a;letter-spacing:.18em;margin-bottom:2px;">
-            洋食だいにんぐ なかむら
-          </div>
-          <div style="font-size:18pt;font-weight:800;color:#1a0c00;letter-spacing:.2em;line-height:1;">
-            お 品 書 き
-          </div>
-        </div>
-        <div style="text-align:right;">
-          ${r.customer ? `
-          <div style="font-size:11pt;font-weight:700;color:#1a0c00;letter-spacing:.1em;margin-bottom:3px;">
-            ${r.customer}　様
-          </div>` : ''}
-          <div style="font-size:9pt;color:#3a2010;letter-spacing:.1em;">
-            ${dateJP}
-          </div>
+        <div style="font-size:18pt;font-weight:800;color:#1a0c00;letter-spacing:.2em;line-height:1;">
+          お 品 書 き
         </div>
       </div>
-
-      <!-- 中央：料理一覧（横書き・上から順番） -->
-      <div style="position:absolute;top:30mm;left:12mm;right:12mm;bottom:12mm;
-        overflow:hidden;">
-        ${rows}
+      <div style="text-align:right;">
+        ${r.customer ? `
+        <div style="font-size:11pt;font-weight:700;color:#1a0c00;letter-spacing:.1em;margin-bottom:3px;">
+          ${r.customer}　様
+        </div>` : ''}
+        <div style="font-size:9pt;color:#3a2010;letter-spacing:.1em;">
+          ${dateJP}
+        </div>
       </div>
+    </div>
+    <div style="position:absolute;top:30mm;left:12mm;right:12mm;bottom:12mm;overflow:hidden;">
+      ${rows}
+    </div>
+    <div style="position:absolute;bottom:7mm;left:50%;transform:translateX(-50%);
+      font-size:7pt;color:#5a3a1a;letter-spacing:.18em;white-space:nowrap;">
+      旬の食材を丁寧に　ごゆるりとお召し上がりください
+    </div>
+  </div>`;
+}
 
-      <!-- 下部一言 -->
-      <div style="position:absolute;bottom:7mm;left:50%;transform:translateX(-50%);
-        font-size:7pt;color:#5a3a1a;letter-spacing:.18em;white-space:nowrap;">
-        旬の食材を丁寧に　ごゆるりとお召し上がりください
-      </div>
-    </div>`;
-  }
+// ═══════════════════════════════════
+// お品書き：印刷（A4縦・上下2席分）
+// ═══════════════════════════════════
+function printOshinagaki(id){
+  const data = getOshinagakiData(id);
+  if(!data) return;
+  const { r, items, dateJP } = data;
 
   const html = `<!DOCTYPE html>
 <html lang="ja"><head><meta charset="UTF-8">
@@ -1526,7 +1497,7 @@ function printOshinagaki(id){
   html,body{width:210mm;height:297mm;overflow:hidden;font-family:'Shippori Mincho B1',serif;}
 </style>
 </head><body>
-  ${makeBlock(148)}
+  ${buildOshinagakiBlock(r, items, dateJP, 148)}
   <div style="width:210mm;height:1px;
     background:repeating-linear-gradient(to right,rgba(80,40,10,0.3) 0,rgba(80,40,10,0.3) 5px,transparent 5px,transparent 10px);
     position:relative;">
@@ -1534,7 +1505,7 @@ function printOshinagaki(id){
       font-size:6pt;color:rgba(80,40,10,0.4);letter-spacing:.15em;top:-7px;
       background:#fff;padding:0 4px;">✂ 切り取り</span>
   </div>
-  ${makeBlock(148)}
+  ${buildOshinagakiBlock(r, items, dateJP, 148)}
 <script>window.onload=function(){window.print()}<\/script>
 </body></html>`;
 
@@ -1554,6 +1525,68 @@ function printOshinagaki(id){
   const blob = new Blob([html], {type:'text/html;charset=utf-8'});
   iframe.src = URL.createObjectURL(blob);
 }
+
+// ═══════════════════════════════════
+// お品書き：画像として保存（PNG）
+// ═══════════════════════════════════
+function loadHtml2Canvas(cb){
+  if(window.html2canvas){ cb(); return; }
+  const s = document.createElement('script');
+  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+  s.onload = cb;
+  s.onerror = ()=>alert('画像ライブラリの読み込みに失敗しました。通信環境をご確認ください。');
+  document.head.appendChild(s);
+}
+
+function saveOshinagakiImage(id){
+  const data = getOshinagakiData(id);
+  if(!data) return;
+  const { r, items, dateJP } = data;
+
+  showToast('🖼 画像を生成中...');
+
+  loadHtml2Canvas(()=>{
+    // 画面外にお品書きブロックを描画（画像用は1枚分・縦長148mm）
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'position:absolute;left:-9999px;top:0;z-index:-1;';
+    wrap.innerHTML = buildOshinagakiBlock(r, items, dateJP, 148);
+    document.body.appendChild(wrap);
+    const target = wrap.firstElementChild;
+
+    // フォント読み込みを待ってからキャプチャ
+    const capture = ()=>{
+      html2canvas(target, {
+        scale: 2,               // 高解像度（約1590×1120px）
+        useCORS: true,
+        backgroundColor: '#fdf9f0',
+      }).then(canvas=>{
+        canvas.toBlob(blob=>{
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = `お品書き_${r.date}.png`;
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(()=>{
+            URL.revokeObjectURL(a.href);
+            a.remove();
+            wrap.remove();
+          }, 1500);
+          showToast('✅ 画像を保存しました');
+        }, 'image/png');
+      }).catch(e=>{
+        alert('画像生成エラー: ' + e.message);
+        wrap.remove();
+      });
+    };
+
+    if(document.fonts && document.fonts.ready){
+      document.fonts.ready.then(()=> setTimeout(capture, 300));
+    } else {
+      setTimeout(capture, 800);
+    }
+  });
+}
+
 
 function copyRecord(id){
   const orig = loadStore().find(r => r.id === id);
