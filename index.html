@@ -80,11 +80,12 @@ body{background:var(--bg);font-family:'Zen Kaku Gothic New',sans-serif;color:var
 /* ─ 共通カード ─ */
 .card{background:var(--card);border-radius:14px;overflow:hidden;box-shadow:0 2px 14px var(--shadow);margin-bottom:12px}
 
-/* ─ モード切替（ランチ/ディナー） ─ */
-.mode-switch{display:grid;grid-template-columns:1fr 1fr;gap:3px;background:var(--border);border-radius:12px;padding:3px;margin-bottom:14px}
-.mode-btn{padding:11px;border:none;border-radius:9px;background:transparent;font-family:'Shippori Mincho B1',serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .22s;color:var(--mid);display:flex;align-items:center;justify-content:center;gap:6px;letter-spacing:.08em}
+/* ─ モード切替（ランチ/ディナー/オードブル） ─ */
+.mode-switch{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;background:var(--border);border-radius:12px;padding:3px;margin-bottom:14px}
+.mode-btn{padding:11px 6px;border:none;border-radius:9px;background:transparent;font-family:'Shippori Mincho B1',serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .22s;color:var(--mid);display:flex;align-items:center;justify-content:center;gap:4px;letter-spacing:.04em}
 .mode-btn.active-lunch{background:var(--gd);color:#fff;box-shadow:0 2px 10px rgba(42,92,63,.35)}
 .mode-btn.active-dinner{background:var(--nd);color:#fff;box-shadow:0 2px 10px rgba(26,46,71,.35)}
+.mode-btn.active-takeout{background:#b5651d;color:#fff;box-shadow:0 2px 10px rgba(181,101,29,.35)}
 
 /* ─ 入力方法切替 ─ */
 .input-switch{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
@@ -112,7 +113,7 @@ body{background:var(--bg);font-family:'Zen Kaku Gothic New',sans-serif;color:var
 
 /* ─ フィールド ─ */
 .card-hd{display:flex;align-items:center;gap:10px;padding:12px 16px}
-.hd-green{background:var(--gd)}.hd-gm{background:var(--gm)}.hd-navy{background:var(--nd)}.hd-nm{background:var(--nm)}.hd-nalt{background:#24426a}
+.hd-green{background:var(--gd)}.hd-gm{background:var(--gm)}.hd-navy{background:var(--nd)}.hd-nm{background:var(--nm)}.hd-nalt{background:#24426a}.hd-takeout{background:#b5651d}.hd-tm{background:#cd8244}
 .hd-num{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.22);border:1.5px solid rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;font-family:'Shippori Mincho B1',serif;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
 .hd-ttl{font-family:'Shippori Mincho B1',serif;font-size:13px;font-weight:700;color:#fff;letter-spacing:.1em;flex:1}
 .hd-sub{font-size:9px;color:rgba(255,255,255,.7)}
@@ -172,6 +173,9 @@ body{background:var(--bg);font-family:'Zen Kaku Gothic New',sans-serif;color:var
 .btn-green:active{opacity:.88;transform:scale(.98)}
 .btn-navy{background:var(--nd);color:#fff;box-shadow:0 4px 16px rgba(26,46,71,.4)}
 .btn-navy:active{opacity:.88;transform:scale(.98)}
+.btn-takeout{background:#b5651d;color:#fff;box-shadow:0 4px 16px rgba(181,101,29,.4)}
+.btn-takeout:active{opacity:.88;transform:scale(.98)}
+.takeout-mode .finp:focus{background:#fbf2e8}
 .btn-outline-g{background:#fff;color:var(--gd);border:1.5px solid var(--gd);padding:13px}
 .btn-outline-n{background:#fff;color:var(--nd);border:1.5px solid var(--nd);padding:13px}
 .btn-gold{background:var(--gold);color:#fff;box-shadow:0 3px 12px rgba(184,144,42,.35)}
@@ -199,6 +203,7 @@ body{background:var(--bg);font-family:'Zen Kaku Gothic New',sans-serif;color:var
 .r-badge{font-size:9px;padding:3px 9px;border-radius:20px;font-weight:700;letter-spacing:.1em;white-space:nowrap;flex-shrink:0;margin-top:1px}
 .rb-lunch{background:var(--gl);color:var(--gd)}
 .rb-dinner{background:var(--nl);color:var(--nd)}
+.rb-takeout{background:#f5e2cf;color:#b5651d}
 .r-body{flex:1;min-width:0}
 .r-date{font-family:'Shippori Mincho B1',serif;font-size:14px;font-weight:700;letter-spacing:.06em}
 .r-dishes{font-size:11px;color:var(--mid);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -290,6 +295,7 @@ body{background:var(--bg);font-family:'Zen Kaku Gothic New',sans-serif;color:var
     <div class="mode-switch">
       <button class="mode-btn active-lunch" id="mode-lunch-btn" onclick="setMode('lunch')">☀ ランチ</button>
       <button class="mode-btn" id="mode-dinner-btn" onclick="setMode('dinner')">🌙 ディナー</button>
+      <button class="mode-btn" id="mode-takeout-btn" onclick="setMode('takeout')">🍱 オードブル</button>
     </div>
 
     <!-- 日付 -->
@@ -419,6 +425,9 @@ body{background:var(--bg);font-family:'Zen Kaku Gothic New',sans-serif;color:var
       </button>
       <button class="btn-sm" id="sort-dinner" onclick="setSort('dinner')">
         🌙 ディナーのみ
+      </button>
+      <button class="btn-sm" id="sort-takeout" onclick="setSort('takeout')">
+        🍱 オードブルのみ
       </button>
     </div>
     <div id="history-list"></div>
@@ -700,6 +709,22 @@ const dinnerDishDefs=[
   {type:'normal',    key:'d9',   label:'料理'},
   {type:'meat',      key:'meat', label:'肉料理セレクト', sub:'4種類から選択'},
 ];
+// テイクアウトオードブル：番号付き皿13品（必要数だけ入力すればOK）
+const takeoutDishDefs=[
+  {type:'normal', key:'d1',  label:'料理'},
+  {type:'normal', key:'d2',  label:'料理'},
+  {type:'normal', key:'d3',  label:'料理'},
+  {type:'normal', key:'d4',  label:'料理'},
+  {type:'normal', key:'d5',  label:'料理'},
+  {type:'normal', key:'d6',  label:'料理'},
+  {type:'normal', key:'d7',  label:'料理'},
+  {type:'normal', key:'d8',  label:'料理'},
+  {type:'normal', key:'d9',  label:'料理'},
+  {type:'normal', key:'d10', label:'料理'},
+  {type:'normal', key:'d11', label:'料理'},
+  {type:'normal', key:'d12', label:'料理'},
+  {type:'normal', key:'d13', label:'料理'},
+];
 
 const normalFields=[
   {id:'nm',lb:'料理名',ph:'例：真鯛のポワレ'},
@@ -716,9 +741,13 @@ const selectFields=[
 function setMode(mode){
   currentMode=mode;
   const isL=mode==='lunch';
+  const isT=mode==='takeout';
   document.getElementById('mode-lunch-btn').className='mode-btn'+(isL?' active-lunch':'');
-  document.getElementById('mode-dinner-btn').className='mode-btn'+(isL?'':' active-dinner');
-  document.getElementById('inp-save-btn').className='btn-save '+(isL?'btn-green':'btn-navy');
+  document.getElementById('mode-dinner-btn').className='mode-btn'+(mode==='dinner'?' active-dinner':'');
+  document.getElementById('mode-takeout-btn').className='mode-btn'+(isT?' active-takeout':'');
+  // 保存ボタンの色
+  const saveBtn = document.getElementById('inp-save-btn');
+  saveBtn.className='btn-save '+(isL?'btn-green':isT?'btn-takeout':'btn-navy');
   document.getElementById('inp-print-btn').style.display='';
   renderInputDishes();
   updateDayStyle('inp-days', mode);
@@ -751,7 +780,8 @@ function renderInputDishes(savedOrder){
   const wrap=document.getElementById('inp-dishes');
   wrap.innerHTML='';
   const isL=currentMode==='lunch';
-  const defs=isL?lunchDishDefs:dinnerDishDefs;
+  const isT=currentMode==='takeout';
+  const defs = isL ? lunchDishDefs : isT ? takeoutDishDefs : dinnerDishDefs;
   const order=savedOrder||defs.map(d=>d.key);
 
   order.forEach(key=>{
@@ -764,8 +794,8 @@ function renderInputDishes(savedOrder){
     card.style.cursor='grab';
     card.draggable=true;
 
-    const hdCls=isL?'hd-green':'hd-navy';
-    const hdClsSub=isL?'hd-gm':'hd-nm';
+    const hdCls=isL?'hd-green':isT?'hd-takeout':'hd-navy';
+    const hdClsSub=isL?'hd-gm':isT?'hd-tm':'hd-nm';
 
     if(d.type==='appetizer'){
       // ランチ：オードブル
@@ -1131,7 +1161,7 @@ function saveRecord(source){
   store.unshift(record);  // 上書きせず、常に新規追加
   saveStore(store);
 
-  showToast(`✅ ${date}の${mode==='lunch'?'ランチ':'ディナー'}献立を保存しました`);
+  showToast(`✅ ${date}の${mode==='lunch'?'ランチ':mode==='takeout'?'オードブル':'ディナー'}献立を保存しました`);
 
   if(source==='input') clearInput();
   else { aiState={};document.getElementById('ai-result-wrap').style.display='none'; }
@@ -1270,7 +1300,7 @@ let currentSort = 'new';
 function setSort(mode){
   currentSort = mode;
   // ボタンのアクティブ状態更新
-  ['new','old','lunch','dinner'].forEach(m=>{
+  ['new','old','lunch','dinner','takeout'].forEach(m=>{
     const btn = document.getElementById(`sort-${m}`);
     if(!btn) return;
     if(m === mode){
@@ -1298,8 +1328,9 @@ function renderHistory(){
 
   // フィルター
   let filtered = store;
-  if(currentSort === 'lunch')  filtered = store.filter(r => r.mode === 'lunch');
-  if(currentSort === 'dinner') filtered = store.filter(r => r.mode === 'dinner');
+  if(currentSort === 'lunch')   filtered = store.filter(r => r.mode === 'lunch');
+  if(currentSort === 'dinner')  filtered = store.filter(r => r.mode === 'dinner');
+  if(currentSort === 'takeout') filtered = store.filter(r => r.mode === 'takeout');
 
   // ソート
   if(currentSort === 'old'){
@@ -1343,6 +1374,7 @@ function renderHistory(){
       const days = ['日','月','火','水','木','金','土'];
       const dateStr = `${parseInt(r.date.slice(5,7))}月${parseInt(r.date.slice(8,10))}日（${days[d.getDay()]}）`;
       const isL = r.mode === 'lunch';
+      const isT = r.mode === 'takeout';
       const dishNames = r.dishes
         .filter(d => !d.isApp && !d.isMeat && d.name && d.name !== 'オードブル盛り合わせ' && d.name !== '肉料理セレクト')
         .map(d => d.name).slice(0,3).join(' / ');
@@ -1350,11 +1382,14 @@ function renderHistory(){
       const item = document.createElement('div');
       item.className = 'record-item';
       item.dataset.id = r.id;
+      const accentCol = isL ? 'var(--gd)' : isT ? '#b5651d' : 'var(--nd)';
       const customerHtml = r.customer
-        ? `<span style="font-family:'Shippori Mincho B1',serif;font-size:12px;color:${isL?'var(--gd)':'var(--nd)'};font-weight:700;margin-left:6px">👤 ${esc(r.customer)}</span>`
+        ? `<span style="font-family:'Shippori Mincho B1',serif;font-size:12px;color:${accentCol};font-weight:700;margin-left:6px">👤 ${esc(r.customer)}</span>`
         : '';
+      const badgeLabel = isL ? '☀ ランチ' : isT ? '🍱 オードブル' : '🌙 ディナー';
+      const badgeCls   = isL ? 'rb-lunch' : isT ? 'rb-takeout' : 'rb-dinner';
       item.innerHTML = `
-        <span class="r-badge ${isL?'rb-lunch':'rb-dinner'}">${isL?'☀ ランチ':'🌙 ディナー'}</span>
+        <span class="r-badge ${badgeCls}">${badgeLabel}</span>
         <div class="r-body">
           <div style="display:flex;align-items:baseline;flex-wrap:wrap">
             <div class="r-date">${dateStr}</div>
@@ -2144,12 +2179,13 @@ ${sheetHtml}
 // A4印刷用HTMLを生成（divのみ・同一ページ内に挿入）
 function buildPrintHTML(r){
   const isL    = r.mode === 'lunch';
-  const col    = isL ? '#3a6b45' : '#1e3352';
-  const colM   = isL ? '#5a9468' : '#2e5080';
-  const bg     = isL ? '#eef7f0' : '#edf2f9';
-  const borderC= isL ? '#b8d4bc' : '#b8cce0';
-  const lineC  = isL ? '#d0e8d4' : '#d4e2f0';
-  const label  = isL ? '☀ Lunch' : '🌙 Dinner';
+  const isT    = r.mode === 'takeout';
+  const col    = isL ? '#3a6b45' : isT ? '#9c5518' : '#1e3352';
+  const colM   = isL ? '#5a9468' : isT ? '#c17a35' : '#2e5080';
+  const bg     = isL ? '#eef7f0' : isT ? '#fbf2e8' : '#edf2f9';
+  const borderC= isL ? '#b8d4bc' : isT ? '#e3c5a0' : '#b8cce0';
+  const lineC  = isL ? '#d0e8d4' : isT ? '#efddc6' : '#d4e2f0';
+  const label  = isL ? '☀ Lunch' : isT ? '🍱 Takeout' : '🌙 Dinner';
 
   const days = ['日','月','火','水','木','金','土'];
   let dateStr = '', activeDayN = -1;
@@ -2176,7 +2212,7 @@ function buildPrintHTML(r){
   const valueSize = scale < 0.75 ? 9 : scale < 0.9 ? 10 : 11;
   const labelSize = scale < 0.85 ? 5.5 : 6;
   // 区切り線を太く・濃く
-  const dividerC = isL ? '#7ab088' : '#5878a8';
+  const dividerC = isL ? '#7ab088' : isT ? '#c99a5e' : '#5878a8';
 
   // 通常皿の横長行
   function normalRow(dish, hcol){
