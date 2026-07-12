@@ -532,6 +532,10 @@ body{background:var(--bg);font-family:'Zen Kaku Gothic New',sans-serif;color:var
 // ═══════════════════════════════════
 let GAS_URL = localStorage.getItem('gas_url') || '';
 
+// 【iPhone印刷の鉄則】iOS(iPhone/iPad)判定：印刷時の紙面サイズ調整に使用
+// （iPadは近年"Mac"を名乗るためタッチ対応も併せて判定。テスト時は上書き可能なようlet宣言）
+let IS_IOS = /iP(hone|od|ad)/.test(navigator.userAgent) || (navigator.userAgent.indexOf('Mac')>=0 && 'ontouchend' in document);
+
 // ═══════════════════════════════════
 // データストア（Google Apps Script + localStorageバックアップ）
 // ═══════════════════════════════════
@@ -1475,11 +1479,8 @@ function buildOshinagakiBlock(r, items, dateJP, height){
 
   return `
   <div style="position:relative;width:210mm;height:${height}mm;overflow:hidden;
-    background:linear-gradient(160deg,#fdf9f0 0%,#f6edd8 60%,#fdf9f0 100%);font-family:'Shippori Mincho B1',serif;">
-    <div style="position:absolute;inset:0;pointer-events:none;
-      background-image:
-        repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(139,101,60,0.03) 3px,rgba(139,101,60,0.03) 4px),
-        repeating-linear-gradient(90deg,transparent,transparent 3px,rgba(139,101,60,0.03) 3px,rgba(139,101,60,0.03) 4px);"></div>
+    background:#faf3e4;font-family:'Shippori Mincho B1',serif;">
+    <!-- 【iPhone印刷の鉄則】背景は単色ベタ塗り（グラデはダークモード印刷で黒くなる）／格子テクスチャは縞模様に化けるため廃止 -->
     <div style="position:absolute;top:5mm;left:5mm;right:5mm;bottom:5mm;
       border:2px solid #5a3a1a;pointer-events:none;"></div>
     <div style="position:absolute;top:6.5mm;left:6.5mm;right:6.5mm;bottom:6.5mm;
@@ -1523,24 +1524,27 @@ function printOshinagaki(id){
   if(!data) return;
   const { r, items, dateJP } = data;
 
+  // 【iPhone印刷の鉄則】iOSのSafariはヘッダー・フッター分の余白を強制確保するため、
+  // A4いっぱい(148mm×2=296mm)だと必ず2ページ目にあふれる。iOSは137mm×2=274mmに縮める
+  const blockH = IS_IOS ? 137 : 148;
+
   const html = `<!DOCTYPE html>
 <html lang="ja"><head><meta charset="UTF-8">
+<meta name="color-scheme" content="light only">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;600;700;800&display=swap');
-  *{margin:0;padding:0;box-sizing:border-box}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   @page{size:A4 portrait;margin:0}
-  html,body{width:210mm;height:297mm;overflow:hidden;font-family:'Shippori Mincho B1',serif;}
+  html,body{width:210mm;background:#fff;font-family:'Shippori Mincho B1',serif;}
 </style>
 </head><body>
-  ${buildOshinagakiBlock(r, items, dateJP, 148)}
-  <div style="width:210mm;height:1px;
-    background:repeating-linear-gradient(to right,rgba(80,40,10,0.3) 0,rgba(80,40,10,0.3) 5px,transparent 5px,transparent 10px);
-    position:relative;">
+  ${buildOshinagakiBlock(r, items, dateJP, blockH)}
+  <div style="width:210mm;height:0;border-top:1px dashed rgba(80,40,10,0.45);position:relative;">
     <span style="position:absolute;left:50%;transform:translateX(-50%);
-      font-size:6pt;color:rgba(80,40,10,0.4);letter-spacing:.15em;top:-7px;
+      font-size:6pt;color:rgba(80,40,10,0.55);letter-spacing:.15em;top:-4px;
       background:#fff;padding:0 4px;">✂ 切り取り</span>
   </div>
-  ${buildOshinagakiBlock(r, items, dateJP, 148)}
+  ${buildOshinagakiBlock(r, items, dateJP, blockH)}
 <script>window.onload=function(){window.print()}<\/script>
 </body></html>`;
 
@@ -2131,19 +2135,21 @@ function openPrintWindow(r){
   const fullHtml = `<!DOCTYPE html>
 <html lang="ja"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=210mm,initial-scale=1">
+<meta name="color-scheme" content="light only">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;600;700;800&display=swap');
-  *{margin:0;padding:0;box-sizing:border-box}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   @page{size:A4 portrait;margin:0}
   html,body{
     width:210mm;
-    height:297mm;
     margin:0;
     padding:0;
     background:#f9f6f0;
     font-family:'Shippori Mincho B1',serif;
-    overflow:hidden;
   }
+  /* 【iPhone印刷の鉄則】iOSはSafariが余白を強制確保しA4全面を使えないため、
+     紙面全体を92.6%に縮小して1ページ(275mm相当)に収める。比率が保たれるのでレイアウトは崩れない */
+  ${IS_IOS ? 'body{zoom:0.926}' : ''}
 </style>
 </head><body>
 ${sheetHtml}
@@ -2284,7 +2290,7 @@ function buildPrintHTML(r){
   const noteHtml = `<div style="flex-shrink:0;border:1pt solid ${borderC};border-radius:3pt;overflow:hidden;margin-top:1.5mm"><div style="background:#b89040;padding:1.2mm 3mm;font-size:7pt;font-weight:700;color:#fff;letter-spacing:.1em">📝 備考</div><div style="padding:1.5mm 3mm;font-size:8.5pt;color:#1a1a1a;min-height:7mm">${r.note||''}</div></div>`;
 
   return `<div style="position:fixed;top:0;left:0;width:210mm;height:297mm;overflow:hidden;background:#f9f6f0;z-index:9999;font-family:'Shippori Mincho B1',serif">
-  <div style="position:absolute;left:0;top:0;bottom:0;width:5mm;background:linear-gradient(180deg,${col},${colM})"></div>
+  <div style="position:absolute;left:0;top:0;bottom:0;width:5mm;background-color:${col};background-image:linear-gradient(180deg,${col},${colM})"></div>
   <div style="position:absolute;top:0;left:0;right:0;height:19mm;padding:4mm 8mm 3mm 12mm;background:${bg};border-bottom:2pt solid ${col};display:flex;align-items:flex-end;justify-content:space-between">
     <div>
       <div style="font-size:6.5pt;color:${colM};letter-spacing:.18em;margin-bottom:1mm">YOUSHOKU DINING NAKAMURA</div>
