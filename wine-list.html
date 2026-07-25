@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light only">
+<title>ワインリスト｜洋食だいにんぐなかむら</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Zen+Kaku+Gothic+New:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sage:#3E5C50;
+    --sage-deep:#2E4A40;
+    --gold:#B08D3E;
+    --gold-soft:#C9AE6E;
+    --bordeaux:#7B3B43;
+    --paper:#FBFAF6;
+    --card:#FFFFFF;
+    --ink:#2B2B28;
+    --muted:#7A776D;
+    --line:#E2DED2;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{font-family:'Zen Kaku Gothic New',sans-serif;background:var(--paper);
+       color:var(--ink);line-height:1.7;}
+
+  /* ===== ヒーロー ===== */
+  .hero{background:linear-gradient(168deg,var(--sage-deep) 0%,var(--sage) 100%);
+        color:#F4F1E8;text-align:center;
+        padding:calc(env(safe-area-inset-top) + 44px) 20px 40px;}
+  .hero .shop{font-family:'Shippori Mincho',serif;font-size:12px;
+              letter-spacing:.4em;text-indent:.4em;color:var(--gold-soft);}
+  .hero h1{font-family:'Shippori Mincho',serif;font-weight:600;font-size:32px;
+           letter-spacing:.3em;text-indent:.3em;margin:12px 0 6px;}
+  .hero .en{font-family:'Cormorant Garamond',serif;font-size:13px;
+            letter-spacing:.5em;text-indent:.5em;color:var(--gold-soft);}
+  .hero .lead{font-size:12px;font-weight:300;color:#D9D9CE;max-width:300px;
+              margin:18px auto 0;}
+  .hero .dia{width:8px;height:8px;border:1px solid var(--gold-soft);
+             rotate:45deg;margin:20px auto 0;}
+
+  /* ===== 3杯セット帯 ===== */
+  .setband{background:#F3EDDD;border-top:1px solid var(--gold);
+           border-bottom:1px solid var(--gold);padding:14px 20px;
+           text-align:center;}
+  .setband .t{font-family:'Shippori Mincho',serif;color:var(--gold);
+              font-size:14px;letter-spacing:.24em;}
+  .setband p{font-size:11.5px;font-weight:300;color:var(--ink);margin-top:4px;}
+
+  /* ===== タブ ===== */
+  .tabs{position:sticky;top:0;z-index:10;background:var(--paper);
+        display:flex;gap:8px;padding:12px 16px;
+        border-bottom:1px solid var(--line);}
+  .tab{flex:1;text-align:center;padding:9px 0;font-size:13px;
+       letter-spacing:.14em;font-family:inherit;
+       border:1px solid var(--line);border-radius:999px;background:#fff;
+       color:var(--muted);cursor:pointer;transition:all .18s ease;}
+  .tab.on{background:var(--sage);border-color:var(--sage);color:#fff;}
+  .tab.on.red{background:var(--bordeaux);border-color:var(--bordeaux);}
+
+  /* ===== リスト ===== */
+  main{max-width:560px;margin:0 auto;padding:8px 16px 30px;}
+  .sec-title{display:flex;align-items:baseline;gap:12px;margin:24px 4px 12px;}
+  .sec-title h2{font-family:'Shippori Mincho',serif;font-weight:600;
+                font-size:18px;letter-spacing:.22em;color:var(--sage);}
+  .sec-title.red h2{color:var(--bordeaux);}
+  .sec-title .en{font-family:'Cormorant Garamond',serif;font-style:italic;
+                 font-size:13px;color:var(--gold);}
+  .sec-title .ln{flex:1;border-top:1px dotted var(--line);}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;
+        padding:16px 16px 14px;margin-bottom:12px;
+        box-shadow:0 1px 4px rgba(62,92,80,.05);}
+  .c-top{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 8px;}
+  .c-name{font-family:'Shippori Mincho',serif;font-weight:600;font-size:15.5px;
+          line-height:1.45;}
+  .c-vint{font-family:'Cormorant Garamond',serif;font-size:12px;color:var(--muted);}
+  .c-badge{font-size:10px;color:#fff;background:var(--gold);border-radius:3px;
+           padding:2px 8px;letter-spacing:.1em;}
+  .c-badge.red{background:var(--bordeaux);}
+  .c-origin{font-family:'Cormorant Garamond',serif;font-size:11px;
+            letter-spacing:.14em;color:var(--gold);text-transform:uppercase;
+            margin-top:2px;}
+  .c-desc{font-size:12.5px;font-weight:300;color:#55534B;margin-top:8px;}
+  .c-prices{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;
+            margin-top:12px;}
+  .p-cell{background:var(--paper);border:1px solid var(--line);border-radius:7px;
+          text-align:center;padding:7px 2px 6px;}
+  .p-cell .l{display:block;font-size:9px;color:var(--muted);letter-spacing:.06em;}
+  .p-cell .v{font-family:'Cormorant Garamond',serif;font-weight:600;
+             font-size:15px;letter-spacing:.02em;}
+  .p-cell.set{background:#F6F1E3;border-color:var(--gold-soft);}
+  .p-cell.set .l,.p-cell.set .v{color:var(--gold);}
+
+  footer{background:var(--sage-deep);color:#CFCDBF;text-align:center;
+         padding:26px 20px calc(env(safe-area-inset-bottom) + 26px);
+         font-size:10.5px;font-weight:300;line-height:2;}
+  footer .shop{font-family:'Shippori Mincho',serif;font-size:12px;
+               letter-spacing:.3em;color:#F4F1E8;margin-bottom:6px;}
+
+  .hidden{display:none;}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="shop">洋食だいにんぐ なかむら</div>
+  <h1>ワインリスト</h1>
+  <div class="en">WINE LIST</div>
+  <p class="lead">瀬戸内の鮮魚と、農場直送の野菜に寄り添う15本。世界6か国から、丁寧に選びました。</p>
+  <div class="dia"></div>
+</header>
+
+<div class="setband">
+  <div class="t">グラス3杯セット</div>
+  <p>お好きな3杯を選ぶと、各グラス（100ml）が約10％引きに。<br>違う銘柄の組み合わせも自由です。すべて税込価格。</p>
+</div>
+
+<nav class="tabs" aria-label="ワインの絞り込み">
+  <button class="tab on" data-f="all">すべて</button>
+  <button class="tab" data-f="white">白ワイン</button>
+  <button class="tab" data-f="red">赤ワイン</button>
+</nav>
+
+<main id="list"></main>
+
+<footer>
+  <div class="shop">洋食だいにんぐ なかむら</div>
+  広島県安芸郡熊野町<br>
+  ヴィンテージは入荷状況により変わる場合がございます。
+</footer>
+
+<script>
+const WINES=[
+ // ===== 白 =====
+ {t:"white",name:"サケット シャルドネ ラ・フィエラ",v:"2025",o:"Veneto, Italy",
+  d:"北イタリア・ヴェネト州の家族経営ワイナリーのカジュアルシャルドネ。青リンゴのようなフレッシュな果実味で、すいすい飲める軽やかさが身上です。乾杯の一杯や、ランチのお供に。",
+  p:[310,630,4710,570]},
+ {t:"white",name:"ミラマン エステート RSV ソーヴィニヨン・ブラン",v:"2024",o:"Chile",
+  d:"チリの太陽が育てたリザーブクラス。グレープフルーツのようなみずみずしい果実味と心地よい苦みのバランスが良く、飲み疲れしません。気軽な一杯目に、サラダや魚介の前菜に。",
+  p:[360,710,5340,640]},
+ {t:"white",name:"NZ66 ソーヴィニヨン・ブラン",v:"2024",o:"New Zealand",
+  d:"ニュージーランド産ならではの、ハーブと柑橘の爽やかな香りが弾ける一本。キリッとした酸が口の中をリセットしてくれます。瀬戸内の白身魚のカルパッチョと合わせるのがおすすめ。",
+  p:[480,960,7230,860]},
+ {t:"white",name:"ミュスカデ セーヴル・エ・メーヌ シュール・リー",v:"2024",o:"Loire, France",badge:"瀬戸内の鮮魚に",
+  d:"「牡蠣に合うワイン」として名高い、ロワール河口の海辺の白。澱と共に熟成させるシュール・リー製法ならではの旨みと、キレのある酸が魚介の甘みを引き立てます。当店の相棒のようなワイン。",
+  p:[420,840,6290,760]},
+ {t:"white",name:"レ・ドーファン ブラン レゼルヴ",v:"2024",o:"Rhône, France",
+  d:"南仏ローヌの造り手による、白い花と洋梨を思わせる柔らかな辛口白。フランスらしい上品さがありながら気取らない味わい。前菜からメインの手前まで、ゆっくり付き合える一本です。",
+  p:[440,880,6600,790]},
+ {t:"white",name:"タラパカ GR ホワイト・ラベル シャルドネ",v:"2025",o:"Maipo Valley, Chile",
+  d:"チリの名門タラパカのグラン・レゼルバ「ホワイト・ラベル」。トロピカルフルーツの華やかな香りと樽由来のほのかなバニラ感。鶏肉のクリーム系、白身魚のムニエルに。",
+  p:[460,920,6910,830]},
+ {t:"white",name:"パナメラ シャルドネ",v:"2023",o:"California, USA",
+  d:"名前の由来は、大陸を貫く世界最長のハイウェイ「パナメリカーナ」。太陽をたっぷり浴びたカリフォルニアらしい、レモンや洋梨の香りにクリーミーなコクが重なる王道シャルドネです。",
+  p:[500,1010,7540,910]},
+ // ===== 赤 =====
+ {t:"red",name:"サケット メルロー ヴェネト",v:"2025",o:"Veneto, Italy",
+  d:"白と同じサケット社のメルロー。チェリーのチャーミングな果実味とまろやかな口当たりで、するする飲める毎日の食卓ワイン。パスタや気軽な洋食との組み合わせに。",
+  p:[310,630,4710,570]},
+ {t:"red",name:"レ・ドーファン ルージュ レゼルヴ",v:"2024",o:"Rhône, France",
+  d:"南仏ローヌのグルナッシュ系ブレンド。赤い果実とスパイスの香りが心地よく、渋みが柔らかいので赤ワイン初心者の方にもおすすめ。トマト系の煮込みや、鴨料理とも好相性です。",
+  p:[440,880,6600,790]},
+ {t:"red",name:"トソ カベルネ・ソーヴィニヨン",v:"2024",o:"Mendoza, Argentina",
+  d:"アンデス山脈の麓メンドーサで120年以上続く名門パスカル・トソ。標高の高い畑らしい澄んだ果実味と滑らかなタンニンで、重すぎず軽すぎず。肉料理全般の頼れる相棒です。",
+  p:[420,840,6290,760]},
+ {t:"red",name:"タラパカ GR ホワイト・ラベル カベルネ・ソーヴィニヨン",v:"2023",o:"Maipo Valley, Chile",
+  d:"白と同じタラパカのグラン・レゼルバ、赤のカベルネ版。完熟プラムとカシスの豊かな果実味に、チョコレートを思わせる甘やかな余韻。デミグラスソースの洋食との相性は間違いありません。",
+  p:[460,920,6910,830]},
+ {t:"red",name:"パナメラ カベルネ・ソーヴィニヨン",v:"2022",o:"California, USA",
+  d:"白と同じくパナメリカーナ・ハイウェイの名を冠したカリフォルニアの赤。カシスやブラックベリーの濃厚な果実味に、樽のスモーキーさがほんのり。ハンバーグやデミグラス系と抜群に合います。",
+  p:[500,1010,7540,910]},
+ {t:"red",name:"タオバ サペラヴィ",v:"2022",o:"Georgia",badge:"個性派",
+  d:"ワイン発祥の地といわれるジョージアの土着品種サペラヴィ。濃い色合いから想像する通りの凝縮した黒果実と、どこか懐かしい野趣のある味わい。「いつもと違う一杯」を探している方に。",
+  p:[590,1170,8800,1050]},
+ {t:"red",name:"メナージュ・ア・トロワ ミッドナイト",v:"2023",o:"California, USA",
+  d:"「3種の葡萄のブレンド」を意味する人気ブランドの、その名も「真夜中」。漆黒のフルボディで、ビターチョコのような深いコクが広がります。牛肉のコースや、食後にチーズとゆっくり。",
+  p:[730,1470,11000,1320]},
+ {t:"red",name:"ルイ・M・マルティーニ プラティ",v:"2022",o:"Sonoma, California",badge:"当店の看板赤",
+  d:"90年以上カベルネ一筋、カリフォルニアの老舗が手がけるソノマの上級キュヴェ。ブラックチェリーとバニラ、杉の香りが幾重にも重なるエレガントな味わいで、米有力ワイン誌90点超の実力派。特別な日の一本に。",
+  p:[1030,2050,15400,1850]},
+];
+
+const yen=n=>"¥"+n.toLocaleString("ja-JP");
+
+function card(w){
+  const badge=w.badge?`<span class="c-badge${w.t==='red'?' red':''}">${w.badge}</span>`:"";
+  return `<article class="card" data-t="${w.t}">
+    <div class="c-top"><span class="c-name">${w.name}</span><span class="c-vint">${w.v}</span>${badge}</div>
+    <div class="c-origin">${w.o}</div>
+    <p class="c-desc">${w.d}</p>
+    <div class="c-prices">
+      <div class="p-cell"><span class="l">グラス50ml</span><span class="v">${yen(w.p[0])}</span></div>
+      <div class="p-cell"><span class="l">グラス100ml</span><span class="v">${yen(w.p[1])}</span></div>
+      <div class="p-cell"><span class="l">ボトル</span><span class="v">${yen(w.p[2])}</span></div>
+      <div class="p-cell set"><span class="l">セット時1杯</span><span class="v">${yen(w.p[3])}</span></div>
+    </div>
+  </article>`;
+}
+
+function secTitle(t){
+  return t==="white"
+    ?`<div class="sec-title" data-t="white"><h2>白ワイン</h2><span class="en">Vin Blanc</span><span class="ln"></span></div>`
+    :`<div class="sec-title red" data-t="red"><h2>赤ワイン</h2><span class="en">Vin Rouge</span><span class="ln"></span></div>`;
+}
+
+function render(){
+  const el=document.getElementById("list");
+  el.innerHTML=
+    secTitle("white")+WINES.filter(w=>w.t==="white").map(card).join("")+
+    secTitle("red")+WINES.filter(w=>w.t==="red").map(card).join("");
+}
+render();
+
+document.querySelectorAll(".tab").forEach(b=>{
+  b.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on","red"));
+    b.classList.add("on");
+    if(b.dataset.f==="red") b.classList.add("red");
+    const f=b.dataset.f;
+    document.querySelectorAll("[data-t]").forEach(n=>{
+      n.classList.toggle("hidden", f!=="all" && n.dataset.t!==f);
+    });
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
+});
+</script>
+</body>
+</html>
