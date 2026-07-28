@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light only">
+<title>ドリンクメニュー｜洋食だいにんぐなかむら</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Zen+Kaku+Gothic+New:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sage:#3E5C50;
+    --sage-deep:#2E4A40;
+    --gold:#B08D3E;
+    --gold-soft:#C9AE6E;
+    --amber:#9A6B2F;
+    --bordeaux:#7B3B43;
+    --paper:#FBFAF6;
+    --card:#FFFFFF;
+    --ink:#2B2B28;
+    --muted:#7A776D;
+    --line:#E2DED2;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{font-family:'Zen Kaku Gothic New',sans-serif;background:var(--paper);
+       color:var(--ink);line-height:1.7;}
+
+  /* ===== ヒーロー ===== */
+  .hero{background:linear-gradient(168deg,var(--sage-deep) 0%,var(--sage) 100%);
+        color:#F4F1E8;text-align:center;
+        padding:calc(env(safe-area-inset-top) + 44px) 20px 40px;}
+  .hero .shop{font-family:'Shippori Mincho',serif;font-size:12px;
+              letter-spacing:.4em;text-indent:.4em;color:var(--gold-soft);}
+  .hero h1{font-family:'Shippori Mincho',serif;font-weight:600;font-size:30px;
+           letter-spacing:.26em;text-indent:.26em;margin:12px 0 6px;}
+  .hero .en{font-family:'Cormorant Garamond',serif;font-size:13px;
+            letter-spacing:.5em;text-indent:.5em;color:var(--gold-soft);}
+  .hero .lead{font-size:12px;font-weight:300;color:#D9D9CE;max-width:300px;
+              margin:18px auto 0;}
+  .hero .dia{width:8px;height:8px;border:1px solid var(--gold-soft);
+             rotate:45deg;margin:20px auto 0;}
+
+  /* ===== ペアリング帯 ===== */
+  .setband{background:#F3EDDD;border-top:1px solid var(--gold);
+           border-bottom:1px solid var(--gold);padding:14px 20px;
+           text-align:center;}
+  .setband .t{font-family:'Shippori Mincho',serif;color:var(--gold);
+              font-size:14px;letter-spacing:.24em;}
+  .setband .pr{font-family:'Cormorant Garamond',serif;color:var(--gold);
+               font-weight:600;font-size:15px;margin-top:2px;}
+  .setband p{font-size:11.5px;font-weight:300;color:var(--ink);margin-top:4px;}
+
+  /* ===== タブ ===== */
+  .tabs{position:sticky;top:0;z-index:10;background:var(--paper);
+        display:flex;gap:8px;padding:12px 16px;
+        border-bottom:1px solid var(--line);}
+  .tab{flex:1;text-align:center;padding:9px 0;font-size:12.5px;
+       letter-spacing:.08em;font-family:inherit;
+       border:1px solid var(--line);border-radius:999px;background:#fff;
+       color:var(--muted);cursor:pointer;transition:all .18s ease;}
+  .tab.on{background:var(--sage);border-color:var(--sage);color:#fff;}
+
+  /* ===== リスト ===== */
+  main{max-width:560px;margin:0 auto;padding:8px 16px 30px;}
+  .sec-title{display:flex;align-items:baseline;gap:12px;margin:24px 4px 12px;}
+  .sec-title h2{font-family:'Shippori Mincho',serif;font-weight:600;
+                font-size:17px;letter-spacing:.18em;color:var(--sage);}
+  .sec-title .en{font-family:'Cormorant Garamond',serif;font-style:italic;
+                 font-size:13px;color:var(--gold);}
+  .sec-title .ln{flex:1;border-top:1px dotted var(--line);}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;
+        padding:14px 16px 13px;margin-bottom:10px;
+        box-shadow:0 1px 4px rgba(62,92,80,.05);}
+  .c-top{display:flex;align-items:baseline;gap:6px 8px;}
+  .c-name{font-family:'Shippori Mincho',serif;font-weight:600;font-size:15px;
+          line-height:1.45;}
+  .c-badge{font-size:10px;color:#fff;background:var(--gold);border-radius:3px;
+           padding:2px 8px;letter-spacing:.1em;white-space:nowrap;}
+  .c-price{margin-left:auto;font-family:'Cormorant Garamond',serif;
+           font-weight:600;font-size:17px;letter-spacing:.02em;
+           white-space:nowrap;color:var(--sage);}
+  .c-origin{font-family:inherit;font-size:11px;font-weight:300;
+            letter-spacing:.06em;color:var(--muted);margin-top:2px;}
+  .c-desc{font-size:12.5px;font-weight:300;color:#55534B;margin-top:8px;}
+
+  /* ===== 関連メニューリンク ===== */
+  .links{max-width:560px;margin:0 auto;padding:6px 16px 28px;}
+  .links .cap{text-align:center;font-size:11px;font-weight:300;
+              color:var(--muted);letter-spacing:.14em;margin-bottom:10px;}
+  .links .btns{display:flex;gap:10px;}
+  .link-btn{flex:1;text-align:center;padding:12px 4px;
+            border:1px solid var(--sage);border-radius:999px;
+            color:var(--sage);text-decoration:none;font-size:13px;
+            letter-spacing:.1em;background:#fff;}
+  .link-btn:active{background:var(--sage);color:#fff;}
+
+  footer{background:var(--sage-deep);color:#CFCDBF;text-align:center;
+         padding:26px 20px calc(env(safe-area-inset-bottom) + 26px);
+         font-size:10.5px;font-weight:300;line-height:2;}
+  footer .shop{font-family:'Shippori Mincho',serif;font-size:12px;
+               letter-spacing:.3em;color:#F4F1E8;margin-bottom:6px;}
+
+  .hidden{display:none;}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="shop">洋食だいにんぐ なかむら</div>
+  <h1>ドリンクメニュー</h1>
+  <div class="en">DRINK MENU</div>
+  <p class="lead">乾杯の一杯から食後の珈琲まで。コース料理に寄り添うお飲み物をご用意しました。</p>
+  <div class="dia"></div>
+</header>
+
+<div class="setband">
+  <div class="t">おまかせペアリング</div>
+  <div class="pr">¥2,500 〜 ¥3,500</div>
+  <p>ビール、白ワイン、赤ワイン、日本酒など、<br>その日のコース料理に合わせて少しずつご提供いたします。</p>
+</div>
+
+<nav class="tabs" aria-label="ドリンクの絞り込み">
+  <button class="tab on" data-f="all">すべて</button>
+  <button class="tab" data-f="alc">お酒</button>
+  <button class="tab" data-f="non">ノンアル</button>
+  <button class="tab" data-f="soft">ソフト</button>
+</nav>
+
+<main id="list"></main>
+
+<div class="links">
+  <div class="cap">あわせてご覧ください</div>
+  <div class="btns">
+    <a class="link-btn" href="https://072204nakamura-dotcom.github.io/nakamura-menu/wine-list.html">ワインリスト</a>
+    <a class="link-btn" href="https://072204nakamura-dotcom.github.io/nakamura-menu/nakamura-tea-menu-line.html">中国茶メニュー</a>
+  </div>
+</div>
+
+<footer>
+  <div class="shop">洋食だいにんぐ なかむら</div>
+  広島県安芸郡熊野町<br>
+  表示価格はすべて税込です。
+</footer>
+
+<script>
+const SECTIONS=[
+ {key:"sparkling",t:"alc",jp:"スパークリングワイン",en:"Sparkling Wine"},
+ {key:"beer",t:"alc",jp:"ビール",en:"Beer"},
+ {key:"sake",t:"alc",jp:"日本酒",en:"Sake"},
+ {key:"shochu",t:"alc",jp:"焼酎",en:"Shochu"},
+ {key:"cocktail",t:"alc",jp:"カクテル",en:"Cocktail"},
+ {key:"non",t:"non",jp:"ノンアルコール",en:"Alcohol-Free"},
+ {key:"soda",t:"soft",jp:"炭酸系",en:"Soda"},
+ {key:"cold",t:"soft",jp:"冷たい飲み物",en:"Cold Drink"},
+ {key:"hot",t:"soft",jp:"温かい飲み物",en:"Hot Drink"},
+];
+
+const DRINKS=[
+ // ===== スパークリング =====
+ {s:"sparkling",name:"ガンチア アスティ",o:"200ml・イタリア ピエモンテ",
+  d:"マスカットの香りが華やかな甘口スパークリング。乾杯にも食後のデザートにもうれしい、飲み切りやすい200mlサイズです。",
+  p:"¥1,650"},
+ {s:"sparkling",name:"スパークリングワイン ボトル",o:"720ml",
+  d:"その日のおすすめボトルをご用意しています。銘柄と価格はスタッフにお尋ねください。",
+  p:"¥3,300〜"},
+ // ===== ビール =====
+ {s:"beer",name:"生ビール　アサヒ スーパードライ",p:"¥650"},
+ {s:"beer",name:"瓶ビール　アサヒ スーパードライ",p:"¥780"},
+ {s:"beer",name:"クラフトビール　ブルックリンラガー",o:"ブルックリン・ブルワリー",
+  d:"19世紀、ビールづくりの町ブルックリンで人気だったウィーンスタイルを受け継ぐ琥珀色のラガー。麦芽の苦みとホップの華やかな香りが際立ち、後味にはカラメル麦芽の風味も。デミグラスの洋食と好相性です。",
+  p:"¥650"},
+ {s:"beer",name:"クラフトビール　豊潤",o:"スプリングバレー",
+  d:"口に広がる麦のうまみと、ホップの上品な香り。豊潤な味わいなのに、すっきりとした綺麗な後味です。",
+  p:"¥650"},
+ {s:"beer",name:"クラフトビール　シルクエール〈白〉",o:"スプリングバレー",
+  d:"きめ細かなふわとろの泡と華やかな香り。シルクのような上質でまろやかな口当たりの白ビールです。",
+  p:"¥650"},
+ // ===== 日本酒 =====
+ {s:"sake",name:"亀齢 上撰",o:"常温・熱燗｜広島県西条・亀齢酒造",
+  d:"酒都・西条の伏流水をふんだんに使い、芳醇な香りと爽快なのどごしを醸す一本。燗にすると旨みがふくらみ、洋食との組み合わせも楽しめます。",
+  p:"¥880"},
+ {s:"sake",name:"土佐鶴 純米酒",o:"冷酒｜高知県・土佐鶴酒造",
+  d:"純米ならではのしっかりしたコクと、さわやかな酸味が生むキリッとした味わい。土佐鶴ならではの旨い辛口で、瀬戸内の鮮魚の前菜と合わせるのがおすすめです。",
+  p:"¥990"},
+ {s:"sake",name:"大号令 純米酒",o:"冷酒｜広島県熊野町・馬上酒造",badge:"地元・熊野町",
+  d:"当店と同じ熊野町の蔵・馬上酒造が醸す純米酒。すべての工程を店主が手作業で行い、江戸時代から続く伝統的な造りを今もなお守り続けています。",
+  p:"¥1,650"},
+ // ===== 焼酎 =====
+ {s:"shochu",name:"赤霧島〈芋〉",o:"ロック・水割り・湯割り｜宮崎県・霧島酒造",
+  d:"みやびで気高い香りと、澄んだ甘み。芋焼酎らしい華やかさをすっきりと楽しめます。",
+  p:"¥650"},
+ {s:"shochu",name:"中々〈麦〉",o:"ロック・水割り・湯割り｜宮崎県・黒木本店",
+  d:"上品でほんのり甘い穀物の香りと、程よく軽やかな味わい。お湯割りにすると甘み・深み・香ばしさがいっそうふくらみます。",
+  p:"¥650"},
+ // ===== カクテル =====
+ {s:"cocktail",name:"自家製ウォッカスカッシュ　生レモン",
+  d:"生のレモンで仕込む自家製スカッシュのウォッカ割り。すっきり爽やかな一杯です。",
+  p:"¥650"},
+ {s:"cocktail",name:"自家製ウォッカスカッシュ　生パイン",
+  d:"生のパインで仕込む自家製スカッシュのウォッカ割り。果実の甘みがやさしく広がります。",
+  p:"¥650"},
+ {s:"cocktail",name:"ハイボール",p:"¥590"},
+ {s:"cocktail",name:"オペレーター",o:"白ワイン×ジンジャエール×レモン",p:"¥720"},
+ // ===== ノンアルコール =====
+ {s:"non",name:"ノンアルコールビール",p:"¥600"},
+ {s:"non",name:"レッドアイゼロ",p:"¥660"},
+ {s:"non",name:"ノンアルコールワイン",o:"白・赤",p:"¥600"},
+ {s:"non",name:"ノンアルコールスパークリング",o:"ハーフボトル",p:"¥1,800"},
+ {s:"non",name:"ノンアルコール梅酒",o:"ロック・ソーダ",p:"¥550"},
+ {s:"non",name:"シャーリーテンプル",p:"¥550"},
+ {s:"non",name:"カシスグレープゼロ",p:"¥550"},
+ {s:"non",name:"オペレーターゼロ",p:"¥660"},
+ // ===== 炭酸系 =====
+ {s:"soda",name:"炭酸水",p:"¥350"},
+ {s:"soda",name:"コカ・コーラ",p:"¥430"},
+ {s:"soda",name:"ジンジャエール",p:"¥430"},
+ {s:"soda",name:"自家製レモンスカッシュ",o:"生レモン",p:"¥550"},
+ {s:"soda",name:"自家製パインスカッシュ",o:"生パイン",p:"¥550"},
+ // ===== 冷たい飲み物 =====
+ {s:"cold",name:"トマトジュース",p:"¥420"},
+ {s:"cold",name:"パインジュース",p:"¥420"},
+ {s:"cold",name:"ザクロジュース",p:"¥420"},
+ {s:"cold",name:"マンゴージュース",p:"¥420"},
+ {s:"cold",name:"たかのりんごのりんごジュース",p:"¥550"},
+ {s:"cold",name:"ウーロン茶",p:"¥430"},
+ {s:"cold",name:"アイスコーヒー",p:"¥550"},
+ {s:"cold",name:"アイスティー",p:"¥550"},
+ // ===== 温かい飲み物 =====
+ {s:"hot",name:"ウーロン茶",p:"¥430"},
+ {s:"hot",name:"ごぼう茶",p:"¥430"},
+ {s:"hot",name:"珈琲",p:"¥550"},
+ {s:"hot",name:"紅茶",p:"¥550"},
+];
+
+function card(x,t){
+  const badge=x.badge?`<span class="c-badge">${x.badge}</span>`:"";
+  const origin=x.o?`<div class="c-origin">${x.o}</div>`:"";
+  const desc=x.d?`<p class="c-desc">${x.d}</p>`:"";
+  return `<article class="card" data-t="${t}">
+    <div class="c-top"><span class="c-name">${x.name}</span>${badge}<span class="c-price">${x.p}</span></div>
+    ${origin}
+    ${desc}
+  </article>`;
+}
+
+function secTitle(s){
+  return `<div class="sec-title" data-t="${s.t}"><h2>${s.jp}</h2><span class="en">${s.en}</span><span class="ln"></span></div>`;
+}
+
+function render(){
+  const el=document.getElementById("list");
+  el.innerHTML=SECTIONS.map(s=>
+    secTitle(s)+DRINKS.filter(x=>x.s===s.key).map(x=>card(x,s.t)).join("")
+  ).join("");
+}
+render();
+
+document.querySelectorAll(".tab").forEach(b=>{
+  b.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on");
+    const f=b.dataset.f;
+    document.querySelectorAll("[data-t]").forEach(n=>{
+      n.classList.toggle("hidden", f!=="all" && n.dataset.t!==f);
+    });
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
+});
+</script>
+</body>
+</html>
