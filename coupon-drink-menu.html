@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light only">
+<title>乾杯ドリンク（LINEクーポン）｜洋食だいにんぐなかむら</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Zen+Kaku+Gothic+New:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sage:#3E5C50;
+    --sage-deep:#2E4A40;
+    --gold:#B08D3E;
+    --gold-soft:#C9AE6E;
+    --paper:#FBFAF6;
+    --card:#FFFFFF;
+    --ink:#2B2B28;
+    --muted:#7A776D;
+    --line:#E2DED2;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{font-family:'Zen Kaku Gothic New',sans-serif;background:var(--paper);
+       color:var(--ink);line-height:1.7;}
+
+  /* ===== ヒーロー ===== */
+  .hero{background:linear-gradient(168deg,var(--sage-deep) 0%,var(--sage) 100%);
+        color:#F4F1E8;text-align:center;
+        padding:calc(env(safe-area-inset-top) + 44px) 20px 40px;}
+  .hero .shop{font-family:'Shippori Mincho',serif;font-size:12px;
+              letter-spacing:.4em;text-indent:.4em;color:var(--gold-soft);}
+  .hero h1{font-family:'Shippori Mincho',serif;font-weight:600;font-size:32px;
+           letter-spacing:.3em;text-indent:.3em;margin:12px 0 6px;}
+  .hero .en{font-family:'Cormorant Garamond',serif;font-size:12px;
+            letter-spacing:.4em;text-indent:.4em;color:var(--gold-soft);}
+  .hero .tag{display:inline-block;margin-top:16px;font-size:11px;
+             letter-spacing:.18em;color:var(--gold-soft);
+             border:1px solid var(--gold-soft);border-radius:999px;
+             padding:5px 16px;}
+  .hero .lead{font-size:12px;font-weight:300;color:#D9D9CE;max-width:300px;
+              margin:18px auto 0;}
+  .hero .dia{width:8px;height:8px;border:1px solid var(--gold-soft);
+             rotate:45deg;margin:20px auto 0;}
+
+  /* ===== ご利用方法帯 ===== */
+  .setband{background:#F3EDDD;border-top:1px solid var(--gold);
+           border-bottom:1px solid var(--gold);padding:14px 20px;
+           text-align:center;}
+  .setband .t{font-family:'Shippori Mincho',serif;color:var(--gold);
+              font-size:14px;letter-spacing:.24em;}
+  .setband p{font-size:11.5px;font-weight:300;color:var(--ink);margin-top:4px;
+             max-width:420px;margin-left:auto;margin-right:auto;}
+
+  /* ===== リスト ===== */
+  main{max-width:560px;margin:0 auto;padding:8px 16px 30px;}
+  .sec-title{display:flex;align-items:baseline;gap:12px;margin:24px 4px 12px;}
+  .sec-title h2{font-family:'Shippori Mincho',serif;font-weight:600;
+                font-size:18px;letter-spacing:.22em;color:var(--sage);}
+  .sec-title .en{font-family:'Cormorant Garamond',serif;font-style:italic;
+                 font-size:13px;color:var(--gold);}
+  .sec-title .ln{flex:1;border-top:1px dotted var(--line);}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;
+        padding:14px 16px 13px;margin-bottom:10px;
+        box-shadow:0 1px 4px rgba(62,92,80,.05);}
+  .c-top{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 8px;}
+  .c-name{font-family:'Shippori Mincho',serif;font-weight:600;font-size:15px;
+          line-height:1.45;}
+  .c-size{font-family:'Cormorant Garamond',serif;font-size:12.5px;
+          color:var(--muted);white-space:nowrap;}
+  .c-badge{font-size:10px;color:#fff;background:var(--gold);border-radius:3px;
+           padding:2px 8px;letter-spacing:.1em;white-space:nowrap;}
+  .c-origin{font-family:'Cormorant Garamond',serif;font-size:11px;
+            letter-spacing:.14em;color:var(--gold);text-transform:uppercase;
+            margin-top:2px;}
+  .c-desc{font-size:12.5px;font-weight:300;color:#55534B;margin-top:8px;}
+
+  /* ===== 関連メニューリンク ===== */
+  .links{max-width:560px;margin:0 auto;padding:6px 16px 28px;}
+  .links .cap{text-align:center;font-size:11px;font-weight:300;
+              color:var(--muted);letter-spacing:.14em;margin-bottom:10px;}
+  .links .btns{display:flex;gap:10px;}
+  .link-btn{flex:1;text-align:center;padding:12px 4px;
+            border:1px solid var(--sage);border-radius:999px;
+            color:var(--sage);text-decoration:none;font-size:13px;
+            letter-spacing:.1em;background:#fff;}
+  .link-btn:active{background:var(--sage);color:#fff;}
+
+  footer{background:var(--sage-deep);color:#CFCDBF;text-align:center;
+         padding:26px 20px calc(env(safe-area-inset-bottom) + 26px);
+         font-size:10.5px;font-weight:300;line-height:2;}
+  footer .shop{font-family:'Shippori Mincho',serif;font-size:12px;
+               letter-spacing:.3em;color:#F4F1E8;margin-bottom:6px;}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="shop">洋食だいにんぐ なかむら</div>
+  <h1>乾杯ドリンク</h1>
+  <div class="en">COMPLIMENTARY TOAST</div>
+  <div><span class="tag">LINE クーポン専用メニュー</span></div>
+  <p class="lead">LINEのドリンククーポンをお持ちのお客様は、この中からお好きな1杯をお選びいただけます。</p>
+  <div class="dia"></div>
+</header>
+
+<div class="setband">
+  <div class="t">ご利用方法</div>
+  <p>ご注文時に、LINEクーポンの画面をスタッフへご提示ください。クーポンはお一人様1枚まで。ご同席の方がそれぞれお持ちの場合は、同じお会計で1枚ずつご利用いただけます。</p>
+</div>
+
+<main id="list"></main>
+
+<div class="links">
+  <div class="cap">お食事とご一緒に</div>
+  <div class="btns">
+    <a class="link-btn" href="https://072204nakamura-dotcom.github.io/nakamura-menu/drink-menu.html">ドリンクメニュー</a>
+    <a class="link-btn" href="https://072204nakamura-dotcom.github.io/nakamura-menu/wine-list.html">ワインリスト</a>
+  </div>
+</div>
+
+<footer>
+  <div class="shop">洋食だいにんぐ なかむら</div>
+  広島県安芸郡熊野町<br>
+  ml表記はグラスでのご提供量です。<br>
+  内容は仕入れ状況により変わる場合がございます。
+</footer>
+
+<script>
+const SECTIONS=[
+ {key:"wine",jp:"ワイン",en:"Wine"},
+ {key:"beer",jp:"ビール",en:"Beer"},
+ {key:"non",jp:"ノンアルコール",en:"Non-Alcohol"},
+];
+
+const DRINKS=[
+ {s:"wine",name:"白ワイン｜サケット シャルドネ ラ・フィエラ",size:"glass 100ml",o:"Veneto, Italy",badge:"乾杯の定番",
+  d:"青リンゴのようなフレッシュな果実味。すいすい飲める軽やかさで、コースの始まりにぴったりの一杯です。"},
+ {s:"wine",name:"赤ワイン｜サケット メルロー ヴェネト",size:"glass 100ml",o:"Veneto, Italy",
+  d:"チェリーのチャーミングな果実味とまろやかな口当たり。最初の一杯から赤で始めたい方に。"},
+ {s:"beer",name:"生ビール｜アサヒ スーパードライ",size:"glass 200ml",o:"Draft Beer",
+  d:"よく冷えた辛口の生ビール。「まずはビールで乾杯」という方はこちらをどうぞ。"},
+ {s:"non",name:"ノンアルコールスパークリング　白",size:"glass 80ml",o:"Sparkling",
+  d:"アルコールゼロでも、乾杯の華やかさはそのまま。お車でお越しの方にもおすすめです。"},
+ {s:"non",name:"ノンアルコールスパークリング　赤",size:"glass 80ml",o:"Sparkling",
+  d:"こちらもアルコールゼロ。赤ワイン気分で乾杯したい方はこちらをどうぞ。"},
+ {s:"non",name:"ザクロジュース",o:"Soft Drink",
+  d:"甘酸っぱく色鮮やかな一杯。お子さまの乾杯にもどうぞ。"},
+ {s:"non",name:"マンゴージュース",o:"Soft Drink",
+  d:"濃厚な甘みとトロピカルな香り。デザート感覚で楽しめる一杯です。"},
+];
+
+function card(x){
+  const size=x.size?`<span class="c-size">${x.size}</span>`:"";
+  const badge=x.badge?`<span class="c-badge">${x.badge}</span>`:"";
+  const origin=x.o?`<div class="c-origin">${x.o}</div>`:"";
+  const desc=x.d?`<p class="c-desc">${x.d}</p>`:"";
+  return `<article class="card">
+    <div class="c-top"><span class="c-name">${x.name}</span>${size}${badge}</div>
+    ${origin}
+    ${desc}
+  </article>`;
+}
+
+function secTitle(s){
+  return `<div class="sec-title"><h2>${s.jp}</h2><span class="en">${s.en}</span><span class="ln"></span></div>`;
+}
+
+function render(){
+  const el=document.getElementById("list");
+  el.innerHTML=SECTIONS.map(s=>
+    secTitle(s)+DRINKS.filter(x=>x.s===s.key).map(card).join("")
+  ).join("");
+}
+render();
+</script>
+</body>
+</html>
