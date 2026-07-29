@@ -58,6 +58,8 @@
        color:var(--muted);cursor:pointer;transition:all .18s ease;}
   .tab.on{background:var(--sage);border-color:var(--sage);color:#fff;}
   .tab.on.red{background:var(--bordeaux);border-color:var(--bordeaux);}
+  .tab.on.rose{background:#A6606B;border-color:#A6606B;}
+  .sec-title.rose h2{color:#A6606B;}
 
   /* ===== リスト ===== */
   main{max-width:560px;margin:0 auto;padding:8px 16px 30px;}
@@ -109,7 +111,7 @@
   <div class="shop">洋食だいにんぐ なかむら</div>
   <h1>ワインリスト</h1>
   <div class="en">WINE LIST</div>
-  <p class="lead">瀬戸内の鮮魚と、農場直送の野菜に寄り添う15本。世界6か国から、丁寧に選びました。</p>
+  <p class="lead">瀬戸内の鮮魚と洋食のコースに寄り添う全20種。世界7か国から、丁寧に選びました。</p>
   <div class="dia"></div>
 </header>
 
@@ -121,6 +123,7 @@
 <nav class="tabs" aria-label="ワインの絞り込み">
   <button class="tab on" data-f="all">すべて</button>
   <button class="tab" data-f="white">白ワイン</button>
+  <button class="tab" data-f="rose">ロゼ</button>
   <button class="tab" data-f="red">赤ワイン</button>
 </nav>
 
@@ -135,6 +138,9 @@
 <script>
 const WINES=[
  // ===== 白 =====
+ {t:"white",name:"テバルド ビアンコ プーリア IGP",v:"2024",o:"Puglia, Italy",
+  d:"南イタリア・プーリアの太陽を浴びたシャルドネ＋トレッビアーノの白。軽やかな辛口で、すいと飲める気軽さが魅力です。乾杯の一杯や、ランチのお供に。",
+  p:[210,420,3140,380]},
  {t:"white",name:"サケット シャルドネ ラ・フィエラ",v:"2025",o:"Veneto, Italy",
   d:"北イタリア・ヴェネト州の家族経営ワイナリーのカジュアルシャルドネ。青リンゴのようなフレッシュな果実味で、すいすい飲める軽やかさが身上です。乾杯の一杯や、ランチのお供に。",
   p:[310,630,4710,570]},
@@ -156,10 +162,23 @@ const WINES=[
  {t:"white",name:"パナメラ シャルドネ",v:"2023",o:"California, USA",
   d:"名前の由来は、大陸を貫く世界最長のハイウェイ「パナメリカーナ」。太陽をたっぷり浴びたカリフォルニアらしい、レモンや洋梨の香りにクリーミーなコクが重なる王道シャルドネです。",
   p:[500,1010,7540,910]},
+{t:"white",name:"アール・ド・ヴィーヴル クレレット・ド・ラングドック",v:"2023",o:"Languedoc, France",badge:"南仏の上級白",
+  d:"南仏の著名生産者ジェラール・ベルトランが手がける、地中海の土着品種クレレットの白。白い花と洋梨の気品ある香りが広がります。前菜から魚料理まで、コースを格上げする一本。",
+  p:[650,1300,9740,1170]},
+ // ===== ロゼ =====
+ {t:"rose",name:"アール・ド・ヴィーヴル ラングドック ロゼ",v:"2024",o:"Languedoc, France",
+  d:"同じくジェラール・ベルトランによる南仏ロゼ。ベリーと柑橘の爽やかさで、前菜から肉料理まで幅広く寄り添う懐の深さがあります。テラス席の昼下がりにもどうぞ。",
+  p:[650,1300,9740,1170]},
  // ===== 赤 =====
+ {t:"red",name:"テバルド ロッソ プーリア IGP",v:"2024",o:"Puglia, Italy",
+  d:"南イタリア・プーリアの気軽な赤。素直な果実味のカジュアルタイプで、日常の洋食に寄り添います。パスタやハンバーグと気負わずに。",
+  p:[210,420,3140,380]},
  {t:"red",name:"サケット メルロー ヴェネト",v:"2025",o:"Veneto, Italy",
   d:"白と同じサケット社のメルロー。チェリーのチャーミングな果実味とまろやかな口当たりで、するする飲める毎日の食卓ワイン。パスタや気軽な洋食との組み合わせに。",
   p:[310,630,4710,570]},
+ {t:"red",name:"トロイ ピノ・ノワール",v:"2024",o:"Trentino, Italy",
+  d:"北イタリア・ドロミテ山麓で「1つの畑に1品種」を貫くワイナリー、メッツァコロナのピノ・ノワール。柔らかなタンニンとほのかなバニラの樽香が上品なミディアムボディ。鴨や鶏料理と好相性です。",
+  p:[500,1010,7540,910]},
  {t:"red",name:"レ・ドーファン ルージュ レゼルヴ",v:"2024",o:"Rhône, France",
   d:"南仏ローヌのグルナッシュ系ブレンド。赤い果実とスパイスの香りが心地よく、渋みが柔らかいので赤ワイン初心者の方にもおすすめ。トマト系の煮込みや、鴨料理とも好相性です。",
   p:[440,880,6600,790]},
@@ -208,17 +227,20 @@ function secTitle(t){
 
 function render(){
   const el=document.getElementById("list");
+  const roseSec='<div class="sec-title rose" data-t="rose"><h2>ロゼワイン</h2><span class="en">Vin Ros\u00e9</span><span class="ln"></span></div>';
   el.innerHTML=
     secTitle("white")+WINES.filter(w=>w.t==="white").map(card).join("")+
+    roseSec+WINES.filter(w=>w.t==="rose").map(card).join("")+
     secTitle("red")+WINES.filter(w=>w.t==="red").map(card).join("");
 }
 render();
 
 document.querySelectorAll(".tab").forEach(b=>{
   b.addEventListener("click",()=>{
-    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on","red"));
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on","red","rose"));
     b.classList.add("on");
     if(b.dataset.f==="red") b.classList.add("red");
+    if(b.dataset.f==="rose") b.classList.add("rose");
     const f=b.dataset.f;
     document.querySelectorAll("[data-t]").forEach(n=>{
       n.classList.toggle("hidden", f!=="all" && n.dataset.t!==f);
