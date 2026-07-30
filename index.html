@@ -483,8 +483,11 @@ body{background:var(--bg);font-family:'Zen Kaku Gothic New',sans-serif;color:var
       <button class="btn-save btn-gold" onclick="openGasSettings()" style="font-size:13px;padding:13px;margin-bottom:8px">
         ⚙️ URLを設定 / 変更する
       </button>
-      <button class="btn-save" style="background:#fff;color:var(--gd);border:1.5px solid var(--gd);padding:12px;margin-bottom:8px;font-size:13px" onclick="loadFromGAS().then(()=>showToast('🔄 最新データを取得しました'))">
-        🔄 今すぐ同期する
+      <button class="btn-save" style="background:#fff;color:var(--gd);border:1.5px solid var(--gd);padding:12px;margin-bottom:8px;font-size:13px" onclick="saveToCloud()">
+        💾 クラウドに保存する（この端末 → クラウド）
+      </button>
+      <button class="btn-save" style="background:#fff;color:var(--nd);border:1.5px solid var(--nd);padding:12px;margin-bottom:8px;font-size:13px" onclick="loadFromCloud()">
+        📥 クラウドから読み込む（クラウド → この端末）
       </button>
       <button class="btn-save" style="background:#fff;color:var(--red);border:1.5px solid var(--red);padding:12px;margin-bottom:0;font-size:13px" onclick="clearAllData()">
         🗑 全データを削除する
@@ -532,10 +535,6 @@ body{background:var(--bg);font-family:'Zen Kaku Gothic New',sans-serif;color:var
 // ═══════════════════════════════════
 let GAS_URL = localStorage.getItem('gas_url') || '';
 
-// 【iPhone印刷の鉄則】iOS(iPhone/iPad)判定：印刷時の紙面サイズ調整に使用
-// （iPadは近年"Mac"を名乗るためタッチ対応も併せて判定。テスト時は上書き可能なようlet宣言）
-let IS_IOS = /iP(hone|od|ad)/.test(navigator.userAgent) || (navigator.userAgent.indexOf('Mac')>=0 && 'ontouchend' in document);
-
 // ═══════════════════════════════════
 // データストア（Google Apps Script + localStorageバックアップ）
 // ═══════════════════════════════════
@@ -570,43 +569,75 @@ async function saveStore(data){
   }
 }
 
-// GASからデータを読み込む（GETはCORS問題なし）
-async function loadFromGAS(){
-  if(!GAS_URL) return;
+// ═══════════════════════════════════
+// 📥 クラウドから読み込む（手動・確認付き）
+// ※ クラウドのデータでこの端末のデータを置き換える
+// ═══════════════════════════════════
+async function loadFromCloud(){
+  if(!GAS_URL){
+    alert('クラウドURLが未設定です。\n右上の「☁️ クラウド設定」からURLを登録してください。');
+    return;
+  }
   try{
     showSyncBadge('sync');
-    const res = await fetch(GAS_URL + '?t=' + Date.now(), {
-      method: 'GET',
-      mode: 'cors',
-    });
+    const res = await fetch(GAS_URL + '?t=' + Date.now(), { method:'GET', mode:'cors' });
     if(!res.ok) throw new Error('HTTP ' + res.status);
     const json = await res.json();
-    if(json.ok && Array.isArray(json.data) && json.data.length > 0){
-      // GASのデータとlocalStorageを合成して重複排除
-      const local = JSON.parse(localStorage.getItem('nakamura_menu_v1')||'[]');
-      const merged = mergeData(json.data, local);
-      _memoryStore = merged;
-      localStorage.setItem('nakamura_menu_v1', JSON.stringify(merged));
-      // 合成データをGASに書き戻す
-      pushToGAS(merged);
+    if(!json.ok || !Array.isArray(json.data)) throw new Error(json.error || '不明なエラー');
+
+    const cloudData = json.data;
+    const local = JSON.parse(localStorage.getItem('nakamura_menu_v1')||'[]');
+
+    // 確認ダイアログ（件数を表示）
+    const msg = `📥 クラウドから読み込みます。\n\n`
+      + `クラウド側：${cloudData.length}件\n`
+      + `この端末側：${local.length}件\n\n`
+      + `⚠️ この端末のデータは、クラウドの${cloudData.length}件で置き換わります。\n`
+      + `よろしいですか？`;
+    if(!confirm(msg)){
       showSyncBadge('ok');
-      renderHistory();
-      renderStats();
-    } else if(json.ok && Array.isArray(json.data)){
-      // GASが空 → localのデータをGASに送る
-      const local = JSON.parse(localStorage.getItem('nakamura_menu_v1')||'[]');
-      if(local.length > 0){
-        _memoryStore = local;
-        pushToGAS(local);
-      }
-      showSyncBadge('ok');
-    } else {
-      throw new Error(json.error || '不明なエラー');
+      showToast('読み込みをキャンセルしました');
+      return;
     }
+
+    _memoryStore = cloudData;
+    localStorage.setItem('nakamura_menu_v1', JSON.stringify(cloudData));
+    showSyncBadge('ok');
+    renderHistory();
+    renderStats();
+    showToast(`📥 クラウドから${cloudData.length}件を読み込みました`);
   } catch(e){
-    // CORSエラーの場合はlocalStorageのデータを使う
     showSyncBadge('err');
-    console.warn('GAS読み込み失敗:', e.message);
+    alert('クラウドの読み込みに失敗しました：' + e.message);
+  }
+}
+
+// ═══════════════════════════════════
+// 💾 クラウドに保存する（手動）
+// ※ この端末のデータをクラウドへ送る
+// ═══════════════════════════════════
+async function saveToCloud(){
+  if(!GAS_URL){
+    alert('クラウドURLが未設定です。\n右上の「☁️ クラウド設定」からURLを登録してください。');
+    return;
+  }
+  const local = JSON.parse(localStorage.getItem('nakamura_menu_v1')||'[]');
+  if(local.length === 0){
+    if(!confirm('⚠️ この端末のデータは0件です。\nクラウドを空データで上書きしてしまいますが、よろしいですか？')) return;
+  }
+  try{
+    showSyncBadge('sync');
+    await fetch(GAS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'save', data: local }),
+    });
+    showSyncBadge('ok');
+    showToast(`💾 ${local.length}件をクラウドに保存しました`);
+  } catch(e){
+    showSyncBadge('err');
+    alert('クラウドへの保存に失敗しました：' + e.message);
   }
 }
 
@@ -665,8 +696,8 @@ function openGasSettings(){
   GAS_URL = url.trim();
   localStorage.setItem('gas_url', GAS_URL);
   if(GAS_URL){
-    showToast('✅ URLを設定しました。データを同期中…');
-    loadFromGAS();
+    showToast('✅ URLを設定しました');
+    alert('URLを設定しました。\n\nクラウドとのやり取りは、この画面の\n「💾 クラウドに保存する」\n「📥 クラウドから読み込む」\nボタンから手動で行ってください。');
   } else {
     showToast('URLをクリアしました');
   }
@@ -1479,8 +1510,11 @@ function buildOshinagakiBlock(r, items, dateJP, height){
 
   return `
   <div style="position:relative;width:210mm;height:${height}mm;overflow:hidden;
-    background:#faf3e4;font-family:'Shippori Mincho B1',serif;">
-    <!-- 【iPhone印刷の鉄則】背景は単色ベタ塗り（グラデはダークモード印刷で黒くなる）／格子テクスチャは縞模様に化けるため廃止 -->
+    background:linear-gradient(160deg,#fdf9f0 0%,#f6edd8 60%,#fdf9f0 100%);font-family:'Shippori Mincho B1',serif;">
+    <div style="position:absolute;inset:0;pointer-events:none;
+      background-image:
+        repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(139,101,60,0.03) 3px,rgba(139,101,60,0.03) 4px),
+        repeating-linear-gradient(90deg,transparent,transparent 3px,rgba(139,101,60,0.03) 3px,rgba(139,101,60,0.03) 4px);"></div>
     <div style="position:absolute;top:5mm;left:5mm;right:5mm;bottom:5mm;
       border:2px solid #5a3a1a;pointer-events:none;"></div>
     <div style="position:absolute;top:6.5mm;left:6.5mm;right:6.5mm;bottom:6.5mm;
@@ -1524,27 +1558,24 @@ function printOshinagaki(id){
   if(!data) return;
   const { r, items, dateJP } = data;
 
-  // 【iPhone印刷の鉄則】iOSのSafariはヘッダー・フッター分の余白を強制確保するため、
-  // A4いっぱい(148mm×2=296mm)だと必ず2ページ目にあふれる。iOSは137mm×2=274mmに縮める
-  const blockH = IS_IOS ? 137 : 148;
-
   const html = `<!DOCTYPE html>
 <html lang="ja"><head><meta charset="UTF-8">
-<meta name="color-scheme" content="light only">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;600;700;800&display=swap');
-  *{margin:0;padding:0;box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  *{margin:0;padding:0;box-sizing:border-box}
   @page{size:A4 portrait;margin:0}
-  html,body{width:210mm;background:#fff;font-family:'Shippori Mincho B1',serif;}
+  html,body{width:210mm;height:297mm;overflow:hidden;font-family:'Shippori Mincho B1',serif;}
 </style>
 </head><body>
-  ${buildOshinagakiBlock(r, items, dateJP, blockH)}
-  <div style="width:210mm;height:0;border-top:1px dashed rgba(80,40,10,0.45);position:relative;">
+  ${buildOshinagakiBlock(r, items, dateJP, 148)}
+  <div style="width:210mm;height:1px;
+    background:repeating-linear-gradient(to right,rgba(80,40,10,0.3) 0,rgba(80,40,10,0.3) 5px,transparent 5px,transparent 10px);
+    position:relative;">
     <span style="position:absolute;left:50%;transform:translateX(-50%);
-      font-size:6pt;color:rgba(80,40,10,0.55);letter-spacing:.15em;top:-4px;
+      font-size:6pt;color:rgba(80,40,10,0.4);letter-spacing:.15em;top:-7px;
       background:#fff;padding:0 4px;">✂ 切り取り</span>
   </div>
-  ${buildOshinagakiBlock(r, items, dateJP, blockH)}
+  ${buildOshinagakiBlock(r, items, dateJP, 148)}
 <script>window.onload=function(){window.print()}<\/script>
 </body></html>`;
 
@@ -2135,21 +2166,19 @@ function openPrintWindow(r){
   const fullHtml = `<!DOCTYPE html>
 <html lang="ja"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=210mm,initial-scale=1">
-<meta name="color-scheme" content="light only">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;600;700;800&display=swap');
-  *{margin:0;padding:0;box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  *{margin:0;padding:0;box-sizing:border-box}
   @page{size:A4 portrait;margin:0}
   html,body{
     width:210mm;
+    height:297mm;
     margin:0;
     padding:0;
     background:#f9f6f0;
     font-family:'Shippori Mincho B1',serif;
+    overflow:hidden;
   }
-  /* 【iPhone印刷の鉄則】iOSはSafariが余白を強制確保しA4全面を使えないため、
-     紙面全体を92.6%に縮小して1ページ(275mm相当)に収める。比率が保たれるのでレイアウトは崩れない */
-  ${IS_IOS ? 'body{zoom:0.926}' : ''}
 </style>
 </head><body>
 ${sheetHtml}
@@ -2223,9 +2252,9 @@ function buildPrintHTML(r){
   // 通常皿の横長行
   function normalRow(dish, hcol){
     return `<div style="display:flex;border:1.2pt solid ${dividerC};border-radius:3pt;overflow:hidden;height:${rowH}mm;flex-shrink:0;background:#fff">
-      <!-- 左：料理名（カラーバー付き） -->
-      <div style="width:42mm;background:${hcol};color:#fff;padding:1.5mm 3mm;display:flex;align-items:center;flex-shrink:0;border-right:1.5pt solid ${dividerC}">
-        <span style="font-size:${nameSize}pt;font-weight:700;line-height:1.25;letter-spacing:.04em;word-break:break-all">${dish.name||'料理'}</span>
+      <!-- 左：料理名（白背景・手書き対応） -->
+      <div style="width:42mm;background:#fff;color:${hcol};padding:1.5mm 3mm;display:flex;align-items:center;flex-shrink:0;border-right:1.5pt solid ${dividerC};border-left:2mm solid ${hcol}">
+        <span style="font-size:${nameSize}pt;font-weight:700;line-height:1.25;letter-spacing:.04em;word-break:break-all;color:#1a1a1a">${dish.name||''}</span>
       </div>
       <!-- 右：食材～トッピング横並び -->
       <div style="flex:1;display:flex;min-width:0">
@@ -2247,9 +2276,9 @@ function buildPrintHTML(r){
         <div style="font-size:${valueSize-1}pt;color:#3a3a3a;line-height:1.25;word-break:break-all">${it.ingredient||''}</div>
       </div>`).join('');
     return `<div style="display:flex;border:1.2pt solid ${dividerC};border-radius:3pt;overflow:hidden;height:${wideH}mm;flex-shrink:0">
-      <div style="width:42mm;background:${col};color:#fff;padding:2mm 3mm;display:flex;flex-direction:column;justify-content:center;flex-shrink:0;border-right:1.5pt solid ${dividerC}">
-        <span style="font-size:${nameSize}pt;font-weight:700;letter-spacing:.05em">オードブル</span>
-        <span style="font-size:${labelSize+1}pt;opacity:.8;margin-top:1mm">3点盛り合わせ</span>
+      <div style="width:42mm;background:#fff;padding:2mm 3mm;display:flex;flex-direction:column;justify-content:center;flex-shrink:0;border-right:1.5pt solid ${dividerC};border-left:2mm solid ${col}">
+        <span style="font-size:${nameSize}pt;font-weight:700;letter-spacing:.05em;color:${col}">オードブル</span>
+        <span style="font-size:${labelSize+1}pt;color:${col};opacity:.75;margin-top:1mm">3点盛り合わせ</span>
       </div>
       <div style="flex:1;display:flex;min-width:0">${items}</div>
     </div>`;
@@ -2264,9 +2293,9 @@ function buildPrintHTML(r){
         <div style="font-size:${valueSize-1}pt;color:#3a3a3a;line-height:1.25;word-break:break-all">${it.ingredient||''}</div>
       </div>`).join('');
     return `<div style="display:flex;border:1.2pt solid ${dividerC};border-radius:3pt;overflow:hidden;height:${wideH}mm;flex-shrink:0">
-      <div style="width:42mm;background:${col};color:#fff;padding:2mm 3mm;display:flex;flex-direction:column;justify-content:center;flex-shrink:0;border-right:1.5pt solid ${dividerC}">
-        <span style="font-size:${nameSize}pt;font-weight:700;letter-spacing:.05em">🥩 肉料理</span>
-        <span style="font-size:${labelSize+1}pt;opacity:.8;margin-top:1mm">4種類から選択</span>
+      <div style="width:42mm;background:#fff;padding:2mm 3mm;display:flex;flex-direction:column;justify-content:center;flex-shrink:0;border-right:1.5pt solid ${dividerC};border-left:2mm solid ${col}">
+        <span style="font-size:${nameSize}pt;font-weight:700;letter-spacing:.05em;color:${col}">🥩 肉料理</span>
+        <span style="font-size:${labelSize+1}pt;color:${col};opacity:.75;margin-top:1mm">4種類から選択</span>
       </div>
       <div style="flex:1;display:flex;min-width:0">${items}</div>
     </div>`;
@@ -2290,7 +2319,7 @@ function buildPrintHTML(r){
   const noteHtml = `<div style="flex-shrink:0;border:1pt solid ${borderC};border-radius:3pt;overflow:hidden;margin-top:1.5mm"><div style="background:#b89040;padding:1.2mm 3mm;font-size:7pt;font-weight:700;color:#fff;letter-spacing:.1em">📝 備考</div><div style="padding:1.5mm 3mm;font-size:8.5pt;color:#1a1a1a;min-height:7mm">${r.note||''}</div></div>`;
 
   return `<div style="position:fixed;top:0;left:0;width:210mm;height:297mm;overflow:hidden;background:#f9f6f0;z-index:9999;font-family:'Shippori Mincho B1',serif">
-  <div style="position:absolute;left:0;top:0;bottom:0;width:5mm;background-color:${col};background-image:linear-gradient(180deg,${col},${colM})"></div>
+  <div style="position:absolute;left:0;top:0;bottom:0;width:5mm;background:linear-gradient(180deg,${col},${colM})"></div>
   <div style="position:absolute;top:0;left:0;right:0;height:19mm;padding:4mm 8mm 3mm 12mm;background:${bg};border-bottom:2pt solid ${col};display:flex;align-items:flex-end;justify-content:space-between">
     <div>
       <div style="font-size:6.5pt;color:${colM};letter-spacing:.18em;margin-bottom:1mm">YOUSHOKU DINING NAKAMURA</div>
@@ -2411,7 +2440,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   initDate('ai-date','ai-days');
   renderStats();
   applyAutoResize();
-  if(GAS_URL){ loadFromGAS(); }
+  // ※ 起動時の自動クラウド読み込みは廃止（データ上書き事故防止のため）
+  //    クラウドとのやり取りは「集計」タブの💾保存・📥読込ボタンから手動で行う
 });
 </script>
 </body>
