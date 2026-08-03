@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light only">
+<title>メニュー一覧｜洋食だいにんぐなかむら</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Zen+Kaku+Gothic+New:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sage:#3E5C50;
+    --sage-deep:#2E4A40;
+    --gold:#B08D3E;
+    --gold-soft:#C9AE6E;
+    --paper:#FBFAF6;
+    --card:#FFFFFF;
+    --ink:#2B2B28;
+    --muted:#7A776D;
+    --line:#E2DED2;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{font-family:'Zen Kaku Gothic New',sans-serif;background:var(--paper);
+       color:var(--ink);line-height:1.7;}
+
+  /* ===== ヒーロー ===== */
+  .hero{background:linear-gradient(168deg,var(--sage-deep) 0%,var(--sage) 100%);
+        color:#F4F1E8;text-align:center;
+        padding:calc(env(safe-area-inset-top) + 44px) 20px 40px;}
+  .hero .shop{font-family:'Shippori Mincho',serif;font-size:12px;
+              letter-spacing:.4em;text-indent:.4em;color:var(--gold-soft);}
+  .hero h1{font-family:'Shippori Mincho',serif;font-weight:600;font-size:30px;
+           letter-spacing:.26em;text-indent:.26em;margin:12px 0 6px;}
+  .hero .en{font-family:'Cormorant Garamond',serif;font-size:13px;
+            letter-spacing:.5em;text-indent:.5em;color:var(--gold-soft);}
+  .hero .lead{font-size:12px;font-weight:300;color:#D9D9CE;max-width:300px;
+              margin:18px auto 0;}
+  .hero .dia{width:8px;height:8px;border:1px solid var(--gold-soft);
+             rotate:45deg;margin:20px auto 0;}
+
+  /* ===== ご案内帯 ===== */
+  .setband{background:#F3EDDD;border-top:1px solid var(--gold);
+           border-bottom:1px solid var(--gold);padding:14px 20px;
+           text-align:center;}
+  .setband .t{font-family:'Shippori Mincho',serif;color:var(--gold);
+              font-size:14px;letter-spacing:.24em;}
+  .setband p{font-size:11.5px;font-weight:300;color:var(--ink);margin-top:4px;
+             max-width:420px;margin-left:auto;margin-right:auto;}
+
+  /* ===== メニューカード ===== */
+  main{max-width:560px;margin:0 auto;padding:8px 16px 30px;}
+  .sec-title{display:flex;align-items:baseline;gap:12px;margin:24px 4px 12px;}
+  .sec-title h2{font-family:'Shippori Mincho',serif;font-weight:600;
+                font-size:17px;letter-spacing:.18em;color:var(--sage);}
+  .sec-title .en{font-family:'Cormorant Garamond',serif;font-style:italic;
+                 font-size:13px;color:var(--gold);}
+  .sec-title .ln{flex:1;border-top:1px dotted var(--line);}
+
+  .m-card{display:block;text-decoration:none;color:inherit;
+          background:var(--card);border:1px solid var(--line);border-radius:10px;
+          padding:16px 46px 15px 16px;margin-bottom:10px;position:relative;
+          box-shadow:0 1px 4px rgba(62,92,80,.05);
+          transition:background .18s ease,border-color .18s ease;}
+  .m-card:active{background:#F3EDDD;border-color:var(--gold-soft);}
+  .m-top{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 8px;}
+  .m-name{font-family:'Shippori Mincho',serif;font-weight:600;font-size:16px;
+          line-height:1.45;}
+  .m-badge{font-size:10px;color:#fff;background:var(--gold);border-radius:3px;
+           padding:2px 8px;letter-spacing:.1em;white-space:nowrap;}
+  .m-en{font-family:'Cormorant Garamond',serif;font-size:11px;
+        letter-spacing:.14em;color:var(--gold);text-transform:uppercase;
+        margin-top:2px;}
+  .m-desc{font-size:12.5px;font-weight:300;color:#55534B;margin-top:8px;}
+  .m-card::after{content:'';position:absolute;right:20px;top:50%;
+                 width:8px;height:8px;border-top:1px solid var(--gold);
+                 border-right:1px solid var(--gold);
+                 transform:translateY(-50%) rotate(45deg);}
+
+  footer{background:var(--sage-deep);color:#CFCDBF;text-align:center;
+         padding:26px 20px calc(env(safe-area-inset-bottom) + 26px);
+         font-size:10.5px;font-weight:300;line-height:2;}
+  footer .shop{font-family:'Shippori Mincho',serif;font-size:12px;
+               letter-spacing:.3em;color:#F4F1E8;margin-bottom:6px;}
+
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="shop">洋食だいにんぐ なかむら</div>
+  <h1>メニュー一覧</h1>
+  <div class="en">MENU</div>
+  <p class="lead">お飲み物のメニューをまとめました。ご覧になりたいものをお選びください。</p>
+  <div class="dia"></div>
+</header>
+
+<div class="setband">
+  <div class="t">お飲み物のご案内</div>
+  <p>コースのお料理に合わせたお飲み物をご用意しております。表示価格はすべて税込です。</p>
+</div>
+
+<main>
+
+  <div class="sec-title">
+    <h2>お飲み物</h2><span class="en">Drinks</span><span class="ln"></span>
+  </div>
+
+  <a class="m-card" href="https://072204nakamura-dotcom.github.io/nakamura-menu/drink-menu.html">
+    <div class="m-top"><span class="m-name">ドリンクメニュー</span></div>
+    <div class="m-en">Drink Menu</div>
+    <p class="m-desc">乾杯の一杯から食後の珈琲まで。ビール・日本酒・焼酎・カクテル・ノンアルコール・ソフトドリンクをすべてこちらに。おまかせペアリングのご案内もあります。</p>
+  </a>
+
+  <a class="m-card" href="https://072204nakamura-dotcom.github.io/nakamura-menu/wine-list.html">
+    <div class="m-top"><span class="m-name">ワインリスト</span></div>
+    <div class="m-en">Wine List</div>
+    <p class="m-desc">世界7か国から選んだ全20種。グラス・ハーフ・ボトルの価格を載せています。お好きな3杯を選ぶと約10％引きになるグラス3杯セットもございます。</p>
+  </a>
+
+  <a class="m-card" href="https://072204nakamura-dotcom.github.io/nakamura-menu/nakamura-tea-menu-line.html">
+    <div class="m-top"><span class="m-name">中国茶メニュー</span></div>
+    <div class="m-en">Chinese Tea</div>
+    <p class="m-desc">中国茶専門店「姫茶伝」から仕入れた茶葉を、ティーポットでご用意します。白湯のお替りもお出しできますので、食後にゆっくりとどうぞ。</p>
+  </a>
+
+  <div class="sec-title">
+    <h2>LINEをご利用の方へ</h2><span class="en">For LINE Friends</span><span class="ln"></span>
+  </div>
+
+  <a class="m-card" href="https://072204nakamura-dotcom.github.io/nakamura-menu/coupon-drink-menu.html">
+    <div class="m-top"><span class="m-name">乾杯ドリンク</span><span class="m-badge">クーポン専用</span></div>
+    <div class="m-en">Complimentary Toast</div>
+    <p class="m-desc">LINEのドリンククーポンをお持ちのお客様が、お好きな1杯をお選びいただけるメニューです。ご注文時にクーポン画面をスタッフへご提示ください。</p>
+  </a>
+
+</main>
+
+<footer>
+  <div class="shop">洋食だいにんぐ なかむら</div>
+  広島県安芸郡熊野町<br>
+  表示価格はすべて税込です。<br>
+  内容は仕入れ状況により変わる場合がございます。
+</footer>
+
+</body>
+</html>

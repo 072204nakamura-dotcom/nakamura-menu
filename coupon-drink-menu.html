@@ -86,6 +86,11 @@
             color:var(--sage);text-decoration:none;font-size:13px;
             letter-spacing:.1em;background:#fff;}
   .link-btn:active{background:var(--sage);color:#fff;}
+  .back-btn{display:block;text-align:center;margin-top:10px;padding:12px 4px;
+            border:1px solid var(--sage);border-radius:999px;
+            background:var(--sage);color:#fff;text-decoration:none;
+            font-size:13px;letter-spacing:.1em;}
+  .back-btn:active{opacity:.72;}
 
   footer{background:var(--sage-deep);color:#CFCDBF;text-align:center;
          padding:26px 20px calc(env(safe-area-inset-bottom) + 26px);
@@ -107,7 +112,7 @@
 
 <div class="setband">
   <div class="t">ご利用方法</div>
-  <p>ご注文時に、LINEクーポンの画面をスタッフへご提示ください。クーポンはお一人様1枚まで。ご同席の方がそれぞれお持ちの場合は、同じお会計で1枚ずつご利用いただけます。</p>
+  <p>ご注文時に、LINEクーポンの画面をスタッフへご提示ください。クーポンはお一人様1枚まで。ご同席の方がお持ちの分も、同じお会計でご利用いただけます。</p>
 </div>
 
 <main id="list"></main>
@@ -118,6 +123,7 @@
     <a class="link-btn" href="https://072204nakamura-dotcom.github.io/nakamura-menu/drink-menu.html">ドリンクメニュー</a>
     <a class="link-btn" href="https://072204nakamura-dotcom.github.io/nakamura-menu/wine-list.html">ワインリスト</a>
   </div>
+  <a class="back-btn" href="https://072204nakamura-dotcom.github.io/nakamura-menu/menu.html">メニュー一覧へ戻る</a>
 </div>
 
 <footer>
@@ -135,10 +141,10 @@ const SECTIONS=[
 ];
 
 const DRINKS=[
- {s:"wine",name:"白ワイン｜サケット シャルドネ ラ・フィエラ",size:"glass 100ml",o:"Veneto, Italy",badge:"乾杯の定番",
-  d:"青リンゴのようなフレッシュな果実味。すいすい飲める軽やかさで、コースの始まりにぴったりの一杯です。"},
- {s:"wine",name:"赤ワイン｜サケット メルロー ヴェネト",size:"glass 100ml",o:"Veneto, Italy",
-  d:"チェリーのチャーミングな果実味とまろやかな口当たり。最初の一杯から赤で始めたい方に。"},
+ {s:"wine",name:"白ワイン｜テバルド ビアンコ プーリア IGP",size:"glass 100ml",o:"Puglia, Italy",badge:"乾杯の定番",
+  d:"南イタリア・プーリアの軽やかな辛口。すっきりとした飲み口で、コースの始まりにぴったりの一杯です。"},
+ {s:"wine",name:"赤ワイン｜テバルド ロッソ プーリア IGP",size:"glass 100ml",o:"Puglia, Italy",
+  d:"同じくプーリアの気軽な赤。素直な果実味とやわらかな口当たりで、洋食のお料理に寄り添います。"},
  {s:"beer",name:"生ビール｜アサヒ スーパードライ",size:"glass 200ml",o:"Draft Beer",
   d:"よく冷えた辛口の生ビール。「まずはビールで乾杯」という方はこちらをどうぞ。"},
  {s:"non",name:"ノンアルコールスパークリング　白",size:"glass 80ml",o:"Sparkling",
