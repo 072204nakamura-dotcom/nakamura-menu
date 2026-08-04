@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light only">
+<title>コースメニュー｜洋食だいにんぐなかむら</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Zen+Kaku+Gothic+New:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sage:#3E5C50;
+    --sage-deep:#2E4A40;
+    --gold:#B08D3E;
+    --gold-deep:#96762F;
+    --gold-soft:#C9AE6E;
+    --paper:#FBFAF6;
+    --card:#FFFFFF;
+    --ink:#2B2B28;
+    --muted:#57544B;
+    --line:#E2DED2;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{font-family:'Zen Kaku Gothic New',sans-serif;background:var(--paper);
+       color:var(--ink);line-height:1.7;}
+
+  /* ===== ヒーロー ===== */
+  .hero{background:linear-gradient(168deg,var(--sage-deep) 0%,var(--sage) 100%);
+        color:#F4F1E8;text-align:center;
+        padding:calc(env(safe-area-inset-top) + 44px) 20px 40px;}
+  .hero .shop{font-family:'Shippori Mincho',serif;font-size:12px;
+              letter-spacing:.4em;text-indent:.4em;color:var(--gold-soft);}
+  .hero h1{font-family:'Shippori Mincho',serif;font-weight:600;font-size:30px;
+           letter-spacing:.26em;text-indent:.26em;margin:12px 0 6px;}
+  .hero .en{font-family:'Cormorant Garamond',serif;font-size:13px;
+            letter-spacing:.5em;text-indent:.5em;color:var(--gold-soft);}
+  .hero .lead{font-size:12px;font-weight:300;color:#D9D9CE;max-width:310px;
+              margin:18px auto 0;}
+  .hero .dia{width:8px;height:8px;border:1px solid var(--gold-soft);
+             rotate:45deg;margin:20px auto 0;}
+
+  /* ===== タブ ===== */
+  .tabs{position:sticky;top:0;z-index:10;background:var(--paper);
+        display:flex;gap:10px;padding:12px 16px;
+        border-bottom:1px solid var(--line);}
+  .tab{flex:1;min-width:0;text-align:center;padding:11px 0;font-size:13.5px;
+       letter-spacing:.1em;font-family:'Shippori Mincho',serif;font-weight:600;
+       border:1px solid var(--line);border-radius:999px;background:#fff;
+       color:var(--muted);cursor:pointer;transition:all .18s ease;}
+  .tab.on{background:var(--gold-deep);border-color:var(--gold-deep);color:#fff;}
+  .tab.on.lunch{background:var(--sage);border-color:var(--sage);}
+
+  main{max-width:560px;margin:0 auto;padding:0 16px 30px;}
+
+  /* ===== コースの見出しカード ===== */
+  .course-head{margin:22px 0 6px;padding:22px 20px 20px;text-align:center;
+               border:1.5px solid var(--gold);border-radius:12px;
+               background:linear-gradient(180deg,#FBF6E9 0%,#FFFFFF 100%);
+               position:relative;}
+  .course-head.lunch{border-color:var(--sage);
+                     background:linear-gradient(180deg,#F2F6F1 0%,#FFFFFF 100%);}
+  .course-head .en{font-family:'Cormorant Garamond',serif;font-style:italic;
+                   font-size:27px;color:var(--gold-deep);letter-spacing:.02em;}
+  .course-head.lunch .en{color:var(--sage);}
+  .course-head .ribbon{display:inline-block;margin-top:8px;padding:5px 20px;
+                       background:var(--gold-deep);color:#fff;border-radius:3px;
+                       font-family:'Shippori Mincho',serif;font-size:13.5px;
+                       letter-spacing:.14em;}
+  .course-head.lunch .ribbon{background:var(--sage);}
+  .course-head .price{margin-top:14px;font-family:'Cormorant Garamond',serif;
+                      font-weight:700;font-size:40px;color:var(--ink);
+                      line-height:1.1;}
+  .course-head .price small{font-family:'Zen Kaku Gothic New',sans-serif;
+                            font-size:12px;font-weight:400;color:var(--muted);
+                            margin-left:4px;}
+  /* 価格が複数あるとき（ディナーの肉違い） */
+  .price-list{margin:14px auto 0;max-width:250px;}
+  .p-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+         padding:8px 0;border-bottom:1px dotted var(--line);}
+  .p-row:last-child{border-bottom:none;}
+  .p-lbl{font-family:'Shippori Mincho',serif;font-weight:600;font-size:15px;
+         color:var(--ink);white-space:nowrap;}
+  .p-val{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:27px;
+         color:var(--ink);line-height:1.1;}
+  .price-tax{margin-top:8px;font-size:11.5px;color:var(--muted);}
+  .course-head .opt{margin-top:12px;display:inline-block;max-width:100%;
+                    padding:8px 16px;border:1px solid var(--line);border-radius:6px;
+                    font-size:12.5px;line-height:1.7;color:var(--muted);background:#fff;}
+
+  /* ===== 品目 ===== */
+  .dish{display:flex;gap:13px;padding:15px 4px 14px;
+        border-bottom:1px dotted var(--line);}
+  .dish:last-of-type{border-bottom:none;}
+  .num{flex:0 0 auto;width:30px;height:30px;
+       display:flex;align-items:center;justify-content:center;
+       background:var(--gold-deep);color:#fff;rotate:45deg;margin-top:3px;}
+  .num span{rotate:-45deg;font-family:'Cormorant Garamond',serif;
+            font-weight:700;font-size:13px;letter-spacing:.02em;}
+  .lunch-list .num{background:var(--sage);}
+  .d-body{flex:1;min-width:0;}
+  .d-name{font-family:'Shippori Mincho',serif;font-weight:600;font-size:16.5px;
+          line-height:1.5;}
+  .d-desc{font-size:12.5px;font-weight:300;color:var(--muted);margin-top:4px;}
+
+  /* ===== 注記 ===== */
+  .note{margin:18px 0 4px;padding:14px 16px;border:1px solid var(--line);
+        border-radius:10px;background:#fff;text-align:center;
+        font-size:12.5px;color:var(--muted);line-height:1.85;}
+  .note b{color:var(--ink);font-weight:500;}
+
+  /* ===== 関連リンク ===== */
+  .links{max-width:560px;margin:0 auto;padding:6px 16px 28px;}
+  .links .cap{text-align:center;font-size:11px;font-weight:300;
+              color:var(--muted);letter-spacing:.14em;margin-bottom:10px;}
+  .links .btns{display:flex;gap:10px;}
+  .link-btn{flex:1;text-align:center;padding:12px 4px;
+            border:1px solid var(--sage);border-radius:999px;
+            color:var(--sage);text-decoration:none;font-size:13px;
+            letter-spacing:.1em;background:#fff;}
+  .link-btn:active{background:var(--sage);color:#fff;}
+  .link-btn.wide{display:block;margin-top:10px;border-color:var(--gold-deep);
+                 color:var(--gold-deep);}
+  .link-btn.wide:active{background:var(--gold-deep);color:#fff;}
+  .back-btn{display:block;text-align:center;margin-top:10px;padding:12px 4px;
+            border:1px solid var(--sage);border-radius:999px;
+            background:var(--sage);color:#fff;text-decoration:none;
+            font-size:13px;letter-spacing:.1em;}
+  .back-btn:active{opacity:.72;}
+
+  footer{background:var(--sage-deep);color:#CFCDBF;text-align:center;
+         padding:26px 20px calc(env(safe-area-inset-bottom) + 26px);
+         font-size:10.5px;font-weight:300;line-height:2;}
+  footer .shop{font-family:'Shippori Mincho',serif;font-size:12px;
+               letter-spacing:.3em;color:#F4F1E8;margin-bottom:6px;}
+
+  .hidden{display:none;}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="shop">洋食だいにんぐ なかむら</div>
+  <h1>コースメニュー</h1>
+  <div class="en">COURSE</div>
+  <p class="lead">瀬戸内の鮮魚と、契約農家の野菜で。<br>その日の食材でお作りするコース料理です。</p>
+  <div class="dia"></div>
+</header>
+
+<nav class="tabs" aria-label="コースの切り替え">
+  <button class="tab on" data-f="dinner">ディナーコース</button>
+  <button class="tab lunch" data-f="lunch">ランチコース</button>
+</nav>
+
+<main id="list"></main>
+
+<div class="links">
+  <div class="cap">お飲み物はこちら</div>
+  <div class="btns">
+    <a class="link-btn" href="https://072204nakamura-dotcom.github.io/nakamura-menu/drink-menu.html">ドリンクメニュー</a>
+    <a class="link-btn" href="https://072204nakamura-dotcom.github.io/nakamura-menu/wine-list.html">ワインリスト</a>
+  </div>
+  <a class="link-btn wide" href="https://072204nakamura-dotcom.github.io/nakamura-menu/coupon-drink-menu.html">乾杯ドリンク（LINEクーポンをお持ちの方）</a>
+  <a class="back-btn" href="https://072204nakamura-dotcom.github.io/nakamura-menu/menu.html">メニュー一覧へ戻る</a>
+</div>
+
+<footer>
+  <div class="shop">洋食だいにんぐ なかむら</div>
+  広島県安芸郡熊野町<br>
+  表示価格はすべて税込です。<br>
+  内容は仕入れ状況により変わる場合がございます。
+</footer>
+
+<script>
+const COURSES = {
+  dinner: {
+    en: "Dinner Course",
+    ribbon: "ディナーコース　8品",
+    prices: [
+      ["お任せ", "¥4,800"],
+      ["牛肉",   "¥5,500"],
+      ["ラム肉", "¥5,500"]
+    ],
+    opt: "珈琲・紅茶は ＋¥300（税別）<br>税込 ¥330 にて承ります",
+    dishes: [
+      ["I",    "アミューズ",        "季節の素材で、ひと口の遊び心を"],
+      ["II",   "前菜 － 冷菜",      "自家製テリーヌやマリネを、ひんやりと"],
+      ["III",  "前菜 － 温菜",      "温かいひと皿で、地元野菜のうまみを引き出して"],
+      ["IV",   "ショートパスタ",    "その日の食材で仕上げる、シェフのひと皿"],
+      ["V",    "魚料理",            "旬の魚介をシンプルに、素材の味を大切に"],
+      ["VI",   "お口直しのスープ",  "温かなスープで、ひと息つく間を"],
+      ["VII",  "肉料理",            "お任せ・牛肉・ラム肉からお選びいただけます"],
+      ["VIII", "デザート",          "手作りのひとさじで、余韻をゆっくりと"]
+    ]
+  },
+  lunch: {
+    en: "Lunch Course",
+    ribbon: "ランチコース　6品",
+    price: "¥3,300",
+    opt: "料理を牛肉に変更：＋¥1,500",
+    dishes: [
+      ["I",   "オードブル盛り合わせ 3種",   "旬の野菜・自家製テリーヌなど、季節の素材で"],
+      ["II",  "ショートパスタ",             "その日の食材で仕上げる、シェフのパスタ"],
+      ["III", "魚料理",                     "旬の魚介をシンプルに、素材の味を大切に"],
+      ["IV",  "季節のスープ",               "季節の野菜を使った、やさしい一皿"],
+      ["V",   "肉料理",                     "地元野菜を添え、丁寧に火を入れて"],
+      ["VI",  "デザート ＋ 珈琲または紅茶", "手作りのひとさじで、余韻をゆっくりと"]
+    ]
+  }
+};
+
+function render(key){
+  const c = COURSES[key];
+  const isLunch = key === "lunch";
+  const dishes = c.dishes.map(d => `
+    <div class="dish">
+      <div class="num"><span>${d[0]}</span></div>
+      <div class="d-body">
+        <div class="d-name">${d[1]}</div>
+        <p class="d-desc">${d[2]}</p>
+      </div>
+    </div>`).join("");
+
+  // 価格が1つのコースと、肉違いで複数あるコースで表示を分ける
+  const priceBlock = c.prices
+    ? `<div class="price-list">${
+        c.prices.map(p => `<div class="p-row"><span class="p-lbl">${p[0]}</span><span class="p-val">${p[1]}</span></div>`).join("")
+      }</div><div class="price-tax">表示価格はすべて税込です</div>`
+    : `<div class="price">${c.price}<small>（税込）</small></div>`;
+
+  document.getElementById("list").innerHTML = `
+    <div class="course-head${isLunch ? " lunch" : ""}">
+      <div class="en">${c.en}</div>
+      <div class="ribbon">${c.ribbon}</div>
+      ${priceBlock}
+      <div class="opt">${c.opt}</div>
+    </div>
+    <div class="${isLunch ? "lunch-list" : ""}">${dishes}</div>
+    <div class="note">
+      <b>食物アレルギーのあるお客様は、ご予約の際にお申し付けください。</b><br>
+      コースの内容は、その日の仕入れによって変わります。
+    </div>`;
+}
+render("dinner");
+
+document.querySelectorAll(".tab").forEach(b => {
+  b.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(x => x.classList.remove("on"));
+    b.classList.add("on");
+    render(b.dataset.f);
+    window.scrollTo({top:0, behavior:"smooth"});
+  });
+});
+</script>
+</body>
+</html>
