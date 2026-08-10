@@ -1700,10 +1700,11 @@ function showDetail(id){
   const d=new Date(r.date+'T00:00:00');
   const days=['日','月','火','水','木','金','土'];
   const isL=r.mode==='lunch';
+  const isT=r.mode==='takeout';
   const cls=isL?'':'navy';
 
   document.getElementById('modal-title').textContent=
-    `${r.date.slice(5,7).replace(/^0/,'')}月${r.date.slice(8,10).replace(/^0/,'')}日（${days[d.getDay()]}）${isL?'ランチ':'ディナー'}${r.customer?'　'+r.customer:''}`;
+    `${r.date.slice(5,7).replace(/^0/,'')}月${r.date.slice(8,10).replace(/^0/,'')}日（${days[d.getDay()]}）${isL?'ランチ':isT?'オードブル':'ディナー'}${r.customer?'　'+r.customer:''}`;
 
   let html='';
   r.dishes.forEach(dish=>{
@@ -1768,19 +1769,21 @@ function openEdit(id){
   editingId = id;
 
   const isL = r.mode === 'lunch';
+  const isT = r.mode === 'takeout';
   const d = new Date(r.date + 'T00:00:00');
   const days = ['日','月','火','水','木','金','土'];
   const dateStr = `${parseInt(r.date.slice(5,7))}月${parseInt(r.date.slice(8,10))}日（${days[d.getDay()]}）`;
-  const hdMain = isL ? 'hd-green' : 'hd-navy';
-  const hdSub  = isL ? 'hd-gm'   : 'hd-nm';
+  const hdMain = isL ? 'hd-green' : isT ? 'hd-takeout' : 'hd-navy';
+  const hdSub  = isL ? 'hd-gm'   : isT ? 'hd-tm'      : 'hd-nm';
   const lineCol = isL ? 'var(--gl)' : 'var(--nl)';
   const dragCol = isL ? 'var(--gm)' : 'var(--nm)';
 
   document.getElementById('edit-modal-title').textContent =
-    `✏️ ${dateStr} ${isL ? 'ランチ' : 'ディナー'}`;
+    `✏️ ${dateStr} ${isL ? 'ランチ' : isT ? 'オードブル' : 'ディナー'}`;
 
-  // ディナーで肉料理セレクトがない場合は自動追加（古いデータ対応）
-  if(!isL){
+  // ディナーのみ：肉料理セレクトがない場合は自動追加（古いデータ対応）
+  // ※ オードブル（takeout）には追加しない
+  if(r.mode === 'dinner'){
     const hasMeat = r.dishes.some(d =>
       d.isMeat || d.key==='meat' || d.name==='肉料理セレクト'
     );
@@ -2390,7 +2393,7 @@ function exportCSV(){
   store.forEach(r=>{
     const d=new Date(r.date+'T00:00:00');
     const dayStr=days[d.getDay()];
-    const mode=r.mode==='lunch'?'ランチ':'ディナー';
+    const mode=r.mode==='lunch'?'ランチ':r.mode==='takeout'?'オードブル':'ディナー';
     const customer=r.customer||'';
 
     r.dishes.forEach(dish=>{
