@@ -543,9 +543,10 @@ let _memoryStore = null; // メモリキャッシュ
 function loadStore(){
   // メモリキャッシュがあればそれを返す
   if(_memoryStore !== null) return _memoryStore;
-  // localStorageから読む（GASから読み込む前の暫定）
-  try{ return JSON.parse(localStorage.getItem('nakamura_menu_v1')||'[]'); }
-  catch(e){ return []; }
+  // localStorageから読んでキャッシュに保持（毎回別コピーを返すと編集操作が消えるため）
+  try{ _memoryStore = JSON.parse(localStorage.getItem('nakamura_menu_v1')||'[]'); }
+  catch(e){ _memoryStore = []; }
+  return _memoryStore;
 }
 
 async function saveStore(data){
