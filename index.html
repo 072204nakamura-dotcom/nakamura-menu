@@ -2019,6 +2019,16 @@ function openEdit(id){
     wrap.appendChild(card);
   });
 
+  // ── オードブル：皿を追加ボタン ──
+  if(r.mode === 'takeout'){
+    const addBtn = document.createElement('button');
+    addBtn.className = 'btn-save';
+    addBtn.style.cssText = 'background:#fff;color:#b5651d;border:1.5px dashed #b5651d;padding:12px;margin-bottom:12px;font-size:13px;width:100%;border-radius:12px';
+    addBtn.textContent = '＋ 皿を追加する';
+    addBtn.onclick = addEditDish;
+    wrap.appendChild(addBtn);
+  }
+
   // ── 備考 ──
   const noteCard = document.createElement('div');
   noteCard.className = 'card';
@@ -2029,6 +2039,94 @@ function openEdit(id){
 
   document.getElementById('edit-modal').classList.add('open');
   document.querySelector('#edit-modal .modal').scrollTop = 0;
+}
+
+// ═══════════════════════════════════
+// 編集モーダル：皿を追加（オードブル用）
+// ※ 入力途中の内容を保持したまま空の皿を1枚追加する
+// ═══════════════════════════════════
+function addEditDish(){
+  if(!editingId) return;
+  const r = loadStore().find(x => x.id === editingId);
+  if(!r) return;
+
+  // ① 現在の編集内容（表示順・入力値）をデータに反映して消えないようにする
+  const editCards = [...document.querySelectorAll('#edit-modal-body .edit-dish-card')];
+  let dishNum = 1;
+  const dishes = [];
+  editCards.forEach(card => {
+    const origIdx = parseInt(card.dataset.idx);
+    const orig = r.dishes[origIdx];
+    if(!orig) return;
+    const isAppDish  = orig.isApp  || orig.key==='app'  || orig.name==='オードブル盛り合わせ';
+    const isMeatDish = orig.isMeat || orig.key==='meat' || orig.name==='肉料理セレクト';
+
+    if(isAppDish && orig.items){
+      dishes.push({
+        ...orig, num: dishNum++,
+        items: orig.items.map((it,pi) => ({
+          ...it,
+          name: (document.getElementById(`e-a${pi+1}nm`)?.value||'').trim(),
+          ingredient: (document.getElementById(`e-a${pi+1}ig`)?.value||'').trim(),
+          method: (document.getElementById(`e-a${pi+1}mt`)?.value||'').trim(),
+          sauce: (document.getElementById(`e-a${pi+1}sc`)?.value||'').trim(),
+        })),
+        image: (document.getElementById('e-img-app')?.value||''),
+      });
+    } else if(isMeatDish && orig.items){
+      dishes.push({
+        ...orig, num: dishNum++,
+        items: orig.items.map((it,pi) => ({
+          ...it,
+          name: (document.getElementById(`e-m${pi+1}nm`)?.value||'').trim(),
+          ingredient: (document.getElementById(`e-m${pi+1}ig`)?.value||'').trim(),
+          method: (document.getElementById(`e-m${pi+1}mt`)?.value||'').trim(),
+          sauce: (document.getElementById(`e-m${pi+1}sc`)?.value||'').trim(),
+        })),
+        image: (document.getElementById('e-img-meat')?.value||''),
+      });
+    } else {
+      const dishKey = orig.key || `d${orig.num}`;
+      dishes.push({
+        ...orig, num: dishNum++,
+        name: (document.getElementById(`e-${dishKey}nm`)?.value||'').trim(),
+        ingredient: (document.getElementById(`e-${dishKey}ig`)?.value||'').trim(),
+        method: (document.getElementById(`e-${dishKey}mt`)?.value||'').trim(),
+        sauce: (document.getElementById(`e-${dishKey}sc`)?.value||'').trim(),
+        topping: (document.getElementById(`e-${dishKey}tp`)?.value||'').trim(),
+        image: (document.getElementById(`e-img-${dishKey}`)?.value||''),
+      });
+    }
+  });
+
+  // ② 重複しないキーを採番して空の皿を追加
+  let maxN = 0;
+  dishes.forEach(d0 => {
+    const m = /^d(\d+)$/.exec(d0.key||'');
+    if(m) maxN = Math.max(maxN, parseInt(m[1]));
+  });
+  dishes.push({
+    num: dishes.length + 1,
+    key: `d${maxN + 1}`,
+    name:'', ingredient:'', method:'', sauce:'', garnish:'', topping:'', image:'',
+  });
+
+  // ③ 日付・お客様名・備考の入力値を退避
+  const dv = document.getElementById('edit-date')?.value;
+  const cv = document.getElementById('edit-customer')?.value;
+  const nv = document.getElementById('edit-note')?.value;
+
+  // ④ 再描画して退避値を復元
+  r.dishes = dishes;
+  openEdit(editingId);
+  if(dv !== undefined) document.getElementById('edit-date').value = dv;
+  if(cv !== undefined) document.getElementById('edit-customer').value = cv;
+  if(nv !== undefined) document.getElementById('edit-note').value = nv;
+
+  // ⑤ 追加した皿が見えるよう一番下へスクロール
+  const modal = document.querySelector('#edit-modal .modal');
+  setTimeout(()=>{ modal.scrollTop = modal.scrollHeight; }, 80);
+  showToast('＋ 皿を追加しました');
 }
 
 function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
