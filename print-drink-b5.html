@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ドリンクメニュー（B5印刷用）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Zen+Kaku+Gothic+New:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sage:#3E5C50;      /* 深いセージグリーン */
+    --sage-soft:#5E7A6E;
+    --gold:#B08D3E;      /* ゴールド */
+    --amber:#9A6B2F;     /* ビール用の琥珀 */
+    --bordeaux:#7B3B43;  /* 赤系の差し色 */
+    --paper:#FBFAF6;     /* 生成り */
+    --ink:#1C1C1A;
+    --muted:#46433C;     /* 説明文。薄すぎると読めないので濃いめ */
+    --line:#B5AE9B;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  html,body{background:#EAE7DE;}
+  body{font-family:'Zen Kaku Gothic New',sans-serif;color:var(--ink);
+       -webkit-text-size-adjust:100%;}
+
+  /* ===== 印刷ボタン ===== */
+  .toolbar{max-width:720px;margin:16px auto 0;padding:0 12px;
+           display:flex;justify-content:flex-end;}
+  .print-btn{background:var(--sage);color:#fff;border:none;border-radius:6px;
+             padding:10px 22px;font-size:14px;font-family:inherit;cursor:pointer;
+             letter-spacing:.1em;}
+  .print-btn:active{opacity:.8;}
+  .print-hint{font-size:11.5px;color:#6B6A61;margin-right:14px;align-self:center;}
+  .print-alert{max-width:720px;margin:10px auto 0;padding:0 12px;}
+  .print-alert div{background:#FFF4E0;border:1px solid var(--gold);border-radius:6px;
+                   padding:12px 16px;font-size:12.5px;line-height:1.8;color:#4A3B1E;}
+  .print-alert b{color:#7A5A12;}
+
+  /* ===== B5ページ ===== */
+  .page{width:182mm;min-height:257mm;background:var(--paper);
+        margin:14px auto;padding:14mm 15mm 11mm;position:relative;
+        box-shadow:0 2px 14px rgba(0,0,0,.12);
+        display:flex;flex-direction:column;}
+
+  /* 紙面の二重罫（ワインリストと共通の額装。高さには影響しない） */
+  .page::before{content:"";position:absolute;left:5mm;top:5mm;right:5mm;bottom:5mm;
+                border:1px solid rgba(143,114,38,.42);pointer-events:none;z-index:0;}
+  .page::after{content:"";position:absolute;left:6.6mm;top:6.6mm;right:6.6mm;bottom:6.6mm;
+               border:1px solid rgba(143,114,38,.18);pointer-events:none;z-index:0;}
+  .head,.feature,.sec,.wine,.rows,.foot{position:relative;z-index:1;}
+
+  /* ヘッダー */
+  .head{text-align:center;padding-bottom:5mm;}
+  .head .shop{font-family:'Shippori Mincho',serif;font-size:10px;
+              letter-spacing:.42em;color:var(--sage);text-indent:.42em;}
+  .head h1{font-family:'Shippori Mincho',serif;font-weight:700;
+           font-size:28px;letter-spacing:.3em;text-indent:.3em;
+           color:var(--sage);margin:2.5mm 0 1.5mm;}
+  .head .en{font-family:'Cormorant Garamond',serif;font-size:12px;
+            letter-spacing:.5em;text-indent:.5em;color:var(--gold);}
+  .rule{height:0;border-top:1px solid var(--sage);position:relative;margin-top:4mm;}
+  .rule::after{content:"";position:absolute;left:0;right:0;top:1.2mm;
+               border-top:1px solid var(--line);}
+  .rule i{position:absolute;left:50%;top:-1.6mm;transform:translateX(-50%);
+          width:3.2mm;height:3.2mm;background:var(--paper);
+          border:1px solid var(--gold);rotate:45deg;}
+
+  /* セクション見出し */
+  .sec{display:flex;align-items:baseline;gap:4mm;margin:6mm 0 3mm;}
+  .sec h2{font-family:'Shippori Mincho',serif;font-weight:700;font-size:21px;
+          letter-spacing:.2em;color:var(--sage);white-space:nowrap;}
+  .sec .en{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:600;
+           font-size:14.5px;color:#96762F;letter-spacing:.12em;white-space:nowrap;}
+  .sec .ln{flex:1;border-top:1px dotted var(--line);transform:translateY(-2px);}
+  .sec.amber h2{color:var(--amber);}
+
+  /* おまかせペアリング（巻頭の推し枠） */
+  .feature{border:1px solid var(--gold);border-radius:2px;background:#F6F1E3;
+           padding:4mm 5mm;margin-top:2mm;break-inside:avoid;}
+  .f-top{display:flex;align-items:baseline;gap:3mm;}
+  .f-name{font-family:'Shippori Mincho',serif;font-weight:700;font-size:19px;
+          letter-spacing:.1em;color:var(--sage);}
+  .f-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12.5px;
+        font-weight:600;color:#96762F;letter-spacing:.1em;}
+  .f-price{margin-left:auto;font-family:'Cormorant Garamond',serif;font-weight:700;
+           font-size:18.5px;color:#96762F;white-space:nowrap;}
+  .feature p{font-size:12.5px;font-weight:400;line-height:1.7;color:var(--ink);
+             margin-top:2mm;}
+
+  /* 品目（紹介文つき） */
+  .wine{padding:3.2mm 0;border-bottom:1px dotted var(--line);
+        break-inside:avoid;}
+  /* 1ページ目は品数が多いので、そのページだけ行間をわずかに詰める */
+  .page:first-of-type .wine{padding:2.4mm 0;}
+  .page:first-of-type .feature{padding:3.4mm 5mm;}
+  .wine:last-of-type{border-bottom:none;}
+  .w-top{display:flex;align-items:baseline;gap:2.5mm;}
+  .w-name{font-family:'Shippori Mincho',serif;font-weight:700;font-size:17px;
+          letter-spacing:.02em;}
+  .w-kura{font-size:12px;color:var(--muted);font-weight:400;letter-spacing:.02em;}
+  .w-badge{font-size:10.5px;color:#fff;background:#96762F;border-radius:2px;
+           padding:.8mm 2.2mm;letter-spacing:.08em;white-space:nowrap;}
+  .w-price-r{margin-left:auto;font-family:'Cormorant Garamond',serif;font-weight:700;
+             font-size:18px;white-space:nowrap;}
+  .w-desc{font-size:12.5px;font-weight:400;color:var(--muted);
+          line-height:1.65;margin-top:1.5mm;}
+
+  /* 品目（シンプル行） */
+  .rows{margin-top:.5mm;}
+  .row{display:flex;align-items:baseline;gap:2.5mm;padding:1.9mm 0;
+       border-bottom:1px dotted var(--line);break-inside:avoid;}
+  .rows .row:last-child{border-bottom:none;}
+  .r-name{font-family:'Shippori Mincho',serif;font-weight:700;font-size:16px;
+          letter-spacing:.03em;}
+  .r-note{font-size:12px;color:var(--muted);font-weight:400;}
+  .r-dots{flex:1;min-width:6mm;}
+  .r-price{font-family:'Cormorant Garamond',serif;font-weight:700;
+           font-size:18px;letter-spacing:.02em;}
+
+  /* フッター */
+  .foot{margin-top:auto;padding-top:4mm;}
+  .set-band{border:1px solid var(--gold);border-radius:2px;background:#F6F1E3;
+            padding:2.6mm 4mm;display:flex;gap:3.5mm;align-items:center;}
+  .set-band .mark{font-family:'Shippori Mincho',serif;color:#96762F;font-weight:700;
+                  font-size:13px;letter-spacing:.14em;white-space:nowrap;
+                  border-right:1px solid var(--gold);padding-right:3.5mm;}
+  .set-band p{font-size:11.5px;font-weight:400;line-height:1.65;color:var(--ink);}
+  .notes{margin-top:2.6mm;font-size:10.5px;color:var(--muted);font-weight:400;
+         line-height:1.7;text-align:center;letter-spacing:.03em;}
+  .pageno{position:absolute;bottom:9mm;left:0;right:0;text-align:center;z-index:1;
+          font-family:'Cormorant Garamond',serif;font-size:9px;color:var(--muted);
+          letter-spacing:.3em;}
+
+  /* ===== 印刷ルール ===== */
+  @page{size:182mm 257mm;margin:0;}
+  @media print{
+    html,body{background:#fff;}
+    .toolbar{display:none;}
+    .page{margin:0;box-shadow:none;width:182mm;height:257mm;
+          page-break-after:always;}
+    .page:last-child{page-break-after:auto;}
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <span class="print-hint">キーボードの Ctrl + P でも印刷できます</span>
+  <button class="print-btn" id="printBtn">印刷する</button>
+</div>
+<div class="print-alert" id="printAlert" style="display:none"><div>
+  <b>このプレビュー画面からは印刷できません。</b><br>
+  ファイルを右クリック →「プログラムから開く」→ <b>Google Chrome</b> で開き直してから、
+  もう一度「印刷する」を押してください。<br>
+  （同じフォルダの <b>PDFフォルダ</b> にあるPDFを開いて印刷するのがいちばん確実です）
+</div></div>
+<script>
+document.getElementById('printBtn').addEventListener('click', function(){
+  if (window.self !== window.top) {          // プレビュー等の枠内で開かれている
+    document.getElementById('printAlert').style.display = 'block';
+    return;
+  }
+  try { window.print(); }
+  catch (e) { document.getElementById('printAlert').style.display = 'block'; }
+});
+</script>
+
+<!-- ============ 1ページ目：ペアリング・スパークリング・ビール ============ -->
+<section class="page">
+  <header class="head">
+    <h1>ドリンクメニュー</h1>
+    <div class="en">DRINK MENU</div>
+    <div class="rule"><i></i></div>
+  </header>
+
+  <div class="feature">
+    <div class="f-top"><span class="f-name">おまかせペアリング</span><span class="f-en">Pairing</span><span class="f-price">¥2,800 〜 ¥4,000</span></div>
+    <p>ビール、白ワイン、赤ワイン、日本酒など、その日のコース料理に合わせて少しずつご提供いたします。</p>
+  </div>
+
+  <div class="sec"><h2>スパークリングワイン</h2><span class="en">Sparkling Wine</span><span class="ln"></span></div>
+
+  <div class="wine">
+    <div class="w-top"><span class="w-name">スパークリングワイン グラス</span><span class="w-price-r">¥780〜</span></div>
+    <div class="w-desc">まずは泡で乾杯を。その日のおすすめを1杯からお楽しみいただけます。</div>
+  </div>
+
+  <div class="wine">
+    <div class="w-top"><span class="w-name">スパークリングワイン ボトル</span><span class="w-kura">720ml</span><span class="w-price-r">¥3,500〜</span></div>
+    <div class="w-desc">その日のおすすめボトルをご用意しています。銘柄はスタッフにお尋ねください。</div>
+  </div>
+
+  <div class="sec amber"><h2>ビール</h2><span class="en">Beer</span><span class="ln"></span></div>
+
+  <div class="wine">
+    <div class="w-top"><span class="w-name">生ビール　アサヒ スーパードライ</span><span class="w-price-r">¥650</span></div>
+  </div>
+
+  <div class="wine">
+    <div class="w-top"><span class="w-name">瓶ビール　アサヒ スーパードライ</span><span class="w-price-r">¥780</span></div>
+  </div>
+
+  <div class="wine">
+    <div class="w-top"><span class="w-name">クラフトビール　ブルックリンラガー</span><span class="w-kura">ブルックリン・ブルワリー</span><span class="w-price-r">¥650</span></div>
+    <div class="w-desc">ビールの町ブルックリンで生まれた琥珀色のラガー。麦芽の苦みとホップの華やかな香り、カラメル麦芽の余韻。</div>
+  </div>
+
+  <div class="wine">
+    <div class="w-top"><span class="w-name">クラフトビール　豊潤</span><span class="w-kura">スプリングバレー</span><span class="w-price-r">¥650</span></div>
+    <div class="w-desc">口に広がる麦のうまみとホップの上品な香り。豊潤なのに、すっきりとした綺麗な後味です。</div>
+  </div>
+
+  <div class="wine">
+    <div class="w-top"><span class="w-name">クラフトビール　シルクエール〈白〉</span><span class="w-kura">スプリングバレー</span><span class="w-price-r">¥650</span></div>
+    <div class="w-desc">きめ細かなふわとろの泡と華やかな香り。シルクのようにまろやかな口当たりの白ビールです。</div>
+  </div>
+
+  <footer class="foot">
+    <p class="notes">表示価格はすべて税込です。</p>
+    <div class="pageno">— 1 —</div>
+  </footer>
+</section>
+
+<!-- ============ 2ページ目：日本酒と焼酎 ============ -->
+<section class="page">
+  <header class="head">
+    <h1>ドリンクメニュー</h1>
+    <div class="en">DRINK MENU</div>
+    <div class="rule"><i></i></div>
+  </header>
+
+  <div class="sec"><h2>日本酒 ─ 常温・熱燗</h2><span class="en">Sake</span><span class="ln"></span></div>
+
+  <div class="wine">
+    <div class="w-top"><span class="w-name">亀齢 上撰</span><span class="w-kura">広島県西条・亀齢酒造</span><span class="w-price-r">¥880</span></div>
+    <div class="w-desc">酒都・西条の伏流水をふんだんに使い、芳醇な香りと爽快なのどごしを醸します。燗にすると旨みがふくらみます。</div>
+  </div>
+
+  <div class="sec"><h2>日本酒 ─ 冷酒</h2><span class="en">Cold Sake</span><span class="ln"></span></div>
+
+  <div class="wine">
+    <div class="w-top"><span class="w-name">土佐鶴 純米酒</span><span class="w-kura">高知県・土佐鶴酒造</span><span class="w-price-r">¥990</span></div>
+    <div class="w-desc">純米ならではのしっかりしたコクと、さわやかな酸味が生むキリッとした辛口。瀬戸内の鮮魚の前菜とどうぞ。</div>
+  </div>
+
+  <div class="wine">
+    <div class="w-top"><span class="w-name">大号令 純米酒</span><span class="w-badge">地元・熊野町</span><span class="w-kura">広島県熊野町・馬上酒造</span><span class="w-price-r">¥1,650</span></div>
+    <div class="w-desc">当店と同じ熊野町の蔵が醸す一本。すべての工程を店主の手作業で行い、江戸時代から続く伝統的な造りを今も守っています。</div>
+  </div>
+
+  <div class="sec"><h2>焼酎 ─ ロック・水割り・湯割り</h2><span class="en">Shochu</span><span class="ln"></span></div>
+
+  <div class="wine">
+    <div class="w-top"><span class="w-name">赤霧島〈芋〉</span><span class="w-kura">宮崎県・霧島酒造</span><span class="w-price-r">¥650</span></div>
+    <div class="w-desc">みやびで気高い香りと、澄んだ甘み。芋焼酎らしい華やかさをすっきりと楽しめます。</div>
+  </div>
+
+  <div class="wine">
+    <div class="w-top"><span class="w-name">中々〈麦〉</span><span class="w-kura">宮崎県・黒木本店</span><span class="w-price-r">¥650</span></div>
+    <div class="w-desc">上品でほんのり甘い穀物の香りと、程よく軽やかな味わい。お湯割りでは甘み・深み・香ばしさがふくらみます。</div>
+  </div>
+
+  <footer class="foot">
+    <p class="notes">表示価格はすべて税込です。焼酎はロック・水割り・湯割りからお選びいただけます。</p>
+    <div class="pageno">— 2 —</div>
+  </footer>
+</section>
+
+<!-- ============ 3ページ目：カクテルとノンアルコール ============ -->
+<section class="page">
+  <header class="head">
+    <h1>ドリンクメニュー</h1>
+    <div class="en">DRINK MENU</div>
+    <div class="rule"><i></i></div>
+  </header>
+
+  <div class="sec"><h2>カクテル</h2><span class="en">Cocktail</span><span class="ln"></span></div>
+
+  <div class="wine">
+    <div class="w-top"><span class="w-name">自家製ウォッカスカッシュ　生レモン</span><span class="w-price-r">¥650</span></div>
+    <div class="w-desc">生のレモンで仕込む自家製スカッシュのウォッカ割り。すっきり爽やかな一杯です。</div>
+  </div>
+
+  <div class="wine">
+    <div class="w-top"><span class="w-name">自家製ウォッカスカッシュ　生パイン</span><span class="w-price-r">¥650</span></div>
+    <div class="w-desc">生のパインで仕込む自家製スカッシュのウォッカ割り。果実の甘みがやさしく広がります。</div>
+  </div>
+
+  <div class="wine">
+    <div class="w-top"><span class="w-name">ハイボール</span><span class="w-price-r">¥590</span></div>
+  </div>
+
+  <div class="wine">
+    <div class="w-top"><span class="w-name">オペレーター</span><span class="w-kura">白ワイン×ジンジャエール×レモン</span><span class="w-price-r">¥720</span></div>
+  </div>
+
+  <div class="sec"><h2>ノンアルコール</h2><span class="en">Alcohol-Free</span><span class="ln"></span></div>
+
+  <div class="rows">
+    <div class="row"><span class="r-name">ノンアルコールビール</span><span class="r-dots"></span><span class="r-price">¥600</span></div>
+    <div class="row"><span class="r-name">レッドアイゼロ</span><span class="r-dots"></span><span class="r-price">¥660</span></div>
+    <div class="row"><span class="r-name">ノンアルコールワイン</span><span class="r-note">白・赤</span><span class="r-dots"></span><span class="r-price">¥600</span></div>
+    <div class="row"><span class="r-name">ノンアルコールスパークリング</span><span class="r-note">ハーフボトル</span><span class="r-dots"></span><span class="r-price">¥1,800</span></div>
+    <div class="row"><span class="r-name">ノンアルコール梅酒</span><span class="r-note">ロック・ソーダ</span><span class="r-dots"></span><span class="r-price">¥550</span></div>
+    <div class="row"><span class="r-name">シャーリーテンプル</span><span class="r-dots"></span><span class="r-price">¥550</span></div>
+    <div class="row"><span class="r-name">カシスグレープゼロ</span><span class="r-dots"></span><span class="r-price">¥550</span></div>
+    <div class="row"><span class="r-name">オペレーターゼロ</span><span class="r-dots"></span><span class="r-price">¥660</span></div>
+  </div>
+
+  <footer class="foot">
+    <p class="notes">表示価格はすべて税込です。お車でお越しの方にも、コースに寄り添う一杯をご用意しています。</p>
+    <div class="pageno">— 3 —</div>
+  </footer>
+</section>
+
+<!-- ============ 4ページ目：ソフトドリンク ============ -->
+<section class="page">
+  <header class="head">
+    <h1>ドリンクメニュー</h1>
+    <div class="en">DRINK MENU</div>
+    <div class="rule"><i></i></div>
+  </header>
+
+  <div class="sec"><h2>炭酸系</h2><span class="en">Soda</span><span class="ln"></span></div>
+
+  <div class="rows">
+    <div class="row"><span class="r-name">炭酸水</span><span class="r-dots"></span><span class="r-price">¥350</span></div>
+    <div class="row"><span class="r-name">コカ・コーラ</span><span class="r-dots"></span><span class="r-price">¥430</span></div>
+    <div class="row"><span class="r-name">ジンジャエール</span><span class="r-dots"></span><span class="r-price">¥430</span></div>
+    <div class="row"><span class="r-name">自家製レモンスカッシュ</span><span class="r-note">生レモン</span><span class="r-dots"></span><span class="r-price">¥550</span></div>
+    <div class="row"><span class="r-name">自家製パインスカッシュ</span><span class="r-note">生パイン</span><span class="r-dots"></span><span class="r-price">¥550</span></div>
+  </div>
+
+  <div class="sec"><h2>冷たい飲み物</h2><span class="en">Cold Drink</span><span class="ln"></span></div>
+
+  <div class="rows">
+    <div class="row"><span class="r-name">トマトジュース</span><span class="r-dots"></span><span class="r-price">¥420</span></div>
+    <div class="row"><span class="r-name">パインジュース</span><span class="r-dots"></span><span class="r-price">¥420</span></div>
+    <div class="row"><span class="r-name">ザクロジュース</span><span class="r-dots"></span><span class="r-price">¥420</span></div>
+    <div class="row"><span class="r-name">マンゴージュース</span><span class="r-dots"></span><span class="r-price">¥420</span></div>
+    <div class="row"><span class="r-name">たかのりんごのりんごジュース</span><span class="r-dots"></span><span class="r-price">¥550</span></div>
+    <div class="row"><span class="r-name">ウーロン茶</span><span class="r-dots"></span><span class="r-price">¥430</span></div>
+    <div class="row"><span class="r-name">アイスコーヒー</span><span class="r-dots"></span><span class="r-price">¥550</span></div>
+    <div class="row"><span class="r-name">アイスティー</span><span class="r-dots"></span><span class="r-price">¥550</span></div>
+  </div>
+
+  <footer class="foot">
+    <p class="notes">表示価格はすべて税込です。</p>
+    <div class="pageno">— 4 —</div>
+  </footer>
+</section>
+
+<!-- ============ 5ページ目：温かい飲み物 ============ -->
+<section class="page">
+  <header class="head">
+    <h1>ドリンクメニュー</h1>
+    <div class="en">DRINK MENU</div>
+    <div class="rule"><i></i></div>
+  </header>
+
+  <div class="sec"><h2>温かい飲み物</h2><span class="en">Hot Drink</span><span class="ln"></span></div>
+
+  <div class="rows">
+    <div class="row"><span class="r-name">ウーロン茶</span><span class="r-dots"></span><span class="r-price">¥430</span></div>
+    <div class="row"><span class="r-name">ごぼう茶</span><span class="r-dots"></span><span class="r-price">¥430</span></div>
+    <div class="row"><span class="r-name">珈琲</span><span class="r-dots"></span><span class="r-price">¥550</span></div>
+    <div class="row"><span class="r-name">紅茶</span><span class="r-dots"></span><span class="r-price">¥550</span></div>
+  </div>
+
+  <footer class="foot">
+    <div class="set-band">
+      <span class="mark">ワインリスト</span>
+      <p>グラスワイン・ボトルワインは別紙〈ワインリスト〉をご覧ください。お得な「グラス3杯セット」もそちらでご案内しています。</p>
+    </div>
+    <p class="notes">表示価格はすべて税込です。</p>
+    <div class="pageno">— 5 —</div>
+  </footer>
+</section>
+
+</body>
+</html>

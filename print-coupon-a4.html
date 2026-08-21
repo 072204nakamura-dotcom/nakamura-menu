@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>クーポンドリンクメニュー（A4印刷用）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700;800&family=Zen+Kaku+Gothic+New:wght@300;400;500;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sage:#2E4A40;      /* 深い緑（見出し・番号バッジ） */
+    --gold:#B08D3E;      /* ゴールド */
+    --gold-deep:#8F7226; /* 印刷で沈ませた濃いゴールド */
+    --gold-lite:#D9BE7C;
+    --paper:#FCFAF3;     /* 生成り */
+    --ink:#1C1C1A;
+    --muted:#46433C;
+    --line:#C9BFA4;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  html,body{background:#E9E7E0;}
+  body{font-family:'Zen Kaku Gothic New',sans-serif;color:var(--ink);
+       -webkit-text-size-adjust:100%;}
+
+  /* ===== 画面用ツールバー（印刷時は消える） ===== */
+  .toolbar{max-width:210mm;margin:16px auto 0;padding:0 12px;
+           display:flex;justify-content:flex-end;align-items:center;}
+  .print-hint{font-size:11.5px;color:#6B6A61;margin-right:14px;}
+  .print-btn{background:var(--sage);color:#fff;border:none;border-radius:6px;
+             padding:10px 22px;font-size:14px;font-family:inherit;cursor:pointer;
+             letter-spacing:.1em;}
+  .print-btn:active{opacity:.8;}
+  .print-alert{max-width:210mm;margin:10px auto 0;padding:0 12px;}
+  .print-alert div{background:#FFF4E0;border:1px solid var(--gold);border-radius:6px;
+                   padding:12px 16px;font-size:12.5px;line-height:1.8;color:#4A3B1E;}
+
+  /* ===== A4ページ ===== */
+  .page{width:210mm;height:297mm;background:var(--paper);
+        margin:14px auto;padding:20mm 20mm 19mm;position:relative;
+        box-shadow:0 2px 14px rgba(0,0,0,.12);overflow:hidden;}
+
+  /* 背景の淡いあしらい */
+  .bg-vine{position:absolute;right:2mm;top:74mm;width:52mm;height:150mm;
+           opacity:.3;pointer-events:none;z-index:0;}
+  .bg-glass{position:absolute;left:9mm;top:40mm;width:28mm;height:52mm;
+            opacity:.32;pointer-events:none;z-index:0;}
+
+  /* 四隅の唐草飾り */
+  .corner{position:absolute;width:50mm;height:50mm;pointer-events:none;z-index:1;}
+  .corner.tl{left:6mm;top:6mm;}
+  .corner.tr{right:6mm;top:6mm;transform:scaleX(-1);}
+  .corner.bl{left:6mm;bottom:6mm;transform:scaleY(-1);}
+  .corner.br{right:6mm;bottom:6mm;transform:scale(-1,-1);}
+
+  /* 外周の金枠 */
+  .frame{position:absolute;left:8mm;top:8mm;right:8mm;bottom:8mm;
+         border:1.4px solid var(--gold);pointer-events:none;z-index:0;}
+  .frame::after{content:"";position:absolute;left:1.6mm;top:1.6mm;
+                right:1.6mm;bottom:1.6mm;border:.7px solid rgba(176,141,62,.45);}
+
+  .inner{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;}
+
+  /* ===== タイトル ===== */
+  .head{text-align:center;}
+  .toast-mark{display:block;margin:0 auto .6mm;width:23mm;height:13mm;}
+  .title-box{display:inline-block;position:relative;padding:4.6mm 15mm 4.2mm;}
+  .title-box::before,.title-box::after{content:"";position:absolute;
+             left:0;right:0;height:1.2px;background:var(--gold);}
+  .title-box::before{top:0;}
+  .title-box::after{bottom:0;}
+  .title-box i{position:absolute;width:3.2mm;height:3.2mm;
+               border:1.2px solid var(--gold);rotate:45deg;background:var(--paper);}
+  .title-box i.a{left:-1.6mm;top:-1.6mm;}
+  .title-box i.b{right:-1.6mm;top:-1.6mm;}
+  .title-box i.c{left:-1.6mm;bottom:-1.6mm;}
+  .title-box i.d{right:-1.6mm;bottom:-1.6mm;}
+  h1{font-family:'Shippori Mincho',serif;font-weight:800;font-size:38px;
+     letter-spacing:.14em;text-indent:.14em;color:var(--sage);line-height:1.2;}
+  .lead{margin-top:2.6mm;font-size:13px;font-weight:400;line-height:1.8;
+        color:var(--muted);letter-spacing:.02em;}
+
+  /* ===== セクション見出し ===== */
+  .sec{display:flex;align-items:center;justify-content:center;gap:4mm;
+       margin:5mm 0 2.6mm;}
+  .sec .orn{width:24mm;height:5mm;flex:0 0 auto;}
+  .sec .orn.r{transform:scaleX(-1);}
+  .sec h2{font-family:'Shippori Mincho',serif;font-weight:800;font-size:23px;
+          letter-spacing:.2em;text-indent:.2em;color:var(--sage);white-space:nowrap;}
+
+  /* ===== 品目 ===== */
+  .item{display:flex;gap:4mm;padding:2.2mm 0 1.9mm;
+        border-bottom:1px dotted var(--line);}
+  .list .item:last-child{border-bottom:none;}
+  .no{flex:0 0 auto;width:7.2mm;height:7.2mm;border-radius:50%;
+      background:var(--sage);color:#fff;
+      font-family:'Cormorant Garamond',serif;font-weight:700;font-size:15px;
+      display:flex;align-items:center;justify-content:center;margin-top:.5mm;}
+  .body{flex:1;min-width:0;}
+  .nm{display:flex;align-items:baseline;flex-wrap:wrap;gap:1mm 2.5mm;}
+  .nm .n{font-family:'Shippori Mincho',serif;font-weight:700;font-size:16.5px;
+         letter-spacing:.02em;color:var(--ink);}
+  .nm .sz{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:14px;
+          color:var(--muted);white-space:nowrap;}
+  .nm .bd{font-size:10px;color:#fff;background:var(--gold-deep);border-radius:2px;
+          padding:.7mm 2.2mm;letter-spacing:.08em;white-space:nowrap;}
+  .ds{font-size:12px;font-weight:400;color:var(--muted);line-height:1.6;
+      margin-top:1mm;}
+
+  /* ===== ご利用方法 ===== */
+  .foot{margin-top:auto;padding-top:4mm;}
+  .howto{position:relative;border:1.2px solid var(--gold);
+         background:rgba(246,241,227,.75);padding:3.8mm 8mm 4mm;text-align:center;}
+  .howto::after{content:"";position:absolute;left:1.4mm;top:1.4mm;
+                right:1.4mm;bottom:1.4mm;border:.7px solid rgba(176,141,62,.4);}
+  .howto .t{display:flex;align-items:center;justify-content:center;gap:3mm;
+            margin-bottom:1.8mm;position:relative;z-index:1;}
+  .howto .t span{font-family:'Shippori Mincho',serif;font-weight:700;font-size:15px;
+                 letter-spacing:.18em;text-indent:.18em;color:var(--gold-deep);}
+  .howto .t .orn{width:15mm;height:4mm;flex:0 0 auto;}
+  .howto .t .orn.r{transform:scaleX(-1);}
+  .howto p{font-size:12px;font-weight:400;line-height:1.8;color:var(--ink);
+           position:relative;z-index:1;}
+  .notes{margin-top:2.4mm;text-align:center;font-size:10px;color:var(--muted);
+         line-height:1.7;letter-spacing:.02em;}
+
+  /* ===== 印刷ルール ===== */
+  @page{size:210mm 297mm;margin:0;}
+  @media print{
+    html,body{background:#fff;}
+    .toolbar,.print-alert{display:none !important;}
+    .page{margin:0;box-shadow:none;width:210mm;height:297mm;}
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <span class="print-hint">キーボードの Ctrl + P でも印刷できます</span>
+  <button class="print-btn" id="printBtn">印刷する</button>
+</div>
+<div class="print-alert" id="printAlert" style="display:none"><div>
+  <b>このプレビュー画面からは印刷できません。</b><br>
+  ファイルを右クリック →「プログラムから開く」→ <b>Google Chrome</b> で開き直してください。<br>
+  （同じフォルダの <b>PDFフォルダ</b> にあるPDFを開いて印刷するのがいちばん確実です）
+</div></div>
+
+<section class="page">
+
+  <div class="frame"></div>
+
+  <!-- 背景：ワイングラス（左） -->
+  <svg class="bg-glass" viewBox="0 0 120 210" fill="none" aria-hidden="true">
+    <path d="M30 8 h60 c0 34 -6 52 -22 60 v78 h16 v6 h-48 v-6 h16 v-78 c-16 -8 -22 -26 -22 -60z"
+          stroke="#C9BFA4" stroke-width="1.6" fill="rgba(214,205,180,.16)"/>
+    <path d="M36 20 h48 c-1 22 -6 34 -16 40 h-16 c-10 -6 -15 -18 -16 -40z" fill="rgba(214,205,180,.3)"/>
+  </svg>
+
+  <!-- 背景：シャンパングラス（右） -->
+  <svg class="bg-vine" viewBox="0 0 120 300" fill="none" aria-hidden="true">
+    <path d="M42 10 h36 c2 44 -4 78 -14 92 v168 h14 v6 h-36 v-6 h14 v-168 c-10 -14 -16 -48 -14 -92z"
+          stroke="#CFC6AC" stroke-width="1.8" fill="rgba(214,205,180,.14)"/>
+    <path d="M46 66 h28 c-2 20 -6 32 -12 38 h-4 c-6 -6 -10 -18 -12 -38z" fill="rgba(214,205,180,.3)"/>
+    <g fill="rgba(207,198,172,.5)">
+      <circle cx="56" cy="40" r="3.4"/><circle cx="68" cy="30" r="2.6"/>
+      <circle cx="60" cy="20" r="2"/><circle cx="52" cy="52" r="2.2"/>
+      <circle cx="70" cy="50" r="2"/>
+    </g>
+  </svg>
+
+  <!-- 四隅の唐草（同じ絵を4方向に反転して配置） -->
+  <svg class="corner tl" viewBox="0 0 200 200" fill="none" aria-hidden="true">
+    <path d="M10 192 C10 96 42 34 108 8" stroke="#B08D3E" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+    <path d="M22 192 C24 108 52 52 112 26" stroke="#D9BE7C" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+    <g stroke="#B08D3E" stroke-width="1.3" fill="none" stroke-linecap="round">
+      <path d="M16 152 C4 140 6 122 18 112"/>
+      <path d="M46 78 C36 62 42 44 58 36"/>
+      <path d="M98 26 C94 12 102 2 118 2"/>
+    </g>
+    <g fill="#2E4A40">
+      <ellipse cx="14" cy="164" rx="15" ry="6.4" transform="rotate(-78 14 164)"/>
+      <ellipse cx="26" cy="120" rx="17" ry="7" transform="rotate(-64 26 120)"/>
+      <ellipse cx="48" cy="82" rx="17" ry="7" transform="rotate(-48 48 82)"/>
+      <ellipse cx="78" cy="46" rx="16" ry="6.6" transform="rotate(-32 78 46)"/>
+      <ellipse cx="114" cy="18" rx="15" ry="6" transform="rotate(-16 114 18)"/>
+    </g>
+    <g fill="#B08D3E" opacity=".9">
+      <ellipse cx="32" cy="148" rx="11" ry="4.6" transform="rotate(30 32 148)"/>
+      <ellipse cx="52" cy="108" rx="11" ry="4.6" transform="rotate(16 52 108)"/>
+      <ellipse cx="80" cy="72" rx="11" ry="4.6" transform="rotate(2 80 72)"/>
+      <ellipse cx="116" cy="44" rx="10" ry="4.2" transform="rotate(-10 116 44)"/>
+    </g>
+    <g fill="#B08D3E">
+      <circle cx="10" cy="188" r="3.4"/>
+      <circle cx="142" cy="10" r="3"/>
+      <circle cx="62" cy="62" r="2.4"/>
+      <circle cx="24" cy="134" r="2"/>
+    </g>
+  </svg>
+  <svg class="corner tr" viewBox="0 0 200 200" fill="none" aria-hidden="true">
+    <path d="M10 192 C10 96 42 34 108 8" stroke="#B08D3E" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+    <path d="M22 192 C24 108 52 52 112 26" stroke="#D9BE7C" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+    <g stroke="#B08D3E" stroke-width="1.3" fill="none" stroke-linecap="round">
+      <path d="M16 152 C4 140 6 122 18 112"/>
+      <path d="M46 78 C36 62 42 44 58 36"/>
+      <path d="M98 26 C94 12 102 2 118 2"/>
+    </g>
+    <g fill="#2E4A40">
+      <ellipse cx="14" cy="164" rx="15" ry="6.4" transform="rotate(-78 14 164)"/>
+      <ellipse cx="26" cy="120" rx="17" ry="7" transform="rotate(-64 26 120)"/>
+      <ellipse cx="48" cy="82" rx="17" ry="7" transform="rotate(-48 48 82)"/>
+      <ellipse cx="78" cy="46" rx="16" ry="6.6" transform="rotate(-32 78 46)"/>
+      <ellipse cx="114" cy="18" rx="15" ry="6" transform="rotate(-16 114 18)"/>
+    </g>
+    <g fill="#B08D3E" opacity=".9">
+      <ellipse cx="32" cy="148" rx="11" ry="4.6" transform="rotate(30 32 148)"/>
+      <ellipse cx="52" cy="108" rx="11" ry="4.6" transform="rotate(16 52 108)"/>
+      <ellipse cx="80" cy="72" rx="11" ry="4.6" transform="rotate(2 80 72)"/>
+      <ellipse cx="116" cy="44" rx="10" ry="4.2" transform="rotate(-10 116 44)"/>
+    </g>
+    <g fill="#B08D3E">
+      <circle cx="10" cy="188" r="3.4"/>
+      <circle cx="142" cy="10" r="3"/>
+      <circle cx="62" cy="62" r="2.4"/>
+      <circle cx="24" cy="134" r="2"/>
+    </g>
+  </svg>
+  <svg class="corner bl" viewBox="0 0 200 200" fill="none" aria-hidden="true">
+    <path d="M10 192 C10 96 42 34 108 8" stroke="#B08D3E" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+    <path d="M22 192 C24 108 52 52 112 26" stroke="#D9BE7C" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+    <g stroke="#B08D3E" stroke-width="1.3" fill="none" stroke-linecap="round">
+      <path d="M16 152 C4 140 6 122 18 112"/>
+      <path d="M46 78 C36 62 42 44 58 36"/>
+      <path d="M98 26 C94 12 102 2 118 2"/>
+    </g>
+    <g fill="#2E4A40">
+      <ellipse cx="14" cy="164" rx="15" ry="6.4" transform="rotate(-78 14 164)"/>
+      <ellipse cx="26" cy="120" rx="17" ry="7" transform="rotate(-64 26 120)"/>
+      <ellipse cx="48" cy="82" rx="17" ry="7" transform="rotate(-48 48 82)"/>
+      <ellipse cx="78" cy="46" rx="16" ry="6.6" transform="rotate(-32 78 46)"/>
+      <ellipse cx="114" cy="18" rx="15" ry="6" transform="rotate(-16 114 18)"/>
+    </g>
+    <g fill="#B08D3E" opacity=".9">
+      <ellipse cx="32" cy="148" rx="11" ry="4.6" transform="rotate(30 32 148)"/>
+      <ellipse cx="52" cy="108" rx="11" ry="4.6" transform="rotate(16 52 108)"/>
+      <ellipse cx="80" cy="72" rx="11" ry="4.6" transform="rotate(2 80 72)"/>
+      <ellipse cx="116" cy="44" rx="10" ry="4.2" transform="rotate(-10 116 44)"/>
+    </g>
+    <g fill="#B08D3E">
+      <circle cx="10" cy="188" r="3.4"/>
+      <circle cx="142" cy="10" r="3"/>
+      <circle cx="62" cy="62" r="2.4"/>
+      <circle cx="24" cy="134" r="2"/>
+    </g>
+  </svg>
+  <svg class="corner br" viewBox="0 0 200 200" fill="none" aria-hidden="true">
+    <path d="M10 192 C10 96 42 34 108 8" stroke="#B08D3E" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+    <path d="M22 192 C24 108 52 52 112 26" stroke="#D9BE7C" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+    <g stroke="#B08D3E" stroke-width="1.3" fill="none" stroke-linecap="round">
+      <path d="M16 152 C4 140 6 122 18 112"/>
+      <path d="M46 78 C36 62 42 44 58 36"/>
+      <path d="M98 26 C94 12 102 2 118 2"/>
+    </g>
+    <g fill="#2E4A40">
+      <ellipse cx="14" cy="164" rx="15" ry="6.4" transform="rotate(-78 14 164)"/>
+      <ellipse cx="26" cy="120" rx="17" ry="7" transform="rotate(-64 26 120)"/>
+      <ellipse cx="48" cy="82" rx="17" ry="7" transform="rotate(-48 48 82)"/>
+      <ellipse cx="78" cy="46" rx="16" ry="6.6" transform="rotate(-32 78 46)"/>
+      <ellipse cx="114" cy="18" rx="15" ry="6" transform="rotate(-16 114 18)"/>
+    </g>
+    <g fill="#B08D3E" opacity=".9">
+      <ellipse cx="32" cy="148" rx="11" ry="4.6" transform="rotate(30 32 148)"/>
+      <ellipse cx="52" cy="108" rx="11" ry="4.6" transform="rotate(16 52 108)"/>
+      <ellipse cx="80" cy="72" rx="11" ry="4.6" transform="rotate(2 80 72)"/>
+      <ellipse cx="116" cy="44" rx="10" ry="4.2" transform="rotate(-10 116 44)"/>
+    </g>
+    <g fill="#B08D3E">
+      <circle cx="10" cy="188" r="3.4"/>
+      <circle cx="142" cy="10" r="3"/>
+      <circle cx="62" cy="62" r="2.4"/>
+      <circle cx="24" cy="134" r="2"/>
+    </g>
+  </svg>
+
+  <div class="inner">
+
+    <header class="head">
+      <svg class="toast-mark" viewBox="0 0 200 120" fill="none" aria-hidden="true">
+        <g stroke="#B08D3E" stroke-width="2.4" stroke-linecap="round">
+          <path d="M100 6 v10 M74 12 l5 10 M126 12 l-5 10 M56 24 l8 8 M144 24 l-8 8"/>
+        </g>
+        <g stroke="#8F7226" stroke-width="2.2" fill="none" stroke-linecap="round">
+          <path d="M62 42 h34 l-6 30 c-1 6 -4 9 -11 10 v26 h12"/>
+          <path d="M67 108 h-12"/>
+          <path d="M138 42 h-34 l6 30 c1 6 4 9 11 10 v26 h-12"/>
+          <path d="M133 108 h12"/>
+        </g>
+        <path d="M66 48 h26 l-4 18 c-1 4 -3 6 -9 6 c-6 0 -8 -2 -9 -6z" fill="rgba(217,190,124,.5)"/>
+        <path d="M134 48 h-26 l4 18 c1 4 3 6 9 6 c6 0 8 -2 9 -6z" fill="rgba(217,190,124,.5)"/>
+        <g fill="#B08D3E">
+          <circle cx="84" cy="30" r="2.2"/><circle cx="116" cy="30" r="2.2"/>
+          <circle cx="100" cy="24" r="2.6"/>
+        </g>
+      </svg>
+
+      <div class="title-box">
+        <i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i>
+        <h1>乾杯ドリンク</h1>
+      </div>
+
+      <p class="lead">LINEの初回来店クーポンで、<br>下記よりお好きな1杯をお選びいただけます</p>
+    </header>
+
+    <!-- ===== ワイン ===== -->
+    <div class="sec">
+      <svg class="orn" viewBox="0 0 120 26" fill="none" aria-hidden="true">
+        <path d="M2 13 h56" stroke="#B08D3E" stroke-width="1.3"/>
+        <path d="M118 13 C104 13 100 6 92 6 C84 6 80 12 86 16 C90 19 96 17 96 13
+                 C96 9 90 7 84 9 C76 12 74 18 66 18" stroke="#B08D3E" stroke-width="1.6" fill="none"/>
+        <path d="M8 13 l4 -4 l4 4 l-4 4z" fill="#B08D3E"/>
+      </svg>
+      <h2>ワイン</h2>
+      <svg class="orn r" viewBox="0 0 120 26" fill="none" aria-hidden="true">
+        <path d="M2 13 h56" stroke="#B08D3E" stroke-width="1.3"/>
+        <path d="M118 13 C104 13 100 6 92 6 C84 6 80 12 86 16 C90 19 96 17 96 13
+                 C96 9 90 7 84 9 C76 12 74 18 66 18" stroke="#B08D3E" stroke-width="1.6" fill="none"/>
+        <path d="M8 13 l4 -4 l4 4 l-4 4z" fill="#B08D3E"/>
+      </svg>
+    </div>
+
+    <div class="list">
+      <div class="item">
+        <div class="no">1</div>
+        <div class="body">
+          <div class="nm"><span class="n">白ワイン｜テバルド ビアンコ プーリア IGP</span><span class="sz">（glass 100ml）</span><span class="bd">乾杯の定番</span></div>
+          <p class="ds">南イタリア・プーリアの軽やかな辛口。すっきりとした飲み口で、コースの始まりにぴったりの一杯です。</p>
+        </div>
+      </div>
+      <div class="item">
+        <div class="no">2</div>
+        <div class="body">
+          <div class="nm"><span class="n">赤ワイン｜テバルド ロッソ プーリア IGP</span><span class="sz">（glass 100ml）</span></div>
+          <p class="ds">同じくプーリアの気軽な赤。素直な果実味とやわらかな口当たりで、洋食のお料理に寄り添います。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ビール ===== -->
+    <div class="sec">
+      <svg class="orn" viewBox="0 0 120 26" fill="none" aria-hidden="true">
+        <path d="M2 13 h56" stroke="#B08D3E" stroke-width="1.3"/>
+        <path d="M118 13 C104 13 100 6 92 6 C84 6 80 12 86 16 C90 19 96 17 96 13
+                 C96 9 90 7 84 9 C76 12 74 18 66 18" stroke="#B08D3E" stroke-width="1.6" fill="none"/>
+        <path d="M8 13 l4 -4 l4 4 l-4 4z" fill="#B08D3E"/>
+      </svg>
+      <h2>ビール</h2>
+      <svg class="orn r" viewBox="0 0 120 26" fill="none" aria-hidden="true">
+        <path d="M2 13 h56" stroke="#B08D3E" stroke-width="1.3"/>
+        <path d="M118 13 C104 13 100 6 92 6 C84 6 80 12 86 16 C90 19 96 17 96 13
+                 C96 9 90 7 84 9 C76 12 74 18 66 18" stroke="#B08D3E" stroke-width="1.6" fill="none"/>
+        <path d="M8 13 l4 -4 l4 4 l-4 4z" fill="#B08D3E"/>
+      </svg>
+    </div>
+
+    <div class="list">
+      <div class="item">
+        <div class="no">3</div>
+        <div class="body">
+          <div class="nm"><span class="n">生ビール｜アサヒ スーパードライ</span><span class="sz">（glass 200ml）</span></div>
+          <p class="ds">よく冷えた辛口の生ビール。「まずはビールで乾杯」という方はこちらをどうぞ。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ノンアルコール ===== -->
+    <div class="sec">
+      <svg class="orn" viewBox="0 0 120 26" fill="none" aria-hidden="true">
+        <path d="M2 13 h56" stroke="#B08D3E" stroke-width="1.3"/>
+        <path d="M118 13 C104 13 100 6 92 6 C84 6 80 12 86 16 C90 19 96 17 96 13
+                 C96 9 90 7 84 9 C76 12 74 18 66 18" stroke="#B08D3E" stroke-width="1.6" fill="none"/>
+        <path d="M8 13 l4 -4 l4 4 l-4 4z" fill="#B08D3E"/>
+      </svg>
+      <h2>ノンアルコール</h2>
+      <svg class="orn r" viewBox="0 0 120 26" fill="none" aria-hidden="true">
+        <path d="M2 13 h56" stroke="#B08D3E" stroke-width="1.3"/>
+        <path d="M118 13 C104 13 100 6 92 6 C84 6 80 12 86 16 C90 19 96 17 96 13
+                 C96 9 90 7 84 9 C76 12 74 18 66 18" stroke="#B08D3E" stroke-width="1.6" fill="none"/>
+        <path d="M8 13 l4 -4 l4 4 l-4 4z" fill="#B08D3E"/>
+      </svg>
+    </div>
+
+    <div class="list">
+      <div class="item">
+        <div class="no">4</div>
+        <div class="body">
+          <div class="nm"><span class="n">ノンアルコールスパークリング</span><span class="sz">（glass 80ml）</span></div>
+          <p class="ds">アルコールゼロでも、乾杯の華やかさはそのまま。お車でお越しの方にもおすすめです。</p>
+        </div>
+      </div>
+      <div class="item">
+        <div class="no">5</div>
+        <div class="body">
+          <div class="nm"><span class="n">ザクロジュース</span></div>
+          <p class="ds">甘酸っぱく色鮮やかな一杯。お子さまの乾杯にもどうぞ。</p>
+        </div>
+      </div>
+      <div class="item">
+        <div class="no">6</div>
+        <div class="body">
+          <div class="nm"><span class="n">マンゴージュース</span></div>
+          <p class="ds">濃厚な甘みとトロピカルな香り。デザート感覚で楽しめる一杯です。</p>
+        </div>
+      </div>
+    </div>
+
+    <footer class="foot">
+      <div class="howto">
+        <div class="t">
+          <svg class="orn" viewBox="0 0 80 24" fill="none" aria-hidden="true">
+            <path d="M78 12 C64 12 60 5 52 5 C44 5 40 11 46 15 C50 18 56 16 56 12
+                     C56 8 50 6 44 8 C36 11 34 17 26 17" stroke="#B08D3E" stroke-width="1.6" fill="none"/>
+          </svg>
+          <span>ご利用方法</span>
+          <svg class="orn r" viewBox="0 0 80 24" fill="none" aria-hidden="true">
+            <path d="M78 12 C64 12 60 5 52 5 C44 5 40 11 46 15 C50 18 56 16 56 12
+                     C56 8 50 6 44 8 C36 11 34 17 26 17" stroke="#B08D3E" stroke-width="1.6" fill="none"/>
+          </svg>
+        </div>
+        <p>ご注文時に、LINEクーポンの画面をスタッフへご提示ください。<br>
+           クーポンはお一人様1枚まで。ご同席の方がお持ちの分も、同じお会計でご利用いただけます。</p>
+      </div>
+      <p class="notes">ml表記はグラスでのご提供量です。内容は仕入れ状況により変わる場合がございます。</p>
+    </footer>
+
+  </div>
+</section>
+
+<script>
+document.getElementById('printBtn').addEventListener('click', function(){
+  if (window.self !== window.top) {
+    document.getElementById('printAlert').style.display = 'block';
+    return;
+  }
+  try { window.print(); }
+  catch (e) { document.getElementById('printAlert').style.display = 'block'; }
+});
+</script>
+</body>
+</html>

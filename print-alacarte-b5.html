@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>アラカルト（B5印刷用）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Zen+Kaku+Gothic+New:wght@300;400;500;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sage:#3E5C50;
+    --gold:#B08D3E;
+    --gold-deep:#8F7226;
+    --paper:#FBFAF6;
+    --ink:#1C1C1A;
+    --muted:#46433C;
+    --line:#B5AE9B;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  html,body{background:#EAE7DE;}
+  body{font-family:'Zen Kaku Gothic New',sans-serif;color:var(--ink);
+       -webkit-text-size-adjust:100%;}
+
+  /* ===== 印刷ボタン ===== */
+  .toolbar{max-width:720px;margin:16px auto 0;padding:0 12px;
+           display:flex;justify-content:flex-end;align-items:center;}
+  .print-hint{font-size:11.5px;color:#6B6A61;margin-right:14px;}
+  .print-btn{background:var(--sage);color:#fff;border:none;border-radius:6px;
+             padding:10px 22px;font-size:14px;font-family:inherit;cursor:pointer;
+             letter-spacing:.1em;}
+  .print-btn:active{opacity:.8;}
+
+  /* ===== B5ページ ===== */
+  .page{width:182mm;min-height:257mm;background:var(--paper);
+        margin:14px auto;padding:14mm 15mm 11mm;position:relative;
+        box-shadow:0 2px 14px rgba(0,0,0,.12);
+        display:flex;flex-direction:column;}
+
+  /* 紙面の二重罫（他のメニューと共通の額装） */
+  .page::before{content:"";position:absolute;left:5mm;top:5mm;right:5mm;bottom:5mm;
+                border:1px solid rgba(143,114,38,.42);pointer-events:none;z-index:0;}
+  .page::after{content:"";position:absolute;left:6.6mm;top:6.6mm;right:6.6mm;bottom:6.6mm;
+               border:1px solid rgba(143,114,38,.18);pointer-events:none;z-index:0;}
+  .head,.lead-box,.sec,.dish,.foot{position:relative;z-index:1;}
+
+  /* ヘッダー */
+  .head{text-align:center;padding-bottom:5mm;}
+  .head h1{font-family:'Shippori Mincho',serif;font-weight:700;
+           font-size:28px;letter-spacing:.3em;text-indent:.3em;
+           color:var(--sage);margin:2.5mm 0 1.5mm;}
+  .head .en{font-family:'Cormorant Garamond',serif;font-size:12px;
+            letter-spacing:.5em;text-indent:.5em;color:var(--gold);}
+  .rule{height:0;border-top:1px solid var(--sage);position:relative;margin-top:4mm;}
+  .rule::after{content:"";position:absolute;left:0;right:0;top:1.2mm;
+               border-top:1px solid var(--line);}
+  .rule i{position:absolute;left:50%;top:-1.6mm;transform:translateX(-50%);
+          width:3.2mm;height:3.2mm;background:var(--paper);
+          border:1px solid var(--gold);rotate:45deg;}
+
+  /* コースへの案内 */
+  .lead-box{border:1px solid var(--gold);border-radius:2px;background:#F6F1E3;
+            padding:4mm 6mm;margin-top:2mm;text-align:center;}
+  .lead-box .t{font-family:'Shippori Mincho',serif;font-weight:700;font-size:15px;
+               letter-spacing:.16em;color:var(--gold-deep);}
+  .lead-box p{font-size:11.5px;font-weight:400;line-height:1.75;color:var(--ink);
+              margin-top:1.8mm;}
+
+  /* セクション見出し */
+  .sec{display:flex;align-items:baseline;gap:4mm;margin:7mm 0 3mm;}
+  .sec h2{font-family:'Shippori Mincho',serif;font-weight:700;font-size:19px;
+          letter-spacing:.22em;color:var(--sage);white-space:nowrap;}
+  .sec .en{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:600;
+           font-size:14px;color:var(--gold-deep);letter-spacing:.12em;white-space:nowrap;}
+  .sec .ln{flex:1;border-top:1px dotted var(--line);transform:translateY(-2px);}
+
+  /* 品目 */
+  .dish{padding:3.4mm 0;border-bottom:1px dotted var(--line);break-inside:avoid;}
+  .dish:last-of-type{border-bottom:none;}
+  .d-top{display:flex;align-items:baseline;gap:3mm;}
+  .d-name{font-family:'Shippori Mincho',serif;font-weight:700;font-size:16.5px;
+          letter-spacing:.02em;line-height:1.4;}
+  .d-price{margin-left:auto;font-family:'Cormorant Garamond',serif;font-weight:700;
+           font-size:18px;white-space:nowrap;}
+  .d-desc{font-size:12.5px;font-weight:400;color:var(--muted);
+          line-height:1.6;margin-top:1.4mm;}
+
+  /* フッター */
+  .foot{margin-top:auto;padding-top:4mm;}
+  .notes{font-size:10.5px;color:var(--muted);font-weight:400;
+         line-height:1.8;text-align:center;letter-spacing:.03em;}
+
+  /* ===== 印刷ルール ===== */
+  @page{size:182mm 257mm;margin:0;}
+  @media print{
+    html,body{background:#fff;}
+    .toolbar{display:none;}
+    .page{margin:0;box-shadow:none;width:182mm;height:257mm;}
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <span class="print-hint">キーボードの Ctrl + P でも印刷できます</span>
+  <button class="print-btn" onclick="window.print()">印刷する</button>
+</div>
+
+<section class="page">
+  <header class="head">
+    <h1>アラカルト</h1>
+    <div class="en">A LA CARTE</div>
+    <div class="rule"><i></i></div>
+  </header>
+
+  <div class="lead-box">
+    <div class="t">コースに、もう一皿</div>
+    <p>コースのお料理に追加していただける一品です。<br>
+       お腹に余裕のあるとき、シェアして召し上がりたいときにどうぞ。</p>
+  </div>
+
+  <div class="sec"><h2>パスタ</h2><span class="en">Pasta</span><span class="ln"></span></div>
+
+  <div class="dish">
+    <div class="d-top"><span class="d-name">きのことベーコンのペペロンチーノ</span><span class="d-price">¥1,200</span></div>
+    <div class="d-desc">きのことベーコンを、にんにくと唐辛子でシンプルに仕上げました。香りとほのかな辛みが後を引きます。</div>
+  </div>
+
+  <div class="dish">
+    <div class="d-top"><span class="d-name">フレッシュトマトとチーズのトマトソース</span><span class="d-price">¥1,200</span></div>
+    <div class="d-desc">生のトマトの酸味と、とろけるチーズのコク。さっぱりとしていて、コースの後でも召し上がりやすい一皿です。</div>
+  </div>
+
+  <div class="dish">
+    <div class="d-top"><span class="d-name">海老のトマトクリームソース</span><span class="d-price">¥1,500</span></div>
+    <div class="d-desc">海老の旨みをトマトクリームで包み込みました。三種の中でいちばん濃厚な、食べごたえのある一皿です。</div>
+  </div>
+
+  <div class="sec"><h2>サイドメニュー</h2><span class="en">Side Dish</span><span class="ln"></span></div>
+
+  <div class="dish">
+    <div class="d-top"><span class="d-name">チーズの盛り合わせ</span><span class="d-price">¥1,000</span></div>
+    <div class="d-desc">数種のチーズを少しずつ。ワインのお供に、食後のひとときにどうぞ。</div>
+  </div>
+
+  <div class="dish">
+    <div class="d-top"><span class="d-name">フライドポテト</span><span class="d-price">¥500</span></div>
+    <div class="d-desc">揚げたてを熱いうちに。お子さまにも人気の一品です。</div>
+  </div>
+
+  <footer class="foot">
+    <p class="notes">表示価格はすべて税込です。<br>
+       内容は仕入れ状況により変わる場合がございます。アレルギーはご注文の際にお申し付けください。</p>
+  </footer>
+</section>
+
+</body>
+</html>

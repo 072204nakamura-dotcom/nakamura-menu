@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>お子様セット（A4印刷用）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Zen+Kaku+Gothic+New:wght@300;400;500;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sage:#3E5C50;
+    --gold:#B08D3E;
+    --gold-deep:#8F7226;
+    --paper:#FBFAF6;
+    --ink:#1C1C1A;
+    --muted:#46433C;
+    --line:#B5AE9B;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  html,body{background:#EAE7DE;}
+  body{font-family:'Zen Kaku Gothic New',sans-serif;color:var(--ink);
+       -webkit-text-size-adjust:100%;}
+
+  /* ===== 印刷ボタン ===== */
+  .toolbar{max-width:210mm;margin:16px auto 0;padding:0 12px;
+           display:flex;justify-content:flex-end;align-items:center;}
+  .print-hint{font-size:11.5px;color:#6B6A61;margin-right:14px;}
+  .print-btn{background:var(--sage);color:#fff;border:none;border-radius:6px;
+             padding:10px 22px;font-size:14px;font-family:inherit;cursor:pointer;
+             letter-spacing:.1em;}
+  .print-btn:active{opacity:.8;}
+
+  /* ===== A4ページ ===== */
+  .page{width:210mm;min-height:297mm;background:var(--paper);
+        margin:14px auto;padding:16mm 18mm 14mm;position:relative;
+        box-shadow:0 2px 14px rgba(0,0,0,.12);
+        display:flex;flex-direction:column;}
+
+  /* 紙面の二重罫（他のメニューと共通の額装） */
+  .page::before{content:"";position:absolute;left:6mm;top:6mm;right:6mm;bottom:6mm;
+                border:1px solid rgba(143,114,38,.42);pointer-events:none;z-index:0;}
+  .page::after{content:"";position:absolute;left:7.6mm;top:7.6mm;right:7.6mm;bottom:7.6mm;
+               border:1px solid rgba(143,114,38,.18);pointer-events:none;z-index:0;}
+  .inner{position:relative;z-index:1;display:flex;flex-direction:column;flex:1;}
+
+  /* ヘッダー */
+  .head{text-align:center;padding-bottom:4mm;}
+  .head h1{font-family:'Shippori Mincho',serif;font-weight:700;
+           font-size:30px;letter-spacing:.26em;text-indent:.26em;
+           color:var(--sage);margin:1mm 0 2mm;}
+  .head .en{font-family:'Cormorant Garamond',serif;font-size:12.5px;
+            letter-spacing:.44em;text-indent:.44em;color:var(--gold);}
+  .rule{height:0;border-top:1px solid var(--sage);position:relative;margin-top:4mm;}
+  .rule::after{content:"";position:absolute;left:0;right:0;top:1.2mm;
+               border-top:1px solid var(--line);}
+  .rule i{position:absolute;left:50%;top:-1.6mm;transform:translateX(-50%);
+          width:3.2mm;height:3.2mm;background:var(--paper);
+          border:1px solid var(--gold);rotate:45deg;}
+
+  /* 写真 */
+  .photo-area{text-align:center;margin-top:6mm;}
+  .photo-frame{display:inline-block;padding:3mm;background:#fff;
+               border:1px solid var(--line);box-shadow:0 1px 6px rgba(0,0,0,.08);}
+  .photo-frame img{display:block;width:112mm;height:auto;}
+  .photo-none{width:112mm;height:100mm;border:1.5px dashed var(--line);
+              display:flex;align-items:center;justify-content:center;
+              color:#8A857A;font-size:12px;text-align:center;line-height:1.9;
+              background:#F5F2EA;}
+
+  /* 価格 */
+  .price-line{text-align:center;margin-top:6mm;}
+  .price-line .nm{font-family:'Shippori Mincho',serif;font-weight:700;
+                  font-size:19px;letter-spacing:.14em;color:var(--sage);}
+  .price-line .pr{font-family:'Cormorant Garamond',serif;font-weight:700;
+                  font-size:34px;letter-spacing:.02em;margin-left:5mm;}
+  .price-line .tax{font-size:12px;color:var(--muted);margin-left:2mm;}
+
+  /* 内容 */
+  .sec{display:flex;align-items:baseline;gap:4mm;margin:8mm 0 3mm;}
+  .sec h2{font-family:'Shippori Mincho',serif;font-weight:700;font-size:17px;
+          letter-spacing:.2em;color:var(--sage);white-space:nowrap;}
+  .sec .en{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:600;
+           font-size:13px;color:var(--gold-deep);letter-spacing:.12em;}
+  .sec .ln{flex:1;border-top:1px dotted var(--line);transform:translateY(-2px);}
+
+  .items{display:grid;grid-template-columns:1fr 1fr;gap:2.6mm 10mm;
+         padding:0 4mm;}
+  .item{display:flex;align-items:baseline;gap:3mm;font-size:15px;
+        font-family:'Shippori Mincho',serif;font-weight:600;
+        padding-bottom:2.2mm;border-bottom:1px dotted var(--line);}
+  .item .dot{width:2.6mm;height:2.6mm;background:var(--gold);rotate:45deg;
+             flex:0 0 auto;}
+  .item .sub{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:400;
+             font-size:12px;color:var(--muted);}
+
+  .dessert{margin-top:4mm;border:1px solid var(--gold);background:#F6F1E3;
+           padding:3.6mm 6mm;text-align:center;}
+  .dessert .t{font-family:'Shippori Mincho',serif;font-weight:700;font-size:14px;
+              letter-spacing:.14em;color:var(--gold-deep);}
+  .dessert p{font-size:13px;margin-top:1.4mm;}
+
+  /* フッター */
+  .foot{margin-top:auto;padding-top:5mm;}
+  .caution{border:1px solid var(--sage);background:#fff;padding:4mm 6mm;
+           text-align:center;}
+  .caution .t{font-family:'Shippori Mincho',serif;font-weight:700;font-size:13.5px;
+              letter-spacing:.16em;color:var(--sage);margin-bottom:1.6mm;}
+  .caution p{font-size:12.5px;line-height:1.8;color:var(--ink);}
+  .notes{margin-top:3mm;font-size:10.5px;color:var(--muted);
+         line-height:1.8;text-align:center;letter-spacing:.03em;}
+
+  /* ===== 印刷ルール ===== */
+  @page{size:210mm 297mm;margin:0;}
+  @media print{
+    html,body{background:#fff;}
+    .toolbar{display:none;}
+    .page{margin:0;box-shadow:none;width:210mm;height:297mm;}
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <span class="print-hint">キーボードの Ctrl + P でも印刷できます</span>
+  <button class="print-btn" onclick="window.print()">印刷する</button>
+</div>
+
+<section class="page">
+  <div class="inner">
+
+    <header class="head">
+      <h1>お子様セット</h1>
+      <div class="en">KIDS PLATE</div>
+      <div class="rule"><i></i></div>
+    </header>
+
+    <div class="photo-area">
+      <div class="photo-frame">
+        <!-- 写真ファイル（kids-plate.jpg）を同じフォルダに置くと表示されます -->
+        <img src="kids-plate.jpg" alt="お子様セットのお皿"
+             onerror="this.style.display='none';document.getElementById('noPhoto').style.display='flex';">
+        <div class="photo-none" id="noPhoto" style="display:none">
+          写真（kids-plate.jpg）をこのフォルダに置くと<br>ここに表示されます
+        </div>
+      </div>
+    </div>
+
+    <div class="price-line">
+      <span class="nm">お子様セット</span><span class="pr">¥1,300</span><span class="tax">（税込）</span>
+    </div>
+
+    <div class="sec"><h2>お料理</h2><span class="en">Plate</span><span class="ln"></span></div>
+
+    <div class="items">
+      <div class="item"><span class="dot"></span>オムライス</div>
+      <div class="item"><span class="dot"></span>ハンバーグ</div>
+      <div class="item"><span class="dot"></span>エビフライ<span class="sub">タルタルソース</span></div>
+      <div class="item"><span class="dot"></span>唐揚げ</div>
+      <div class="item"><span class="dot"></span>フライドポテト</div>
+      <div class="item"><span class="dot"></span>ブロッコリー</div>
+    </div>
+
+    <div class="dessert">
+      <div class="t">食後のデザート</div>
+      <p>お食事のあとに、バニラアイスをお持ちします。</p>
+    </div>
+
+    <footer class="foot">
+      <div class="caution">
+        <div class="t">ご予約の際にお申し付けください</div>
+        <p>コース料理のご用意がございますので、お子様セットは<br>
+           ご予約時にご注文をお願いしております。10歳未満のお子様向けです。</p>
+      </div>
+      <p class="notes">表示価格は税込です。<br>
+         食物アレルギーのあるお子様は、ご予約の際にお知らせください。</p>
+    </footer>
+
+  </div>
+</section>
+
+</body>
+</html>
