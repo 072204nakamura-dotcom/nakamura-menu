@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>印刷用メニュー（店舗用）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Zen+Kaku+Gothic+New:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sage:#3E5C50; --sage-deep:#2E4A40; --gold:#B08D3E; --gold-deep:#96762F;
+    --paper:#FBFAF6; --ink:#22221F; --muted:#57544B; --line:#E2DED2;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Zen Kaku Gothic New',sans-serif;background:var(--paper);
+       color:var(--ink);line-height:1.7;}
+
+  header{background:linear-gradient(168deg,var(--sage-deep) 0%,var(--sage) 100%);
+         color:#F4F1E8;text-align:center;padding:38px 20px 34px;}
+  header .tag{display:inline-block;font-size:11px;letter-spacing:.18em;
+              border:1px solid #C9AE6E;color:#C9AE6E;border-radius:999px;
+              padding:4px 14px;margin-bottom:14px;}
+  header h1{font-family:'Shippori Mincho',serif;font-weight:600;font-size:25px;
+            letter-spacing:.2em;text-indent:.2em;}
+  header p{font-size:12px;font-weight:300;color:#D9D9CE;margin-top:10px;}
+
+  main{max-width:600px;margin:0 auto;padding:22px 16px 40px;}
+
+  .edge-note{background:#E8F0FA;border:1px solid #7FA8D4;border-radius:10px;
+             padding:13px 16px;margin-bottom:14px;font-size:13px;line-height:1.8;
+             color:#1B3A5C;}
+  .edge-note b{display:block;font-size:14px;}
+  .steps{background:#F3EDDD;border:1px solid var(--gold);border-radius:10px;
+         padding:16px 18px;margin-bottom:24px;}
+  .steps h2{font-family:'Shippori Mincho',serif;font-size:14px;
+            letter-spacing:.14em;color:var(--gold-deep);margin-bottom:8px;}
+  .steps ol{margin-left:1.2em;font-size:13px;line-height:2;}
+  .steps b{color:var(--sage-deep);}
+
+  .card{display:flex;align-items:center;gap:14px;background:#fff;
+        border:1px solid var(--line);border-radius:10px;
+        padding:16px 18px;margin-bottom:12px;text-decoration:none;color:inherit;
+        box-shadow:0 1px 4px rgba(62,92,80,.05);}
+  .card:active{background:#F3EDDD;}
+  .card .body{flex:1;min-width:0;}
+  .card .nm{font-family:'Shippori Mincho',serif;font-weight:600;font-size:16.5px;}
+  .card .ds{font-size:12px;color:var(--muted);margin-top:3px;}
+  .size{flex:0 0 auto;font-family:'Cormorant Garamond',serif;font-weight:600;
+        font-size:15px;color:#fff;background:var(--sage);
+        border-radius:6px;padding:6px 12px;letter-spacing:.04em;}
+  .size.a4{background:var(--gold-deep);}
+  .arrow{flex:0 0 auto;width:9px;height:9px;border-top:1.6px solid var(--gold);
+         border-right:1.6px solid var(--gold);transform:rotate(45deg);}
+
+  .note{margin-top:22px;font-size:11.5px;color:var(--muted);line-height:1.9;
+        border-top:1px dotted var(--line);padding-top:16px;}
+  footer{background:var(--sage-deep);color:#CFCDBF;text-align:center;
+         padding:20px;font-size:10.5px;font-weight:300;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="tag">店舗用ページ</div>
+  <h1>印刷用メニュー</h1>
+  <p>お客様用ではありません。メニューを刷るときに開いてください。</p>
+</header>
+
+<main>
+
+  <div class="edge-note">
+    <b>このページは Microsoft Edge で開いてください。</b>
+    印刷の設定がいちばん安定します。
+  </div>
+
+  <div class="steps">
+    <h2>印刷のしかた</h2>
+    <ol>
+      <li>下から刷りたいメニューを選ぶ</li>
+      <li>ページ右上の「<b>印刷する</b>」ボタンを押す（または <b>Ctrl + P</b>）</li>
+      <li>用紙サイズを <b>右に表示されているサイズ</b> に合わせる</li>
+      <li>「詳細設定」→「<b>背景のグラフィック</b>」にチェックを入れる</li>
+      <li>倍率は「<b>100%</b>」または「実際のサイズ」で印刷</li>
+    </ol>
+  </div>
+
+  <a class="card" href="print-drink-b5.html">
+    <div class="body">
+      <div class="nm">ドリンクメニュー</div>
+      <div class="ds">全5ページ／ペアリング・ビール・日本酒・焼酎・カクテル・ソフトドリンク</div>
+    </div>
+    <span class="size">B5</span>
+    <span class="arrow"></span>
+  </a>
+
+  <a class="card" href="print-wine-b5.html">
+    <div class="body">
+      <div class="nm">ワインリスト</div>
+      <div class="ds">全6ページ／白・ロゼ・赤 全20種（背景はクリーム色）</div>
+    </div>
+    <span class="size">B5</span>
+    <span class="arrow"></span>
+  </a>
+
+  <a class="card" href="print-alacarte-b5.html">
+    <div class="body">
+      <div class="nm">アラカルト</div>
+      <div class="ds">1ページ／パスタ3種・サイドメニュー2種（コースへの追加用）</div>
+    </div>
+    <span class="size">B5</span>
+    <span class="arrow"></span>
+  </a>
+
+  <a class="card" href="print-kids-a4.html">
+    <div class="body">
+      <div class="nm">お子様セット</div>
+      <div class="ds">1ページ／写真入り・¥1,300（要予約・10歳未満向け）</div>
+    </div>
+    <span class="size a4">A4</span>
+    <span class="arrow"></span>
+  </a>
+
+  <a class="card" href="print-coupon-a4.html">
+    <div class="body">
+      <div class="nm">乾杯ドリンク（LINEクーポン専用）</div>
+      <div class="ds">1ページ／クーポンをお持ちのお客様にお見せする用</div>
+    </div>
+    <span class="size a4">A4</span>
+    <span class="arrow"></span>
+  </a>
+
+  <p class="note">
+    ドリンクメニューとワインリストは、同じメニューブックに綴じる前提で作っています（どちらもB5）。<br>
+    乾杯ドリンクだけA4です。用紙を間違えると余白がずれるのでご注意ください。<br>
+    内容を直したいときは、Claudeに「ドリンクメニューの◯◯を変えて」と伝えてください。
+  </p>
+
+</main>
+
+<footer>洋食だいにんぐ なかむら｜店舗用</footer>
+
+</body>
+</html>
