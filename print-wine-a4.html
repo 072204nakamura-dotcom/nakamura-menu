@@ -1,0 +1,436 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ワインリスト（A4印刷用）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Zen+Kaku+Gothic+New:wght@300;400;500;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sage:#3E5C50; --gold:#B08D3E; --gold-deep:#8F7226;
+    --bordeaux:#7B3B43; --rose:#A6606B;
+    --paper:#F7EDD6; --ink:#2B2B28; --muted:#55524A; --line:#C4B99C;
+    --frame:#8F7226;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  html,body{background:#EAE7DE;}
+  body{font-family:'Zen Kaku Gothic New',sans-serif;color:var(--ink);}
+  .toolbar{max-width:720px;margin:16px auto 0;padding:0 12px;
+           display:flex;justify-content:flex-end;align-items:center;}
+  .print-hint{font-size:11.5px;color:#6B6A61;margin-right:14px;}
+  .print-btn{background:var(--sage);color:#fff;border:none;border-radius:6px;
+             padding:10px 22px;font-size:14px;font-family:inherit;cursor:pointer;
+             letter-spacing:.1em;}
+
+  /* B5: 182x297mm。paddingを含めて絶対にはみ出さないようflexで内側を管理 */
+  .page{width:210mm;height:297mm;background:var(--paper);
+        margin:14px auto;padding:15mm 17mm 12mm;position:relative;
+        box-shadow:0 2px 14px rgba(0,0,0,.12);
+        display:flex;flex-direction:column;overflow:hidden;}
+
+  /* 紙面の二重罫（エレガント装飾。高さには影響しない） */
+  .page::before{content:"";position:absolute;left:5mm;top:5mm;right:5mm;bottom:5mm;
+                border:1px solid rgba(143,114,38,.42);pointer-events:none;z-index:0;}
+  .page::after{content:"";position:absolute;left:6.6mm;top:6.6mm;right:6.6mm;bottom:6.6mm;
+               border:1px solid rgba(143,114,38,.18);pointer-events:none;z-index:0;}
+  .head,.body-area,.foot{position:relative;z-index:1;}
+
+  .body-area{flex:1;min-height:0;}
+
+  .head{text-align:center;padding-bottom:3.5mm;}
+  .head .shop{font-family:'Shippori Mincho',serif;font-size:11px;
+              letter-spacing:.42em;color:var(--sage);text-indent:.42em;}
+  .head h1{font-family:'Shippori Mincho',serif;font-weight:700;
+           font-size:26px;letter-spacing:.32em;text-indent:.32em;
+           color:var(--sage);margin:1.8mm 0 1.2mm;}
+  .head .en{font-family:'Cormorant Garamond',serif;font-size:12px;
+            letter-spacing:.5em;text-indent:.5em;color:var(--gold);}
+  .rule{height:0;border-top:1px solid var(--sage);position:relative;margin-top:3mm;}
+  .rule::after{content:"";position:absolute;left:0;right:0;top:1.2mm;
+               border-top:1px solid var(--line);}
+  .rule i{position:absolute;left:50%;top:-1.6mm;transform:translateX(-50%);
+          width:3.2mm;height:3.2mm;background:var(--paper);
+          border:1px solid var(--gold);rotate:45deg;}
+
+  .sec{display:flex;align-items:baseline;gap:4mm;margin:4.5mm 0 2.5mm;}
+  .sec h2{font-family:'Shippori Mincho',serif;font-weight:700;font-size:19px;
+          letter-spacing:.24em;color:var(--sage);white-space:nowrap;}
+  .sec .en{font-family:'Cormorant Garamond',serif;font-style:italic;
+           font-size:14px;color:var(--gold);letter-spacing:.12em;white-space:nowrap;}
+  .sec .ln{flex:1;border-top:1px dotted var(--line);transform:translateY(-2px);}
+  .page.red .sec h2{color:var(--bordeaux);}
+  .sec.rose h2{color:var(--rose) !important;}
+
+  .wine{padding:3mm 0;border-bottom:1px dotted var(--line);break-inside:avoid;}
+  .wine:last-of-type{border-bottom:none;}
+  .w-top{display:flex;align-items:baseline;gap:3mm;flex-wrap:wrap;}
+  .w-name{font-family:'Shippori Mincho',serif;font-weight:700;font-size:19px;
+          letter-spacing:.03em;line-height:1.35;}
+  .w-vint{font-family:'Cormorant Garamond',serif;font-size:13px;color:var(--muted);}
+  .w-origin{font-family:'Cormorant Garamond',serif;font-size:12px;font-weight:600;
+            letter-spacing:.12em;color:var(--gold-deep);text-transform:uppercase;
+            margin-left:auto;white-space:nowrap;}
+  .w-badge{font-size:11px;color:#fff;background:var(--gold);border-radius:2px;
+           padding:.8mm 2.2mm;letter-spacing:.1em;white-space:nowrap;}
+  .page.red .w-badge{background:var(--bordeaux);}
+  .w-desc{font-size:14px;font-weight:400;color:#33312B;
+          line-height:1.75;margin-top:1.3mm;}
+  .w-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2mm;margin-top:2.2mm;}
+  .cell{border:1px solid var(--line);border-radius:1.5mm;background:#fff;
+        text-align:center;padding:1.6mm 1mm 1.4mm;}
+  .cell .l{display:block;font-size:11.5px;color:var(--muted);
+           letter-spacing:.03em;font-weight:500;}
+  .cell .v{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:700;font-size:19px;letter-spacing:.01em;line-height:1.25;}
+  .cell.set{background:var(--gold-deep);border-color:var(--gold-deep);}
+  .cell.set .l{color:#F6EFDD;}
+  .cell.set .v{color:#fff;}
+
+  .foot{flex-shrink:0;padding-top:3mm;}
+  .set-line{border-top:1px solid var(--gold);border-bottom:1px solid var(--gold);
+            background:#F6F1E3;padding:2.4mm 4mm;text-align:center;
+            font-size:12px;color:#33312B;letter-spacing:.03em;line-height:1.6;}
+  .set-line b{font-family:'Shippori Mincho',serif;color:var(--gold-deep);
+              letter-spacing:.16em;font-weight:700;font-size:13.5px;margin-right:3mm;}
+  .notes{margin-top:2mm;font-size:11.5px;color:var(--muted);font-weight:400;
+         line-height:1.7;text-align:center;letter-spacing:.03em;}
+  .pageno{margin-top:1.5mm;text-align:center;
+          font-family:'Cormorant Garamond',serif;font-size:10px;color:var(--muted);
+          letter-spacing:.3em;}
+
+  .qr-area{display:flex;gap:8mm;align-items:center;justify-content:center;
+           margin:6mm auto 2mm;padding:5mm 7mm;border:1px solid var(--gold);
+           background:#fff;width:fit-content;}
+  .qr-area img{width:34mm;height:34mm;display:block;}
+  .qr-txt{text-align:left;}
+  .qr-txt .t{font-family:'Shippori Mincho',serif;font-size:14px;color:var(--sage);
+             letter-spacing:.12em;margin-bottom:2mm;font-weight:700;}
+  .qr-txt p{font-size:11.5px;color:#33312B;line-height:1.9;}
+
+  @page{size:210mm 297mm;margin:0;}
+  @media print{
+    html,body{background:#fff;}
+    .toolbar{display:none;}
+    .page{margin:0;box-shadow:none;page-break-after:always;}
+    .page:last-child{page-break-after:auto;}
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <span class="print-hint">キーボードの Ctrl + P でも印刷できます</span>
+  <button class="print-btn" onclick="window.print()">印刷する</button>
+</div>
+
+<section class="page ">
+  <header class="head">
+    <h1>ワインリスト</h1>
+    <div class="en">WINE LIST</div>
+    <div class="rule"><i></i></div>
+  </header>
+  <div class="body-area">
+    <div class="sec "><h2>白ワイン</h2><span class="en">Vin Blanc</span><span class="ln"></span></div>
+    <div class="wine">
+      <div class="w-top"><span class="w-name">テバルド ビアンコ プーリア IGP</span><span class="w-vint">2024</span><span class="w-origin">Puglia, Italy</span></div>
+      <div class="w-desc">南イタリア・プーリアの軽やかな辛口。乾杯やランチのお供に。</div>
+      <div class="w-grid">
+        <div class="cell"><span class="l">グラス 50ml</span><span class="v">¥290</span></div>
+        <div class="cell"><span class="l">グラス 100ml</span><span class="v">¥590</span></div>
+        <div class="cell"><span class="l">ボトル</span><span class="v">¥3,330</span></div>
+        <div class="cell set"><span class="l">3杯セット時 1杯</span><span class="v">¥530</span></div>
+      </div>
+    </div>
+    <div class="wine">
+      <div class="w-top"><span class="w-name">サケット シャルドネ ラ・フィエラ</span><span class="w-vint">2025</span><span class="w-origin">Veneto, Italy</span></div>
+      <div class="w-desc">青リンゴのフレッシュな果実味。すいすい飲める軽やかさ。</div>
+      <div class="w-grid">
+        <div class="cell"><span class="l">グラス 50ml</span><span class="v">¥440</span></div>
+        <div class="cell"><span class="l">グラス 100ml</span><span class="v">¥880</span></div>
+        <div class="cell"><span class="l">ボトル</span><span class="v">¥5,000</span></div>
+        <div class="cell set"><span class="l">3杯セット時 1杯</span><span class="v">¥790</span></div>
+      </div>
+    </div>
+    <div class="wine">
+      <div class="w-top"><span class="w-name">ミラマン エステート RSV ソーヴィニヨン・ブラン</span><span class="w-vint">2024</span><span class="w-origin">Chile</span></div>
+      <div class="w-desc">グレープフルーツのみずみずしさと心地よい苦み。気軽な一杯目に。</div>
+      <div class="w-grid">
+        <div class="cell"><span class="l">グラス 50ml</span><span class="v">¥500</span></div>
+        <div class="cell"><span class="l">グラス 100ml</span><span class="v">¥1,000</span></div>
+        <div class="cell"><span class="l">ボトル</span><span class="v">¥5,670</span></div>
+        <div class="cell set"><span class="l">3杯セット時 1杯</span><span class="v">¥900</span></div>
+      </div>
+    </div>
+    <div class="wine">
+      <div class="w-top"><span class="w-name">ミュスカデ セーヴル・エ・メーヌ シュール・リー</span><span class="w-vint">2024</span><span class="w-badge">瀬戸内の鮮魚に</span><span class="w-origin">Loire, France</span></div>
+      <div class="w-desc">牡蠣に合う海辺の白。瀬戸内の鮮魚の相棒です。</div>
+      <div class="w-grid">
+        <div class="cell"><span class="l">グラス 50ml</span><span class="v">¥590</span></div>
+        <div class="cell"><span class="l">グラス 100ml</span><span class="v">¥1,170</span></div>
+        <div class="cell"><span class="l">ボトル</span><span class="v">¥6,670</span></div>
+        <div class="cell set"><span class="l">3杯セット時 1杯</span><span class="v">¥1,050</span></div>
+      </div>
+    </div>
+  </div>
+  <footer class="foot">
+    <div class="set-line"><b>グラス3杯セット</b>お好きな3杯（違う銘柄OK）で、各グラス100mlが約10％引きの金色枠〈セット時1杯〉価格に</div>
+    <p class="notes">表示価格はすべて税込です。ヴィンテージは入荷状況により変わる場合がございます。</p>
+    <div class="pageno">— 1 —</div>
+  </footer>
+</section>
+
+<section class="page ">
+  <header class="head">
+    <h1>ワインリスト</h1>
+    <div class="en">WINE LIST</div>
+    <div class="rule"><i></i></div>
+  </header>
+  <div class="body-area">
+    <div class="sec "><h2>白ワイン 〜つづき〜</h2><span class="en">Vin Blanc</span><span class="ln"></span></div>
+    <div class="wine">
+      <div class="w-top"><span class="w-name">NZ66 ソーヴィニヨン・ブラン</span><span class="w-vint">2024</span><span class="w-origin">New Zealand</span></div>
+      <div class="w-desc">ハーブと柑橘が弾けるニュージーランド産。前菜から魚料理まで。</div>
+      <div class="w-grid">
+        <div class="cell"><span class="l">グラス 50ml</span><span class="v">¥670</span></div>
+        <div class="cell"><span class="l">グラス 100ml</span><span class="v">¥1,350</span></div>
+        <div class="cell"><span class="l">ボトル</span><span class="v">¥7,670</span></div>
+        <div class="cell set"><span class="l">3杯セット時 1杯</span><span class="v">¥1,220</span></div>
+      </div>
+    </div>
+    <div class="wine">
+      <div class="w-top"><span class="w-name">レ・ドーファン ブラン レゼルヴ</span><span class="w-vint">2024</span><span class="w-origin">Rhône, France</span></div>
+      <div class="w-desc">白い花と洋梨の柔らかな辛口。コースに寄り添う南仏の白。</div>
+      <div class="w-grid">
+        <div class="cell"><span class="l">グラス 50ml</span><span class="v">¥620</span></div>
+        <div class="cell"><span class="l">グラス 100ml</span><span class="v">¥1,230</span></div>
+        <div class="cell"><span class="l">ボトル</span><span class="v">¥7,000</span></div>
+        <div class="cell set"><span class="l">3杯セット時 1杯</span><span class="v">¥1,110</span></div>
+      </div>
+    </div>
+    <div class="wine">
+      <div class="w-top"><span class="w-name">タラパカ GR ホワイト・ラベル シャルドネ</span><span class="w-vint">2025</span><span class="w-origin">Maipo Valley, Chile</span></div>
+      <div class="w-desc">トロピカルな香りとほのかな樽のバニラ。チリの名門の実力。</div>
+      <div class="w-grid">
+        <div class="cell"><span class="l">グラス 50ml</span><span class="v">¥650</span></div>
+        <div class="cell"><span class="l">グラス 100ml</span><span class="v">¥1,290</span></div>
+        <div class="cell"><span class="l">ボトル</span><span class="v">¥7,330</span></div>
+        <div class="cell set"><span class="l">3杯セット時 1杯</span><span class="v">¥1,160</span></div>
+      </div>
+    </div>
+    <div class="wine">
+      <div class="w-top"><span class="w-name">パナメラ シャルドネ</span><span class="w-vint">2023</span><span class="w-origin">California, USA</span></div>
+      <div class="w-desc">レモンと洋梨、クリーミーなコクの王道シャルドネ。</div>
+      <div class="w-grid">
+        <div class="cell"><span class="l">グラス 50ml</span><span class="v">¥700</span></div>
+        <div class="cell"><span class="l">グラス 100ml</span><span class="v">¥1,410</span></div>
+        <div class="cell"><span class="l">ボトル</span><span class="v">¥8,000</span></div>
+        <div class="cell set"><span class="l">3杯セット時 1杯</span><span class="v">¥1,270</span></div>
+      </div>
+    </div>
+  </div>
+  <footer class="foot">
+    <div class="set-line"><b>グラス3杯セット</b>お好きな3杯（違う銘柄OK）で、各グラス100mlが約10％引きの金色枠〈セット時1杯〉価格に</div>
+    <p class="notes">表示価格はすべて税込です。ヴィンテージは入荷状況により変わる場合がございます。</p>
+    <div class="pageno">— 2 —</div>
+  </footer>
+</section>
+
+<section class="page ">
+  <header class="head">
+    <h1>ワインリスト</h1>
+    <div class="en">WINE LIST</div>
+    <div class="rule"><i></i></div>
+  </header>
+  <div class="body-area">
+    <div class="sec "><h2>白ワイン 〜つづき〜</h2><span class="en">Vin Blanc</span><span class="ln"></span></div>
+    <div class="wine">
+      <div class="w-top"><span class="w-name">アール・ド・ヴィーヴル クレレット・ド・ラングドック</span><span class="w-vint">2023</span><span class="w-badge">南仏の上級白</span><span class="w-origin">Languedoc, France</span></div>
+      <div class="w-desc">ジェラール・ベルトランの上級白。白い花と洋梨の気品ある香り。</div>
+      <div class="w-grid">
+        <div class="cell"><span class="l">グラス 50ml</span><span class="v">¥910</span></div>
+        <div class="cell"><span class="l">グラス 100ml</span><span class="v">¥1,820</span></div>
+        <div class="cell"><span class="l">ボトル</span><span class="v">¥10,330</span></div>
+        <div class="cell set"><span class="l">3杯セット時 1杯</span><span class="v">¥1,640</span></div>
+      </div>
+    </div>
+    <div class="sec rose"><h2>ロゼワイン</h2><span class="en">Vin Rosé</span><span class="ln"></span></div>
+    <div class="wine">
+      <div class="w-top"><span class="w-name">アール・ド・ヴィーヴル ラングドック ロゼ</span><span class="w-vint">2024</span><span class="w-origin">Languedoc, France</span></div>
+      <div class="w-desc">ベリーと柑橘の爽やかさ。前菜から肉料理まで幅広く。</div>
+      <div class="w-grid">
+        <div class="cell"><span class="l">グラス 50ml</span><span class="v">¥910</span></div>
+        <div class="cell"><span class="l">グラス 100ml</span><span class="v">¥1,820</span></div>
+        <div class="cell"><span class="l">ボトル</span><span class="v">¥10,330</span></div>
+        <div class="cell set"><span class="l">3杯セット時 1杯</span><span class="v">¥1,640</span></div>
+      </div>
+    </div>
+    <div class="sec "><h2>赤ワイン</h2><span class="en">Vin Rouge</span><span class="ln"></span></div>
+    <div class="wine">
+      <div class="w-top"><span class="w-name">テバルド ロッソ プーリア IGP</span><span class="w-vint">2024</span><span class="w-origin">Puglia, Italy</span></div>
+      <div class="w-desc">南イタリア・プーリアの気軽な赤。素直な果実味で日常の洋食に。</div>
+      <div class="w-grid">
+        <div class="cell"><span class="l">グラス 50ml</span><span class="v">¥290</span></div>
+        <div class="cell"><span class="l">グラス 100ml</span><span class="v">¥590</span></div>
+        <div class="cell"><span class="l">ボトル</span><span class="v">¥3,330</span></div>
+        <div class="cell set"><span class="l">3杯セット時 1杯</span><span class="v">¥530</span></div>
+      </div>
+    </div>
+  </div>
+  <footer class="foot">
+    <div class="set-line"><b>グラス3杯セット</b>お好きな3杯（違う銘柄OK）で、各グラス100mlが約10％引きの金色枠〈セット時1杯〉価格に</div>
+    <p class="notes">表示価格はすべて税込です。ヴィンテージは入荷状況により変わる場合がございます。</p>
+    <div class="pageno">— 3 —</div>
+  </footer>
+</section>
+
+<section class="page red">
+  <header class="head">
+    <h1>ワインリスト</h1>
+    <div class="en">WINE LIST</div>
+    <div class="rule"><i></i></div>
+  </header>
+  <div class="body-area">
+    <div class="sec "><h2>赤ワイン 〜つづき〜</h2><span class="en">Vin Rouge</span><span class="ln"></span></div>
+    <div class="wine">
+      <div class="w-top"><span class="w-name">サケット メルロー ヴェネト</span><span class="w-vint">2025</span><span class="w-origin">Veneto, Italy</span></div>
+      <div class="w-desc">チェリーの果実味とまろやかな口当たり。毎日の食卓に。</div>
+      <div class="w-grid">
+        <div class="cell"><span class="l">グラス 50ml</span><span class="v">¥440</span></div>
+        <div class="cell"><span class="l">グラス 100ml</span><span class="v">¥880</span></div>
+        <div class="cell"><span class="l">ボトル</span><span class="v">¥5,000</span></div>
+        <div class="cell set"><span class="l">3杯セット時 1杯</span><span class="v">¥790</span></div>
+      </div>
+    </div>
+    <div class="wine">
+      <div class="w-top"><span class="w-name">トロイ ピノ・ノワール</span><span class="w-vint">2024</span><span class="w-origin">Trentino, Italy</span></div>
+      <div class="w-desc">北イタリア・ドロミテのピノ。柔らかな渋みとバニラの樽香。</div>
+      <div class="w-grid">
+        <div class="cell"><span class="l">グラス 50ml</span><span class="v">¥700</span></div>
+        <div class="cell"><span class="l">グラス 100ml</span><span class="v">¥1,410</span></div>
+        <div class="cell"><span class="l">ボトル</span><span class="v">¥8,000</span></div>
+        <div class="cell set"><span class="l">3杯セット時 1杯</span><span class="v">¥1,270</span></div>
+      </div>
+    </div>
+    <div class="wine">
+      <div class="w-top"><span class="w-name">レ・ドーファン ルージュ レゼルヴ</span><span class="w-vint">2024</span><span class="w-origin">Rhône, France</span></div>
+      <div class="w-desc">赤い果実とスパイス、柔らかい渋み。赤ワイン初めての方にも。</div>
+      <div class="w-grid">
+        <div class="cell"><span class="l">グラス 50ml</span><span class="v">¥620</span></div>
+        <div class="cell"><span class="l">グラス 100ml</span><span class="v">¥1,230</span></div>
+        <div class="cell"><span class="l">ボトル</span><span class="v">¥7,000</span></div>
+        <div class="cell set"><span class="l">3杯セット時 1杯</span><span class="v">¥1,110</span></div>
+      </div>
+    </div>
+    <div class="wine">
+      <div class="w-top"><span class="w-name">トソ カベルネ・ソーヴィニヨン</span><span class="w-vint">2023</span><span class="w-origin">Mendoza, Argentina</span></div>
+      <div class="w-desc">アンデス山麓の名門。澄んだ果実味は肉料理の相棒。</div>
+      <div class="w-grid">
+        <div class="cell"><span class="l">グラス 50ml</span><span class="v">¥590</span></div>
+        <div class="cell"><span class="l">グラス 100ml</span><span class="v">¥1,170</span></div>
+        <div class="cell"><span class="l">ボトル</span><span class="v">¥6,670</span></div>
+        <div class="cell set"><span class="l">3杯セット時 1杯</span><span class="v">¥1,050</span></div>
+      </div>
+    </div>
+  </div>
+  <footer class="foot">
+    <div class="set-line"><b>グラス3杯セット</b>お好きな3杯（違う銘柄OK）で、各グラス100mlが約10％引きの金色枠〈セット時1杯〉価格に</div>
+    <p class="notes">表示価格はすべて税込です。ヴィンテージは入荷状況により変わる場合がございます。</p>
+    <div class="pageno">— 4 —</div>
+  </footer>
+</section>
+
+<section class="page red">
+  <header class="head">
+    <h1>ワインリスト</h1>
+    <div class="en">WINE LIST</div>
+    <div class="rule"><i></i></div>
+  </header>
+  <div class="body-area">
+    <div class="sec "><h2>赤ワイン 〜つづき〜</h2><span class="en">Vin Rouge</span><span class="ln"></span></div>
+    <div class="wine">
+      <div class="w-top"><span class="w-name">タラパカ GR ホワイト・ラベル カベルネ・ソーヴィニヨン</span><span class="w-vint">2023</span><span class="w-origin">Maipo Valley, Chile</span></div>
+      <div class="w-desc">完熟プラムとチョコレートの余韻。デミグラスの洋食と。</div>
+      <div class="w-grid">
+        <div class="cell"><span class="l">グラス 50ml</span><span class="v">¥650</span></div>
+        <div class="cell"><span class="l">グラス 100ml</span><span class="v">¥1,290</span></div>
+        <div class="cell"><span class="l">ボトル</span><span class="v">¥7,330</span></div>
+        <div class="cell set"><span class="l">3杯セット時 1杯</span><span class="v">¥1,160</span></div>
+      </div>
+    </div>
+    <div class="wine">
+      <div class="w-top"><span class="w-name">パナメラ カベルネ・ソーヴィニヨン</span><span class="w-vint">2022</span><span class="w-origin">California, USA</span></div>
+      <div class="w-desc">カシスの濃厚な果実味。ハンバーグと抜群の相性。</div>
+      <div class="w-grid">
+        <div class="cell"><span class="l">グラス 50ml</span><span class="v">¥700</span></div>
+        <div class="cell"><span class="l">グラス 100ml</span><span class="v">¥1,410</span></div>
+        <div class="cell"><span class="l">ボトル</span><span class="v">¥8,000</span></div>
+        <div class="cell set"><span class="l">3杯セット時 1杯</span><span class="v">¥1,270</span></div>
+      </div>
+    </div>
+    <div class="wine">
+      <div class="w-top"><span class="w-name">タオバ サペラヴィ</span><span class="w-vint">2022</span><span class="w-badge">個性派</span><span class="w-origin">Georgia</span></div>
+      <div class="w-desc">ワイン発祥の地ジョージアの土着品種。個性派の一杯。</div>
+      <div class="w-grid">
+        <div class="cell"><span class="l">グラス 50ml</span><span class="v">¥820</span></div>
+        <div class="cell"><span class="l">グラス 100ml</span><span class="v">¥1,640</span></div>
+        <div class="cell"><span class="l">ボトル</span><span class="v">¥9,330</span></div>
+        <div class="cell set"><span class="l">3杯セット時 1杯</span><span class="v">¥1,480</span></div>
+      </div>
+    </div>
+    <div class="wine">
+      <div class="w-top"><span class="w-name">メナージュ・ア・トロワ ミッドナイト</span><span class="w-vint">2023</span><span class="w-origin">California, USA</span></div>
+      <div class="w-desc">その名も「真夜中」。漆黒のフルボディ、ビターチョコのコク。</div>
+      <div class="w-grid">
+        <div class="cell"><span class="l">グラス 50ml</span><span class="v">¥1,030</span></div>
+        <div class="cell"><span class="l">グラス 100ml</span><span class="v">¥2,050</span></div>
+        <div class="cell"><span class="l">ボトル</span><span class="v">¥11,670</span></div>
+        <div class="cell set"><span class="l">3杯セット時 1杯</span><span class="v">¥1,850</span></div>
+      </div>
+    </div>
+  </div>
+  <footer class="foot">
+    <div class="set-line"><b>グラス3杯セット</b>お好きな3杯（違う銘柄OK）で、各グラス100mlが約10％引きの金色枠〈セット時1杯〉価格に</div>
+    <p class="notes">表示価格はすべて税込です。ヴィンテージは入荷状況により変わる場合がございます。</p>
+    <div class="pageno">— 5 —</div>
+  </footer>
+</section>
+
+<section class="page red">
+  <header class="head">
+    <h1>ワインリスト</h1>
+    <div class="en">WINE LIST</div>
+    <div class="rule"><i></i></div>
+  </header>
+  <div class="body-area">
+    <div class="sec "><h2>赤ワイン 〜特別な一本〜</h2><span class="en">Vin Rouge</span><span class="ln"></span></div>
+    <div class="wine">
+      <div class="w-top"><span class="w-name">ルイ・M・マルティーニ プラティ</span><span class="w-vint">2022</span><span class="w-badge">当店の看板赤</span><span class="w-origin">Sonoma, California</span></div>
+      <div class="w-desc">ソノマの上級カベルネ、米有力誌90点超。特別な日の一本に。</div>
+      <div class="w-grid">
+        <div class="cell"><span class="l">グラス 50ml</span><span class="v">¥1,440</span></div>
+        <div class="cell"><span class="l">グラス 100ml</span><span class="v">¥2,870</span></div>
+        <div class="cell"><span class="l">ボトル</span><span class="v">¥16,330</span></div>
+        <div class="cell set"><span class="l">3杯セット時 1杯</span><span class="v">¥2,580</span></div>
+      </div>
+    </div>
+
+    <div class="sec "><h2>スマートフォン版のご案内</h2><span class="en">Digital List</span><span class="ln"></span></div>
+    <div class="qr-area">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA4QAAAOECAIAAAB2LGhsAAAWoElEQVR4nO3Y0ZGjvLpA0du3nBcxEADREQAxEBkngqlxWz3s1s9a7xQfQrJ38XVd1/8BAEDh/+sBAAB4LjEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJB51QPcbdnWegT+4tyPj68deb8j9x3xtJlHzLg3ZvzNsc73eNr55X3V3qj4MgoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkXvUAMzn3ox5hGsu2JvcdeUcjM4/c92kzj6ie92n7uVrnGc14fkc87f2OqH43ZuTLKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJB51QM8xbKt9Qjfdu5HPcKtRp53xvc7onre6h05C+972t6wr9434+/k095RxZdRAAAyYhQAgIwYBQAgI0YBAMiIUQAAMmIUAICMGAUAICNGAQDIiFEAADJiFACAjBgFACAjRgEAyIhRAAAyYhQAgIwYBQAgI0YBAMiIUQAAMmIUAICMGAUAIPOqB4CftGzrx9ee+5FcW81cqWZ+2jt62n1H3lFlxn0F/4IvowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEDmVQ8Av8WyrfUI31bNfO7Hx9eOzDzjfSsz7ueRda72BjDOl1EAADJiFACAjBgFACAjRgEAyIhRAAAyYhQAgIwYBQAgI0YBAMiIUQAAMmIUAICMGAUAICNGAQDIiFEAADJiFACAjBgFACAjRgEAyIhRAAAyYhQAgIwYBQAg86oHeIpzP+oR+IuRd7Rs6w9Oco9qTz5tnauZq3We8f36fb6HdeZPfBkFACAjRgEAyIhRAAAyYhQAgIwYBQAgI0YBAMiIUQAAMmIUAICMGAUAICNGAQDIiFEAADJiFACAjBgFACAjRgEAyIhRAAAyYhQAgIwYBQAgI0YBAMiIUQAAMq96gJks21qPwH/QuR8fX1vtyZH7jjzviGqdZ3y/M3ra+63OkT3Jv+DLKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJD5uq6rngF+zLKtH1977scPTvK+auaR+1aqd1SZ8R1VqrPwtD0J/4IvowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEDm67queoZbLdv68bXnfvzgJPeonnfkvjOacW/MaMbzW52FGffk096v39h7PG1vzMiXUQAAMmIUAICMGAUAICNGAQDIiFEAADJiFACAjBgFACAjRgEAyIhRAAAyYhQAgIwYBQAgI0YBAMiIUQAAMmIUAICMGAUAICNGAQDIiFEAADJiFACAjBgFACDzdV1XPcOtlm39+NpzP6a774gZ12pEtc4jZnxHT1vnEU9bqxl/6ypP2xszmvEdVXwZBQAgI0YBAMiIUQAAMmIUAICMGAUAICNGAQDIiFEAADJiFACAjBgFACAjRgEAyIhRAAAyYhQAgIwYBQAgI0YBAMiIUQAAMmIUAICMGAUAICNGAQDIiFEAADKveoCnOPejHuHbRmZetnW6+46o7vu0tZrxeSvVOleetq9mfN5qX80489P4MgoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkvq7rqmfgL5ZtrUf4tnM/Pr52xucdUa3VyH1HPO39cg/n6H3W6h7V887Il1EAADJiFACAjBgFACAjRgEAyIhRAAAyYhQAgIwYBQAgI0YBAMiIUQAAMmIUAICMGAUAICNGAQDIiFEAADJiFACAjBgFACAjRgEAyIhRAAAyYhQAgIwYBQAg83VdVz3DrZZtrUf4tnM/Pr72ac87YmStqnc049542vutzPh+Z3xHZr7HjP9lI2b8zRnhyygAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQ+bquq55hGsu2Jvc99yO578jzVjPzvmo/V0b25IxnoZr5aWs1o+r9Vvwf/X6+jAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAACZVz3A3ZZtrUe41cjznvuR3HfEyMwjnravZlSdhREzzjziac87Ysbf54p99fv5MgoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkvq7rqme41bKtyX3P/fj42hlnHvG05+Ue9tX7qrUaMePv1Yz/C5VqrWY8vzPyZRQAgIwYBQAgI0YBAMiIUQAAMmIUAICMGAUAICNGAQDIiFEAADJiFACAjBgFACAjRgEAyIhRAAAyYhQAgIwYBQAgI0YBAMiIUQAAMmIUAICMGAUAICNGAQDIvOoBnmLZ1o+vPffjByd538jMI0aet5q58rTnHdkb9tXvV/3WjZhx5srTzuCM//sVX0YBAMiIUQAAMmIUAICMGAUAICNGAQDIiFEAADJiFACAjBgFACAjRgEAyIhRAAAyYhQAgIwYBQAgI0YBAMiIUQAAMmIUAICMGAUAICNGAQDIiFEAADJiFACAzNd1XfUMj7Bsaz3Ct537UY9wq5F3NLJW1d6Y8f1W72jE097v087RjGbcGyOqfTXjb2zFl1EAADJiFACAjBgFACAjRgEAyIhRAAAyYhQAgIwYBQAgI0YBAMiIUQAAMmIUAICMGAUAICNGAQDIiFEAADJiFACAjBgFACAjRgEAyIhRAAAyYhQAgIwYBQAg86oH4PdatrUeYRozrtXIzOd+/OAk/20ja1Xtqxn3c7Unn3aOZnzeGWd+Gl9GAQDIiFEAADJiFACAjBgFACAjRgEAyIhRAAAyYhQAgIwYBQAgI0YBAMiIUQAAMmIUAICMGAUAICNGAQDIiFEAADJiFACAjBgFACAjRgEAyIhRAAAyYhQAgMzXdV31DLdatvXja8/9+MFJ3jcyc2VkrZ72jqqZR8z4vDPOPKJ63hnX2W/s7zfj8874u1HxZRQAgIwYBQAgI0YBAMiIUQAAMmIUAICMGAUAICNGAQDIiFEAADJiFACAjBgFACAjRgEAyIhRAAAyYhQAgIwYBQAgI0YBAMiIUQAAMmIUAICMGAUAICNGAQDIfF3XVc8wjWVbP7723I/kvjN62lqNPO+Ip63VjM/L+552jmY8C0+bmff5MgoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkXvUAT7Fs68fXnvsx3X2fplqrkfc7oxmf92nnaMZ3VM0842/7yH39H/EnvowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAmVc9wEzO/fj42mVbf3CS32/keUfWmfdV6zzj3qjO79N+NyrVb/uMZ6FSnYWnrXPFl1EAADJiFACAjBgFACAjRgEAyIhRAAAyYhQAgIwYBQAgI0YBAMiIUQAAMmIUAICMGAUAICNGAQDIiFEAADJiFACAjBgFACAjRgEAyIhRAAAyYhQAgIwYBQAg86oHuNuyrR9fe+7HD07y+824VtV9R9ZqRjPujREjM8+4N6rndX75kxnP4IxnoeLLKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJD5uq6rnuFWy7Z+fO25Hz84ye83slYjqnWunndGI+/IvrrHjL9Xfp/vMeOenHFm3ufLKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJB51QM8xbKt9Qi3Ovfj42urtRqZecSMzzsy89PWecSM52hEtTdGzHh+ZzyDM+4N3ufLKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJB51QPc7dyPeoRbVc+7bGty30r1vDPu55G1GnnekWtn3M/O/vtmPL/VOXrafbmHL6MAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBA5uu6rnoG/qFlW5P7nvvx8bVPm3nkvpXqHVVm3M8jqj1ZnaMZz++M+2rEjGdwxt/2ii+jAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQOZVD3C3ZVuT+5778fG1IzOP3HdENfPIfau9MWLG/VyZca2qmWc8CyNm/J3k95vxv7viyygAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQ+bquq54BfsyyrR9fe+7HD07yvpGZKyNr9bR39LSZ3fce1b4aMeM54h6+jAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAACZVz3A3ZZtrUfgL879SO77tL0xss4zrtXIzNWeHDHjzDOa8Rw97Szw+/kyCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGS+ruuqZ7jVsq0fX3vuxw9O8t824zpXM8+4VjMaWecZ2ZPvm3FvWOd7zLjOM/JlFACAjBgFACAjRgEAyIhRAAAyYhQAgIwYBQAgI0YBAMiIUQAAMmIUAICMGAUAICNGAQDIiFEAADJiFACAjBgFACAjRgEAyIhRAAAyYhQAgIwYBQAgI0YBAMi86gGeYtnWeoRvO/ejHuHbnrbOMz7viJG1qtZ5xnNUqda5ekcjz/u0sz8jvxvv82UUAICMGAUAICNGAQDIiFEAADJiFACAjBgFACAjRgEAyIhRAAAyYhQAgIwYBQAgI0YBAMiIUQAAMmIUAICMGAUAICNGAQDIiFEAADJiFACAjBgFACAjRgEAyLzqAeAnnfuR3HfZ1uS+I0bWauR5q/uOmHHmETM+b7UnKzO+oxnXmXv4MgoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkXvUA8Fss2/rxted+JPfl97M33jeyViOets4jqnc0ovptn3GtKr6MAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAAJlXPcBTnPtRj8A/tGxrct+RfVXNPKJ63pFrR2Z+2vut1nmE3/b32ZP8iS+jAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQObruq56hlst21qPwF+c+/HxtdX7fdrMI0aet1rnGd/viGpvzGjGfTXjfUc4g7+fL6MAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBARowCAJARowAAZMQoAAAZMQoAQEaMAgCQEaMAAGTEKAAAGTEKAEBGjAIAkBGjAABkxCgAABkxCgBA5uu6rnoGAAAeypdRAAAyYhQAgIwYBQAgI0YBAMiIUQAAMmIUAICMGAUAICNGAQDIiFEAADJiFACAjBgFACAjRgEAyIhRAAAyYhQAgIwYBQAgI0YBAMiIUQAAMmIUAICMGAUAICNGAQDIiFEAADJiFACAjBgFACAjRgEAyIhRAAAyYhQAgIwYBQAgI0YBAMiIUQAAMmIUAICMGAUAICNGAQDIiFEAADJiFACAjBgFACAjRgEAyIhRAAAyYhQAgIwYBQAgI0YBAMiIUQAAMmIUAICMGAUAICNGAQDIiFEAADJiFACAjBgFACAjRgEAyIhRAAAyYhQAgIwYBQAgI0YBAMiIUQAAMmIUAICMGAUAICNGAQDIiFEAADJiFACAjBgFACAjRgEAyIhRAAAyYhQAgIwYBQAgI0YBAMiIUQAAMmIUAICMGAUAICNGAQDIiFEAADJiFACAjBgFACAjRgEAyIhRAAAyYhQAgIwYBQAgI0YBAMiIUQAAMmIUAICMGAUAIPM/IKzNHuUA88cAAAAASUVORK5CYII=" alt="デジタル版ワインリストのQRコード">
+      <div class="qr-txt">
+        <div class="t">スマートフォンでもご覧いただけます</div>
+        <p>QRコードを読み取ると、全20種のワインリストと<br>くわしい紹介文をご覧いただけます。</p>
+      </div>
+    </div>
+  </div>
+  <footer class="foot">
+    <div class="set-line"><b>グラス3杯セット</b>お好きな3杯（違う銘柄OK）で、各グラス100mlが約10％引きの金色枠〈セット時1杯〉価格に</div>
+    <p class="notes">表示価格はすべて税込です。ヴィンテージは入荷状況により変わる場合がございます。</p>
+    <div class="pageno">— 6 —</div>
+  </footer>
+</section>
+
+</body>
+</html>
+

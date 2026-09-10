@@ -83,8 +83,8 @@
           letter-spacing:.1em;color:var(--sage);}
   .f-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12.5px;
         font-weight:600;color:#96762F;letter-spacing:.1em;}
-  .f-price{margin-left:auto;font-family:'Cormorant Garamond',serif;font-weight:700;
-           font-size:18.5px;color:#96762F;white-space:nowrap;}
+  .f-price{margin-left:auto;font-family:'Zen Kaku Gothic New',sans-serif;font-weight:700;
+           font-size:18.5px;color:#96762F;white-space:nowrap;letter-spacing:.01em;}
   .feature p{font-size:12.5px;font-weight:400;line-height:1.7;color:var(--ink);
              margin-top:2mm;}
 
@@ -101,8 +101,8 @@
   .w-kura{font-size:12px;color:var(--muted);font-weight:400;letter-spacing:.02em;}
   .w-badge{font-size:10.5px;color:#fff;background:#96762F;border-radius:2px;
            padding:.8mm 2.2mm;letter-spacing:.08em;white-space:nowrap;}
-  .w-price-r{margin-left:auto;font-family:'Cormorant Garamond',serif;font-weight:700;
-             font-size:18px;white-space:nowrap;}
+  .w-price-r{margin-left:auto;font-family:'Zen Kaku Gothic New',sans-serif;font-weight:700;
+             font-size:18px;white-space:nowrap;letter-spacing:.01em;}
   .w-desc{font-size:12.5px;font-weight:400;color:var(--muted);
           line-height:1.65;margin-top:1.5mm;}
 
@@ -115,8 +115,8 @@
           letter-spacing:.03em;}
   .r-note{font-size:12px;color:var(--muted);font-weight:400;}
   .r-dots{flex:1;min-width:6mm;}
-  .r-price{font-family:'Cormorant Garamond',serif;font-weight:700;
-           font-size:18px;letter-spacing:.02em;}
+  .r-price{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:700;
+           font-size:18px;letter-spacing:.01em;}
 
   /* フッター */
   .foot{margin-top:auto;padding-top:4mm;}
@@ -126,7 +126,7 @@
                   font-size:13px;letter-spacing:.14em;white-space:nowrap;
                   border-right:1px solid var(--gold);padding-right:3.5mm;}
   .set-band p{font-size:11.5px;font-weight:400;line-height:1.65;color:var(--ink);}
-  .notes{margin-top:2.6mm;font-size:10.5px;color:var(--muted);font-weight:400;
+  .notes{margin-top:2.6mm;font-size:11.5px;color:var(--muted);font-weight:400;
          line-height:1.7;text-align:center;letter-spacing:.03em;}
   .pageno{position:absolute;bottom:9mm;left:0;right:0;text-align:center;z-index:1;
           font-family:'Cormorant Garamond',serif;font-size:9px;color:var(--muted);
@@ -212,8 +212,8 @@ document.getElementById('printBtn').addEventListener('click', function(){
   </div>
 
   <div class="wine">
-    <div class="w-top"><span class="w-name">クラフトビール　シルクエール〈白〉</span><span class="w-kura">スプリングバレー</span><span class="w-price-r">¥650</span></div>
-    <div class="w-desc">きめ細かなふわとろの泡と華やかな香り。シルクのようにまろやかな口当たりの白ビールです。</div>
+    <div class="w-top"><span class="w-name">九州CRAFT　日向夏</span><span class="w-kura">クラフトビール</span><span class="w-badge">期間限定</span><span class="w-price-r">¥650</span></div>
+    <div class="w-desc">柑橘の爽やかな香りが広がる、期間限定のクラフトビールです。</div>
   </div>
 
   <footer class="foot">
@@ -336,7 +336,6 @@ document.getElementById('printBtn').addEventListener('click', function(){
 
   <div class="rows">
     <div class="row"><span class="r-name">トマトジュース</span><span class="r-dots"></span><span class="r-price">¥420</span></div>
-    <div class="row"><span class="r-name">パインジュース</span><span class="r-dots"></span><span class="r-price">¥420</span></div>
     <div class="row"><span class="r-name">ザクロジュース</span><span class="r-dots"></span><span class="r-price">¥420</span></div>
     <div class="row"><span class="r-name">マンゴージュース</span><span class="r-dots"></span><span class="r-price">¥420</span></div>
     <div class="row"><span class="r-name">たかのりんごのりんごジュース</span><span class="r-dots"></span><span class="r-price">¥550</span></div>
@@ -366,6 +365,18 @@ document.getElementById('printBtn').addEventListener('click', function(){
     <div class="row"><span class="r-name">ごぼう茶</span><span class="r-dots"></span><span class="r-price">¥430</span></div>
     <div class="row"><span class="r-name">珈琲</span><span class="r-dots"></span><span class="r-price">¥550</span></div>
     <div class="row"><span class="r-name">紅茶</span><span class="r-dots"></span><span class="r-price">¥550</span></div>
+  </div>
+
+  <div class="sec"><h2>ポットでゆっくりと</h2><span class="en">Tea Pot</span><span class="ln"></span></div>
+
+  <div class="wine">
+    <div class="w-top"><span class="w-name">ルイボスティー</span><span class="w-kura">ティーポット</span><span class="w-price-r">¥1,000</span></div>
+    <div class="w-desc">ティーポットでお出しします。カフェインを含まないお茶ですので、食後のひとときや、これからお休みになる前にも。数杯分をゆっくりと召し上がっていただけます。</div>
+  </div>
+
+  <div class="wine">
+    <div class="w-top"><span class="w-name">中国茶</span><span class="w-kura">ティーポット</span><span class="w-price-r">別紙</span></div>
+    <div class="w-desc">中国茶専門店「姫茶伝」から仕入れた茶葉をご用意しています。茶葉の種類は別紙〈中国茶メニュー〉をご覧ください。</div>
   </div>
 
   <footer class="foot">

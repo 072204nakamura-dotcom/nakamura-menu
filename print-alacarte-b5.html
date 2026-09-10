@@ -60,14 +60,14 @@
 
   /* コースへの案内 */
   .lead-box{border:1px solid var(--gold);border-radius:2px;background:#F6F1E3;
-            padding:4mm 6mm;margin-top:2mm;text-align:center;}
+            padding:3.2mm 6mm;margin-top:1mm;text-align:center;}
   .lead-box .t{font-family:'Shippori Mincho',serif;font-weight:700;font-size:15px;
                letter-spacing:.16em;color:var(--gold-deep);}
-  .lead-box p{font-size:11.5px;font-weight:400;line-height:1.75;color:var(--ink);
+  .lead-box p{font-size:14px;font-weight:400;line-height:1.75;color:var(--ink);
               margin-top:1.8mm;}
 
   /* セクション見出し */
-  .sec{display:flex;align-items:baseline;gap:4mm;margin:7mm 0 3mm;}
+  .sec{display:flex;align-items:baseline;gap:4mm;margin:5mm 0 2.4mm;}
   .sec h2{font-family:'Shippori Mincho',serif;font-weight:700;font-size:19px;
           letter-spacing:.22em;color:var(--sage);white-space:nowrap;}
   .sec .en{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:600;
@@ -75,19 +75,19 @@
   .sec .ln{flex:1;border-top:1px dotted var(--line);transform:translateY(-2px);}
 
   /* 品目 */
-  .dish{padding:3.4mm 0;border-bottom:1px dotted var(--line);break-inside:avoid;}
+  .dish{padding:2.3mm 0;border-bottom:1px dotted var(--line);break-inside:avoid;}
   .dish:last-of-type{border-bottom:none;}
   .d-top{display:flex;align-items:baseline;gap:3mm;}
-  .d-name{font-family:'Shippori Mincho',serif;font-weight:700;font-size:16.5px;
+  .d-name{font-family:'Shippori Mincho',serif;font-weight:700;font-size:18px;
           letter-spacing:.02em;line-height:1.4;}
-  .d-price{margin-left:auto;font-family:'Cormorant Garamond',serif;font-weight:700;
-           font-size:18px;white-space:nowrap;}
-  .d-desc{font-size:12.5px;font-weight:400;color:var(--muted);
-          line-height:1.6;margin-top:1.4mm;}
+  .d-price{margin-left:auto;font-family:'Zen Kaku Gothic New',sans-serif;
+           font-weight:700;font-size:19px;white-space:nowrap;letter-spacing:.01em;}
+  .d-desc{font-size:14px;font-weight:400;color:var(--muted);
+          line-height:1.7;margin-top:1.4mm;}
 
   /* フッター */
   .foot{margin-top:auto;padding-top:4mm;}
-  .notes{font-size:10.5px;color:var(--muted);font-weight:400;
+  .notes{font-size:11.5px;color:var(--muted);font-weight:400;
          line-height:1.8;text-align:center;letter-spacing:.03em;}
 
   /* ===== 印刷ルール ===== */
@@ -132,8 +132,13 @@
   </div>
 
   <div class="dish">
+    <div class="d-top"><span class="d-name">カルボナーラ</span><span class="d-price">¥1,200</span></div>
+    <div class="d-desc">卵とチーズのまろやかなコク。しっかりとした味わいで、食べごたえのある一皿です。</div>
+  </div>
+
+  <div class="dish">
     <div class="d-top"><span class="d-name">海老のトマトクリームソース</span><span class="d-price">¥1,500</span></div>
-    <div class="d-desc">海老の旨みをトマトクリームで包み込みました。三種の中でいちばん濃厚な、食べごたえのある一皿です。</div>
+    <div class="d-desc">海老の旨みをトマトクリームで包み込みました。いちばん濃厚で、満足感のある一皿です。</div>
   </div>
 
   <div class="sec"><h2>サイドメニュー</h2><span class="en">Side Dish</span><span class="ln"></span></div>
