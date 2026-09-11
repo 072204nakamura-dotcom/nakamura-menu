@@ -37,9 +37,9 @@
                    padding:12px 16px;font-size:12.5px;line-height:1.8;color:#4A3B1E;}
   .print-alert b{color:#7A5A12;}
 
-  /* ===== B5ページ ===== */
-  .page{width:182mm;min-height:257mm;background:var(--paper);
-        margin:14px auto;padding:14mm 15mm 11mm;position:relative;
+  /* ===== A4ページ ===== */
+  .page{width:210mm;min-height:297mm;background:var(--paper);
+        margin:14px auto;padding:17mm 18mm 13mm;position:relative;
         box-shadow:0 2px 14px rgba(0,0,0,.12);
         display:flex;flex-direction:column;}
 
@@ -79,44 +79,42 @@
   .feature{border:1px solid var(--gold);border-radius:2px;background:#F6F1E3;
            padding:4mm 5mm;margin-top:2mm;break-inside:avoid;}
   .f-top{display:flex;align-items:baseline;gap:3mm;}
-  .f-name{font-family:'Shippori Mincho',serif;font-weight:700;font-size:19px;
+  .f-name{font-family:'Shippori Mincho',serif;font-weight:700;font-size:21px;
           letter-spacing:.1em;color:var(--sage);}
-  .f-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12.5px;
+  .f-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;
         font-weight:600;color:#96762F;letter-spacing:.1em;}
   .f-price{margin-left:auto;font-family:'Zen Kaku Gothic New',sans-serif;font-weight:700;
-           font-size:18.5px;color:#96762F;white-space:nowrap;letter-spacing:.01em;}
-  .feature p{font-size:12.5px;font-weight:400;line-height:1.7;color:var(--ink);
+           font-size:20px;color:#96762F;white-space:nowrap;letter-spacing:.01em;}
+  .feature p{font-size:14px;font-weight:400;line-height:1.75;color:var(--ink);
              margin-top:2mm;}
 
   /* 品目（紹介文つき） */
   .wine{padding:3.2mm 0;border-bottom:1px dotted var(--line);
         break-inside:avoid;}
-  /* 1ページ目は品数が多いので、そのページだけ行間をわずかに詰める */
-  .page:first-of-type .wine{padding:2.4mm 0;}
-  .page:first-of-type .feature{padding:3.4mm 5mm;}
+  /* A4になって余裕ができたので、1ページ目も他と同じ行間で組む */
   .wine:last-of-type{border-bottom:none;}
   .w-top{display:flex;align-items:baseline;gap:2.5mm;}
-  .w-name{font-family:'Shippori Mincho',serif;font-weight:700;font-size:17px;
+  .w-name{font-family:'Shippori Mincho',serif;font-weight:700;font-size:19px;
           letter-spacing:.02em;}
-  .w-kura{font-size:12px;color:var(--muted);font-weight:400;letter-spacing:.02em;}
-  .w-badge{font-size:10.5px;color:#fff;background:#96762F;border-radius:2px;
+  .w-kura{font-size:12.5px;color:var(--muted);font-weight:400;letter-spacing:.02em;}
+  .w-badge{font-size:11.5px;color:#fff;background:#96762F;border-radius:2px;
            padding:.8mm 2.2mm;letter-spacing:.08em;white-space:nowrap;}
   .w-price-r{margin-left:auto;font-family:'Zen Kaku Gothic New',sans-serif;font-weight:700;
-             font-size:18px;white-space:nowrap;letter-spacing:.01em;}
-  .w-desc{font-size:12.5px;font-weight:400;color:var(--muted);
-          line-height:1.65;margin-top:1.5mm;}
+             font-size:19px;white-space:nowrap;letter-spacing:.01em;}
+  .w-desc{font-size:14px;font-weight:400;color:var(--muted);
+          line-height:1.75;margin-top:1.5mm;}
 
   /* 品目（シンプル行） */
   .rows{margin-top:.5mm;}
   .row{display:flex;align-items:baseline;gap:2.5mm;padding:1.9mm 0;
        border-bottom:1px dotted var(--line);break-inside:avoid;}
   .rows .row:last-child{border-bottom:none;}
-  .r-name{font-family:'Shippori Mincho',serif;font-weight:700;font-size:16px;
+  .r-name{font-family:'Shippori Mincho',serif;font-weight:700;font-size:18px;
           letter-spacing:.03em;}
-  .r-note{font-size:12px;color:var(--muted);font-weight:400;}
+  .r-note{font-size:12.5px;color:var(--muted);font-weight:400;}
   .r-dots{flex:1;min-width:6mm;}
   .r-price{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:700;
-           font-size:18px;letter-spacing:.01em;}
+           font-size:19px;letter-spacing:.01em;}
 
   /* フッター */
   .foot{margin-top:auto;padding-top:4mm;}
@@ -125,7 +123,7 @@
   .set-band .mark{font-family:'Shippori Mincho',serif;color:#96762F;font-weight:700;
                   font-size:13px;letter-spacing:.14em;white-space:nowrap;
                   border-right:1px solid var(--gold);padding-right:3.5mm;}
-  .set-band p{font-size:11.5px;font-weight:400;line-height:1.65;color:var(--ink);}
+  .set-band p{font-size:13px;font-weight:400;line-height:1.75;color:var(--ink);}
   .notes{margin-top:2.6mm;font-size:11.5px;color:var(--muted);font-weight:400;
          line-height:1.7;text-align:center;letter-spacing:.03em;}
   .pageno{position:absolute;bottom:9mm;left:0;right:0;text-align:center;z-index:1;
@@ -133,11 +131,11 @@
           letter-spacing:.3em;}
 
   /* ===== 印刷ルール ===== */
-  @page{size:182mm 257mm;margin:0;}
+  @page{size:210mm 297mm;margin:0;}
   @media print{
     html,body{background:#fff;}
     .toolbar{display:none;}
-    .page{margin:0;box-shadow:none;width:182mm;height:257mm;
+    .page{margin:0;box-shadow:none;width:210mm;height:297mm;
           page-break-after:always;}
     .page:last-child{page-break-after:auto;}
   }
