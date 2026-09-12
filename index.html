@@ -332,7 +332,7 @@ body{background:var(--bg);font-family:'Zen Kaku Gothic New',sans-serif;color:var
         <textarea id="bulk-voice-text" rows="4" placeholder="ここをタップしてマイクで話す"
           style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px;font-size:16px;font-family:'Zen Kaku Gothic New',sans-serif;color:var(--ink);outline:none;resize:vertical;line-height:1.6"></textarea>
         <button class="btn-save btn-gold" onclick="applyBulkVoice()" style="font-size:13px;padding:12px;margin-top:8px;margin-bottom:0">
-          ⬇️ 各皿に振り分ける
+          ⬇️ 各皿に振り分ける（話し終えたら必ず押す）
         </button>
       </div>
     </div>
@@ -602,25 +602,26 @@ function toggleBulkVoice(){
   arrow.textContent = open ? '▲' : '▼';
 }
 
+// 音声テキストを「皿ごと（料理名＋食材）」に解析する（共通）
+function parseBulkText(raw){
+  const segments = raw
+    .split(/次に|次は|つぎに|つぎは|次|つぎ|ツギ|\n/)
+    .map(s => s.replace(/^[、。,．\s]+|[、。,．\s]+$/g,''))
+    .filter(s => s.length > 0);
+  return segments.map(seg => {
+    const m = seg.split(/食材は|食材が|材料は|材料が/);
+    let name = (m[0]||'').replace(/^料理名は|^料理は/,'').replace(/^[、。,．\s]+|[、。,．\sです]+$/g,'');
+    let ing  = (m[1]||'').replace(/^[、。,．\s]+|[、。,．\sです]+$/g,'');
+    return { name, ing };
+  }).filter(p => p.name);
+}
+
 function applyBulkVoice(){
   const raw = (document.getElementById('bulk-voice-text').value||'').trim();
   if(!raw){ alert('まず音声またはキーボードで内容を入力してください。'); return; }
 
-  // 「次」「つぎ」「改行」で皿ごとに分割
-  const segments = raw
-    .split(/次に|次は|つぎに|つぎは|次|つぎ|\n/)
-    .map(s => s.replace(/^[、。,．\s]+|[、。,．\s]+$/g,''))
-    .filter(s => s.length > 0);
-
-  if(segments.length === 0){ alert('内容を読み取れませんでした。'); return; }
-
-  // 各皿を「食材は／食材が」で料理名と食材に分割
-  const parsed = segments.map(seg => {
-    const m = seg.split(/食材は|食材が|材料は|材料が/);
-    let name = (m[0]||'').replace(/^[、。,．\s]+|[、。,．\sです]+$/g,'');
-    let ing  = (m[1]||'').replace(/^[、。,．\s]+|[、。,．\sです]+$/g,'');
-    return { name, ing };
-  }).filter(p => p.name);
+  const parsed = parseBulkText(raw);
+  if(parsed.length === 0){ alert('内容を読み取れませんでした。'); return; }
 
   // 現在表示中の通常皿カードに順番に振り分け（オードブル盛り合わせ・肉料理セレクトはスキップ）
   const cards = [...document.querySelectorAll('#inp-dishes .dish-card')];
@@ -629,8 +630,8 @@ function applyBulkVoice(){
     if(i >= parsed.length) return;
     const key = card.dataset.key;
     if(key === 'app' || key === 'meat') return; // 盛り合わせ・肉料理は対象外
-    const nmEl = document.getElementById(`i-${key}nm`);
-    const igEl = document.getElementById(`i-${key}ig`);
+    const nmEl = card.querySelector(`[id="i-${key}nm"]`);
+    const igEl = card.querySelector(`[id="i-${key}ig"]`);
     if(!nmEl) return;
     nmEl.value = parsed[i].name;
     updateDishHead(`hd-${key}`, parsed[i].name);
@@ -652,6 +653,63 @@ function applyBulkVoice(){
   // 入力欄を閉じる
   document.getElementById('bulk-voice-body').style.display = 'none';
   document.getElementById('bulk-voice-arrow').textContent = '▼';
+}
+
+// ── 編集モーダル用 ──
+function toggleBulkVoiceEdit(){
+  const body = document.getElementById('edit-bulk-voice-body');
+  const arrow = document.getElementById('edit-bulk-voice-arrow');
+  const open = body.style.display === 'none';
+  body.style.display = open ? '' : 'none';
+  arrow.textContent = open ? '▲' : '▼';
+}
+
+function applyBulkVoiceEdit(){
+  if(!editingId) return;
+  const raw = (document.getElementById('edit-bulk-voice-text').value||'').trim();
+  if(!raw){ alert('まず音声またはキーボードで内容を入力してください。'); return; }
+
+  const parsed = parseBulkText(raw);
+  if(parsed.length === 0){ alert('内容を読み取れませんでした。'); return; }
+
+  const r = loadStore().find(x => x.id === editingId);
+  if(!r) return;
+
+  // 現在表示中の編集カードに順番に振り分け（盛り合わせ・肉料理はスキップ）
+  const cards = [...document.querySelectorAll('#edit-modal-body .edit-dish-card')];
+  let i = 0, filled = 0;
+  cards.forEach(card => {
+    if(i >= parsed.length) return;
+    const orig = r.dishes[parseInt(card.dataset.idx)];
+    if(!orig) return;
+    const isAppDish  = orig.isApp  || orig.key==='app'  || orig.name==='オードブル盛り合わせ';
+    const isMeatDish = orig.isMeat || orig.key==='meat' || orig.name==='肉料理セレクト';
+    if(isAppDish || isMeatDish) return;
+    const dishKey = orig.key || `d${orig.num}`;
+    const nmEl = card.querySelector(`[id="e-${dishKey}nm"]`);
+    const igEl = card.querySelector(`[id="e-${dishKey}ig"]`);
+    if(!nmEl) return;
+    nmEl.value = parsed[i].name;
+    autoResize(nmEl);
+    if(igEl){ igEl.value = parsed[i].ing; autoResize(igEl); }
+    // カードのヘッダー表示も更新
+    const ttl = card.querySelector('.hd-ttl');
+    if(ttl) ttl.textContent = parsed[i].name || '料理';
+    i++; filled++;
+  });
+
+  if(filled === 0){
+    alert('振り分け先の皿が見つかりませんでした。');
+    return;
+  }
+
+  let msg = `⬇️ ${filled}皿に振り分けました`;
+  if(parsed.length > filled){
+    msg += `（${parsed.length - filled}品は皿が足りず未反映。＋皿を追加してから再度お試しください）`;
+  }
+  showToast(msg);
+  document.getElementById('edit-bulk-voice-body').style.display = 'none';
+  document.getElementById('edit-bulk-voice-arrow').textContent = '▼';
 }
 
 // ═══════════════════════════════════
@@ -1255,6 +1313,17 @@ function saveRecord(source){
   let date, note, dishes, mode, customer;
 
   if(source==='input'){
+    // 🎤 音声入力欄に内容が残っていて、料理名がどこも空なら自動で振り分ける（押し忘れ対策）
+    const bulkRaw = (document.getElementById('bulk-voice-text')?.value||'').trim();
+    if(bulkRaw){
+      const anyName = [...document.querySelectorAll('#inp-dishes .dish-card')].some(c=>{
+        const k = c.dataset.key;
+        if(k==='app'||k==='meat') return false;
+        return (c.querySelector(`[id="i-${k}nm"]`)?.value||'').trim() !== '';
+      });
+      if(!anyName) applyBulkVoice();
+    }
+
     date=document.getElementById('inp-date').value;
     note=(document.getElementById('inp-note').value||'').trim();
     customer=(document.getElementById('inp-customer').value||'').trim();
@@ -1297,6 +1366,7 @@ function clearInput(){
   document.querySelectorAll('#inp-dishes .finp').forEach(e=>e.value='');
   document.getElementById('inp-note').value='';
   document.getElementById('inp-customer').value='';
+  const bv=document.getElementById('bulk-voice-text'); if(bv) bv.value='';
   // ヘッダーもリセット
   document.querySelectorAll('#inp-dishes .hd-ttl[id^="hd-"]').forEach(el=>{
     el.textContent='料理名を入力してください';
@@ -1917,6 +1987,30 @@ function openEdit(id){
     </div>`;
   wrap.appendChild(dateWrap);
 
+  // ── 🎤 まとめて音声入力（編集用） ──
+  const bulkCard = document.createElement('div');
+  bulkCard.className = 'card';
+  bulkCard.style.marginBottom = '12px';
+  bulkCard.innerHTML = `
+    <button onclick="toggleBulkVoiceEdit()" style="width:100%;border:none;background:transparent;padding:13px 15px;display:flex;align-items:center;gap:8px;cursor:pointer;font-family:'Shippori Mincho B1',serif;font-size:13px;font-weight:700;color:var(--gd)">
+      <span style="font-size:16px">🎤</span>
+      <span style="flex:1;text-align:left">まとめて音声入力</span>
+      <span id="edit-bulk-voice-arrow" style="font-size:11px;color:var(--mid)">▼</span>
+    </button>
+    <div id="edit-bulk-voice-body" style="display:none;padding:0 15px 14px">
+      <div style="font-size:11px;color:var(--mid);line-height:1.8;margin-bottom:8px;background:var(--light);border-radius:8px;padding:8px 10px">
+        下の欄をタップ → キーボードの<b>🎤マイク</b>で話してください。<br>
+        <b>「次」</b>で皿を区切り、<b>「食材は」</b>の後に食材を話します。<br>
+        <span style="color:var(--gd)">例：パテドカンパーニュ 食材は豚肉と鶏レバー <b>次</b> 鯛のマリネ 食材は鯛と大根</span>
+      </div>
+      <textarea id="edit-bulk-voice-text" rows="4" placeholder="ここをタップしてマイクで話す"
+        style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px;font-size:16px;font-family:'Zen Kaku Gothic New',sans-serif;color:var(--ink);outline:none;resize:vertical;line-height:1.6"></textarea>
+      <button class="btn-save btn-gold" onclick="applyBulkVoiceEdit()" style="font-size:13px;padding:12px;margin-top:8px;margin-bottom:0">
+        ⬇️ 各皿に振り分ける（話し終えたら必ず押す）
+      </button>
+    </div>`;
+  wrap.appendChild(bulkCard);
+
   // ── 並び替えヒント ──
   const hint = document.createElement('div');
   hint.style.cssText = 'font-size:10px;color:var(--mid);text-align:center;margin-bottom:10px;letter-spacing:.08em';
@@ -2228,6 +2322,22 @@ function editDayClick(el, mode){
 
 function saveEdit(){
   if(!editingId) return;
+
+  // 🎤 音声入力欄に内容が残っていて、料理名がどこも空なら自動で振り分ける（押し忘れ対策）
+  const editBulkRaw = (document.getElementById('edit-bulk-voice-text')?.value||'').trim();
+  if(editBulkRaw){
+    const rr = loadStore().find(x => x.id === editingId);
+    const anyName = rr && [...document.querySelectorAll('#edit-modal-body .edit-dish-card')].some(c=>{
+      const o = rr.dishes[parseInt(c.dataset.idx)];
+      if(!o) return false;
+      if(o.isApp||o.key==='app'||o.name==='オードブル盛り合わせ') return false;
+      if(o.isMeat||o.key==='meat'||o.name==='肉料理セレクト') return false;
+      const dk = o.key || `d${o.num}`;
+      return (c.querySelector(`[id="e-${dk}nm"]`)?.value||'').trim() !== '';
+    });
+    if(!anyName) applyBulkVoiceEdit();
+  }
+
   const store = loadStore();
   const idx = store.findIndex(r => r.id === editingId);
   if(idx < 0) return;
