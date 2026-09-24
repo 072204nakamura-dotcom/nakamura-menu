@@ -287,6 +287,14 @@ body{background:var(--bg);font-family:'Zen Kaku Gothic New',sans-serif;color:var
     </button>
   </div>
 
+  <!-- 使い方・ご意見箱 -->
+  <div style="display:flex;gap:8px;padding:8px 14px 2px">
+    <a href="manual.html" target="_blank" rel="noopener"
+       style="flex:1;text-align:center;padding:7px;background:#fff;border:1.5px solid var(--border);border-radius:8px;color:var(--mid);font-size:12px;font-weight:700;text-decoration:none;font-family:'Zen Kaku Gothic New',sans-serif">❓ 使い方</a>
+    <button onclick="openFeedback()"
+       style="flex:1;padding:7px;background:#fff;border:1.5px solid var(--gm);border-radius:8px;color:var(--gd);font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;font-family:'Zen Kaku Gothic New',sans-serif">💬 ご意見箱</button>
+  </div>
+
   <!-- ═══════════════════════════
        TAB 1: 直接入力
   ═══════════════════════════ -->
@@ -547,6 +555,14 @@ body{background:var(--bg);font-family:'Zen Kaku Gothic New',sans-serif;color:var
   </div>
 </div>
 
+<!-- 💬 ご意見箱モーダル -->
+<div class="modal-overlay" id="fb-modal" onclick="if(event.target===this)closeFbModal()">
+  <div class="modal" style="max-height:88vh">
+    <div class="modal-handle"></div>
+    <div id="fb-modal-body"></div>
+  </div>
+</div>
+
 <!-- 印刷レイヤーはJSで動的生成 -->
 
 <script>
@@ -589,6 +605,63 @@ async function saveStore(data){
       showSyncBadge('err');
     }
   }
+}
+
+// ═══════════════════════════════════
+// 💬 ご意見箱
+// ═══════════════════════════════════
+const FEEDBACK_APP_NAME = '献立管理';
+
+function closeFbModal(){
+  document.getElementById('fb-modal').classList.remove('open');
+}
+
+function openFeedback(){
+  const kinds = ['困っている','こうしてほしい','不具合','その他'];
+  document.getElementById('fb-modal-body').innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
+      '<div style="font-family:\'Shippori Mincho B1\',serif;font-size:17px;font-weight:800">💬 ご意見箱</div>'+
+      '<button onclick="closeFbModal()" style="background:none;border:none;font-size:22px;color:var(--mid);cursor:pointer">✕</button>'+
+    '</div>'+
+    '<div style="font-size:12px;color:var(--mid);line-height:1.8;margin-bottom:10px">使いにくいところ、分からないところ、「こうなれば便利」を送ってください。小さなことでも大歓迎です。</div>'+
+    '<div style="font-size:11px;font-weight:700;color:var(--mid);margin-bottom:5px">お名前（任意）</div>'+
+    '<input id="fb-name" placeholder="書かなくてもOK" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:9px 10px;font-size:16px;font-family:\'Zen Kaku Gothic New\',sans-serif;margin-bottom:10px;-webkit-appearance:none">'+
+    '<div style="font-size:11px;font-weight:700;color:var(--mid);margin-bottom:5px">種類</div>'+
+    '<div id="fb-kinds" style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px">'+
+      kinds.map((k,i)=>'<button type="button" class="fb-kind'+(i===0?' on':'')+'" onclick="pickFbKind(this)" style="padding:6px 12px;border:1.5px solid var(--border);border-radius:16px;background:'+(i===0?'var(--gd)':'#fff')+';color:'+(i===0?'#fff':'var(--mid)')+';font-size:12px;font-weight:700;cursor:pointer">'+k+'</button>').join('')+
+    '</div>'+
+    '<div style="font-size:11px;font-weight:700;color:var(--mid);margin-bottom:5px">内容</div>'+
+    '<textarea id="fb-text" rows="6" placeholder="例：お品書きの文字をもっと大きくしてほしい／保存の仕方が分かりにくい" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:9px 10px;font-size:16px;font-family:\'Zen Kaku Gothic New\',sans-serif;line-height:1.8;-webkit-appearance:none;resize:vertical"></textarea>'+
+    '<button class="btn-save btn-green" style="margin-top:12px;margin-bottom:8px" onclick="sendFeedback()">送信する</button>'+
+    '<button style="width:100%;padding:12px;border:none;background:transparent;font-size:13px;color:var(--mid);cursor:pointer;font-family:\'Shippori Mincho B1\',serif" onclick="closeFbModal()">キャンセル</button>';
+  document.getElementById('fb-modal').classList.add('open');
+  document.querySelector('#fb-modal .modal').scrollTop = 0;
+}
+
+function pickFbKind(el){
+  document.querySelectorAll('#fb-kinds .fb-kind').forEach(b=>{
+    b.classList.remove('on'); b.style.background='#fff'; b.style.color='var(--mid)';
+  });
+  el.classList.add('on'); el.style.background='var(--gd)'; el.style.color='#fff';
+}
+
+function sendFeedback(){
+  const text = (document.getElementById('fb-text').value||'').trim();
+  if(!text){ showToast('⚠️ 内容を書いてください'); return; }
+  const name = (document.getElementById('fb-name').value||'').trim();
+  const kindEl = document.querySelector('#fb-kinds .fb-kind.on');
+  const kind = kindEl ? kindEl.textContent : 'その他';
+  if(!GAS_URL){ showToast('⚠️ クラウド設定がまだです'); return; }
+  try{
+    fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({action:'save_feedback', data:{ feedback:{
+        at: new Date().toLocaleString('ja-JP'),
+        app: FEEDBACK_APP_NAME,
+        name: name, kind: kind, text: text
+      }}})});
+  }catch(e){}
+  closeFbModal();
+  showToast('✅ 送信しました。ありがとうございます');
 }
 
 // ═══════════════════════════════════
