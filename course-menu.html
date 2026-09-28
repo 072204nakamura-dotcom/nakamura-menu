@@ -81,8 +81,8 @@
   .p-row:last-child{border-bottom:none;}
   .p-lbl{font-family:'Shippori Mincho',serif;font-weight:600;font-size:15px;
          color:var(--ink);white-space:nowrap;}
-  .p-val{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:27px;
-         color:var(--ink);line-height:1.1;}
+  .p-val{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:700;font-size:25px;
+         color:var(--ink);line-height:1.15;letter-spacing:.01em;}
   .price-tax{margin-top:8px;font-size:11.5px;color:var(--muted);}
   .course-head .opt{margin-top:12px;display:inline-block;max-width:100%;
                     padding:8px 16px;border:1px solid var(--line);border-radius:6px;
@@ -184,7 +184,8 @@ const COURSES = {
     prices: [
       ["お任せ", "¥4,800"],
       ["牛肉",   "¥5,500"],
-      ["ラム肉", "¥5,500"]
+      ["ラム肉", "¥5,500"],
+      ["近江鴨", "¥6,000"]
     ],
     opt: "珈琲・紅茶は ＋¥300（税別）<br>税込 ¥330 にて承ります",
     dishes: [
@@ -194,7 +195,7 @@ const COURSES = {
       ["IV",   "ショートパスタ",    "その日の食材で仕上げる、シェフのひと皿"],
       ["V",    "魚料理",            "旬の魚介をシンプルに、素材の味を大切に"],
       ["VI",   "お口直しのスープ",  "温かなスープで、ひと息つく間を"],
-      ["VII",  "肉料理",            "お任せ・牛肉・ラム肉からお選びいただけます"],
+      ["VII",  "肉料理",            "お任せ・牛肉・ラム肉・近江鴨からお選びいただけます"],
       ["VIII", "デザート",          "手作りのひとさじで、余韻をゆっくりと"]
     ]
   },
@@ -202,13 +203,13 @@ const COURSES = {
     en: "Lunch Course",
     ribbon: "ランチコース　6品",
     price: "¥3,300",
-    opt: "料理を牛肉に変更：＋¥1,500",
+    opt: "肉料理を 牛肉・ラム肉・近江鴨 に変更：それぞれ ＋¥1,500",
     dishes: [
       ["I",   "オードブル盛り合わせ 3種",   "旬の野菜・自家製テリーヌなど、季節の素材で"],
       ["II",  "ショートパスタ",             "その日の食材で仕上げる、シェフのパスタ"],
       ["III", "魚料理",                     "旬の魚介をシンプルに、素材の味を大切に"],
       ["IV",  "季節のスープ",               "季節の野菜を使った、やさしい一皿"],
-      ["V",   "肉料理",                     "地元野菜を添え、丁寧に火を入れて"],
+      ["V",   "肉料理",                     "牛肉・ラム肉・近江鴨への変更も承ります（各＋¥1,500）"],
       ["VI",  "デザート ＋ 珈琲または紅茶", "手作りのひとさじで、余韻をゆっくりと"]
     ]
   }
