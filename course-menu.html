@@ -84,6 +84,11 @@
   .p-val{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:700;font-size:25px;
          color:var(--ink);line-height:1.15;letter-spacing:.01em;}
   .price-tax{margin-top:8px;font-size:11.5px;color:var(--muted);}
+  .meat-note{margin-top:12px;padding:10px 14px;border-left:3px solid var(--gold);
+             background:#fff;border-radius:0 6px 6px 0;text-align:left;
+             font-size:14px;font-weight:400;line-height:1.8;color:#2B2B28;}
+  .meat-note b{font-family:'Shippori Mincho',serif;font-weight:700;
+               color:var(--gold-deep,#8F7226);margin-right:4px;}
   .course-head .opt{margin-top:12px;display:inline-block;max-width:100%;
                     padding:8px 16px;border:1px solid var(--line);border-radius:6px;
                     font-size:12.5px;line-height:1.7;color:var(--muted);background:#fff;}
@@ -187,6 +192,7 @@ const COURSES = {
       ["ラム肉", "¥5,500"],
       ["近江鴨", "¥6,000"]
     ],
+    meat: "<b>近江鴨</b>　皮目を香ばしく、中はしっとりと焼き上げます。<br>噛むほどに広がる旨みを、赤ワインとご一緒にどうぞ。",
     opt: "珈琲・紅茶は ＋¥300（税別）<br>税込 ¥330 にて承ります",
     dishes: [
       ["I",    "アミューズ",        "季節の素材で、ひと口の遊び心を"],
@@ -239,6 +245,7 @@ function render(key){
       <div class="en">${c.en}</div>
       <div class="ribbon">${c.ribbon}</div>
       ${priceBlock}
+      ${c.meat ? `<div class="meat-note">${c.meat}</div>` : ""}
       <div class="opt">${c.opt}</div>
     </div>
     <div class="${isLunch ? "lunch-list" : ""}">${dishes}</div>
