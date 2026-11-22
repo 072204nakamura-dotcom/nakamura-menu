@@ -345,6 +345,27 @@ body{background:var(--bg);font-family:'Zen Kaku Gothic New',sans-serif;color:var
       </div>
     </div>
 
+    <!-- 📷 手書き読み取り（AI） -->
+    <div class="card" style="margin-bottom:10px">
+      <button onclick="toggleOcrBox('ocr')" style="width:100%;border:none;background:transparent;padding:13px 15px;display:flex;align-items:center;gap:8px;cursor:pointer;font-family:'Shippori Mincho B1',serif;font-size:13px;font-weight:700;color:var(--gd)">
+        <span style="font-size:16px">📷</span>
+        <span style="flex:1;text-align:left">手書きメモを読み取り（AI）</span>
+        <span id="ocr-arrow" style="font-size:11px;color:var(--mid)">▼</span>
+      </button>
+      <div id="ocr-body" style="display:none;padding:0 15px 14px">
+        <div style="font-size:11px;color:var(--mid);line-height:1.8;margin-bottom:8px;background:var(--light);border-radius:8px;padding:8px 10px">
+          紙に書いた献立を撮影すると、AIが読み取って各皿に自動で入ります。<br>
+          専用の <a href="tegaki.html" target="_blank" rel="noopener" style="color:var(--gd);font-weight:700">📄 手書き用紙</a> を使うと読み取り精度が上がります。<br>
+          <span style="color:var(--gd)">コツ：真上から・明るい場所で・1枚ずつ撮影</span>
+        </div>
+        <label class="btn-save btn-green" style="font-size:13px;padding:12px;margin-bottom:0;display:block;text-align:center;cursor:pointer">
+          📷 撮影 / 写真を選ぶ
+          <input type="file" accept="image/*" style="display:none" onchange="startOcr(this,'input')">
+        </label>
+        <div id="ocr-status" style="font-size:12px;font-weight:700;color:var(--gd);line-height:1.7;margin-top:8px;min-height:18px"></div>
+      </div>
+    </div>
+
     <!-- 皿入力エリア -->
     <div id="inp-dishes"></div>
 
@@ -662,6 +683,163 @@ function sendFeedback(){
   }catch(e){}
   closeFbModal();
   showToast('✅ 送信しました。ありがとうございます');
+}
+
+// ═══════════════════════════════════
+// 📷 手書き読み取り（AI / Gemini via GAS）
+// ═══════════════════════════════════
+function toggleOcrBox(prefix){
+  const body = document.getElementById(prefix + '-body');
+  const arrow = document.getElementById(prefix + '-arrow');
+  const open = body.style.display === 'none';
+  body.style.display = open ? '' : 'none';
+  arrow.textContent = open ? '▲' : '▼';
+}
+
+// 撮影画像をOCR用に圧縮（最大1400px・JPEG82%）
+function compressForOcr(file, cb){
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const maxDim = 1400;
+      let w = img.width, h = img.height;
+      if(Math.max(w,h) > maxDim){
+        const r = maxDim / Math.max(w,h);
+        w = Math.round(w*r); h = Math.round(h*r);
+      }
+      const cv = document.createElement('canvas');
+      cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(img, 0, 0, w, h);
+      cb(cv.toDataURL('image/jpeg', 0.82));
+    };
+    img.onerror = () => alert('画像を読み込めませんでした。別の写真でお試しください。');
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function startOcr(inputEl, target){
+  const file = inputEl.files && inputEl.files[0];
+  inputEl.value = ''; // 同じ写真を選び直せるように
+  if(!file) return;
+  if(!GAS_URL){
+    alert('クラウドURLが未設定です。\n右上の「☁️ クラウド設定」からURLを登録してください。');
+    return;
+  }
+  const statusEl = document.getElementById(target === 'edit' ? 'edit-ocr-status' : 'ocr-status');
+  statusEl.textContent = '📷 画像を準備中…';
+
+  compressForOcr(file, (base64) => {
+    const job = 'j' + Date.now();
+    try{
+      fetch(GAS_URL, {
+        method:'POST', mode:'no-cors',
+        headers:{ 'Content-Type':'text/plain' },
+        body: JSON.stringify({ action:'ocr', data:{ job: job, image: base64 } }),
+      });
+    }catch(e){}
+    statusEl.textContent = '🤖 AIが読み取り中…（10〜30秒ほどかかります）';
+    pollOcr(job, target, statusEl, 0);
+  });
+}
+
+function pollOcr(job, target, statusEl, tries){
+  if(tries > 24){
+    statusEl.textContent = '⚠️ 時間切れです。通信環境を確認してもう一度お試しください。';
+    return;
+  }
+  setTimeout(async () => {
+    try{
+      const res = await fetch(GAS_URL + '?type=ocr_result&job=' + job + '&t=' + Date.now());
+      const json = await res.json();
+      const d = json && json.data;
+      if(json.ok && d && d.status === 'done'){
+        const dishes = Array.isArray(d.dishes) ? d.dishes : [];
+        if(dishes.length === 0){
+          statusEl.textContent = '⚠️ 料理を読み取れませんでした。明るい場所で真上から撮り直してみてください。';
+          return;
+        }
+        if(target === 'edit') fillOcrEdit(dishes, statusEl);
+        else fillOcrInput(dishes, statusEl);
+        return;
+      }
+      if(json.ok && d && d.status === 'error'){
+        statusEl.textContent = '⚠️ 読み取りエラー：' + (d.message || '不明なエラー');
+        return;
+      }
+    }catch(e){ /* 準備中は無視して再確認 */ }
+    pollOcr(job, target, statusEl, tries + 1);
+  }, 2500);
+}
+
+// 読み取り結果を入力タブの各皿へ
+function fillOcrInput(dishes, statusEl){
+  const cards = [...document.querySelectorAll('#inp-dishes .dish-card')];
+  let i = 0, filled = 0;
+  cards.forEach(card => {
+    if(i >= dishes.length) return;
+    const key = card.dataset.key;
+    if(key === 'app' || key === 'meat') return;
+    const nmEl = card.querySelector(`[id="i-${key}nm"]`);
+    if(!nmEl) return;
+    const d = dishes[i];
+    const set = (sfx, val) => {
+      const el = card.querySelector(`[id="i-${key}${sfx}"]`);
+      if(el){ el.value = (val||'').trim(); autoResize(el); }
+    };
+    set('nm', d.name); set('ig', d.ingredient); set('mt', d.method);
+    set('sc', d.sauce); set('tp', d.topping);
+    updateDishHead(`hd-${key}`, (d.name||'').trim());
+    i++; filled++;
+  });
+  finishOcr(statusEl, filled, dishes.length, false);
+}
+
+// 読み取り結果を編集画面の各皿へ
+function fillOcrEdit(dishes, statusEl){
+  if(!editingId) return;
+  const r = loadStore().find(x => x.id === editingId);
+  if(!r) return;
+  const cards = [...document.querySelectorAll('#edit-modal-body .edit-dish-card')];
+  let i = 0, filled = 0;
+  cards.forEach(card => {
+    if(i >= dishes.length) return;
+    const orig = r.dishes[parseInt(card.dataset.idx)];
+    if(!orig) return;
+    if(orig.isApp || orig.key==='app' || orig.name==='オードブル盛り合わせ') return;
+    if(orig.isMeat || orig.key==='meat' || orig.name==='肉料理セレクト') return;
+    const dishKey = orig.key || `d${orig.num}`;
+    const nmEl = card.querySelector(`[id="e-${dishKey}nm"]`);
+    if(!nmEl) return;
+    const d = dishes[i];
+    const set = (sfx, val) => {
+      const el = card.querySelector(`[id="e-${dishKey}${sfx}"]`);
+      if(el){ el.value = (val||'').trim(); autoResize(el); }
+    };
+    set('nm', d.name); set('ig', d.ingredient); set('mt', d.method);
+    set('sc', d.sauce); set('tp', d.topping);
+    const ttl = card.querySelector('.hd-ttl');
+    if(ttl) ttl.textContent = (d.name||'').trim() || '料理';
+    i++; filled++;
+  });
+  finishOcr(statusEl, filled, dishes.length, true);
+}
+
+function finishOcr(statusEl, filled, total, isEdit){
+  if(filled === 0){
+    statusEl.textContent = '⚠️ 振り分け先の皿が見つかりませんでした。';
+    return;
+  }
+  let msg = `✅ ${filled}皿に読み取り結果を入れました`;
+  if(total > filled){
+    msg += isEdit
+      ? `（${total - filled}品は皿が足りず未反映。＋皿を追加して再撮影してください）`
+      : `（${total - filled}品は皿が足りず未反映）`;
+  }
+  msg += '。内容を確認して保存してください';
+  statusEl.textContent = msg;
+  showToast(`✅ ${filled}皿に読み取りました`);
 }
 
 // ═══════════════════════════════════
@@ -2083,6 +2261,29 @@ function openEdit(id){
       </button>
     </div>`;
   wrap.appendChild(bulkCard);
+
+  // ── 📷 手書き読み取り（編集用） ──
+  const ocrCard = document.createElement('div');
+  ocrCard.className = 'card';
+  ocrCard.style.marginBottom = '12px';
+  ocrCard.innerHTML = `
+    <button onclick="toggleOcrBox('edit-ocr')" style="width:100%;border:none;background:transparent;padding:13px 15px;display:flex;align-items:center;gap:8px;cursor:pointer;font-family:'Shippori Mincho B1',serif;font-size:13px;font-weight:700;color:var(--gd)">
+      <span style="font-size:16px">📷</span>
+      <span style="flex:1;text-align:left">手書きメモを読み取り（AI）</span>
+      <span id="edit-ocr-arrow" style="font-size:11px;color:var(--mid)">▼</span>
+    </button>
+    <div id="edit-ocr-body" style="display:none;padding:0 15px 14px">
+      <div style="font-size:11px;color:var(--mid);line-height:1.8;margin-bottom:8px;background:var(--light);border-radius:8px;padding:8px 10px">
+        紙に書いた献立を撮影すると、AIが読み取って各皿に自動で入ります。<br>
+        専用の <a href="tegaki.html" target="_blank" rel="noopener" style="color:var(--gd);font-weight:700">📄 手書き用紙</a> を使うと読み取り精度が上がります。
+      </div>
+      <label class="btn-save btn-green" style="font-size:13px;padding:12px;margin-bottom:0;display:block;text-align:center;cursor:pointer">
+        📷 撮影 / 写真を選ぶ
+        <input type="file" accept="image/*" style="display:none" onchange="startOcr(this,'edit')">
+      </label>
+      <div id="edit-ocr-status" style="font-size:12px;font-weight:700;color:var(--gd);line-height:1.7;margin-top:8px;min-height:18px"></div>
+    </div>`;
+  wrap.appendChild(ocrCard);
 
   // ── 並び替えヒント ──
   const hint = document.createElement('div');

@@ -96,7 +96,18 @@ tr:last-child th,tr:last-child td{border-bottom:none}
 </ol>
 <div class="box">💡 振り分けを押し忘れて保存しても、料理名が全部空のときは自動で振り分けてから保存されます。編集画面にも同じ音声入力があります。</div>
 
-<h2>5. 直す・消す・使い回す</h2>
+<h2>5. 📷 紙に書いて、撮影で入れる</h2>
+<p>紙の<b>手書き用紙</b>に書いた献立を撮影すると、AIが読み取って各皿に自動で入ります。</p>
+<ol>
+  <li>まず <a href="tegaki.html" target="_blank" rel="noopener" style="color:var(--gd);font-weight:700">📄 手書き用紙</a> を印刷しておきます（ランチ・ディナー・オードブルの3種。まとめて印刷してコピーしておくと便利です）。</li>
+  <li>枠の中に<b>はっきりした字・黒いペン</b>で書きます。空欄の皿はそのままでOK。</li>
+  <li>アプリの入力タブ（または編集画面）で <span class="btn">📷 手書きメモを読み取り（AI）</span> を開き、<span class="btn g">📷 撮影 / 写真を選ぶ</span> をタップ。</li>
+  <li><b>真上から・明るい場所で</b>撮影します。「🤖 AIが読み取り中…」と出て、10〜30秒で各皿に入ります。</li>
+  <li>読み取り結果を確認して、間違いがあれば手で直してから保存します。</li>
+</ol>
+<div class="box">💡 ふつうのメモ帳に書いたものでも読み取れますが、専用の手書き用紙のほうが正確に入ります。日付とお客様名はアプリ側で入力してください（紙の記入欄は厨房用のメモです）。</div>
+
+<h2>6. 直す・消す・使い回す</h2>
 <table>
   <tr><th><span class="btn">✏️ 編集</span></th><td>保存した献立を開いて直します。直したら <span class="btn g">💾 上書き保存する</span> を押します</td></tr>
   <tr><th><span class="btn">＋ 皿を追加する</span></th><td>オードブルの編集画面だけに出ます。皿が足りないとき押すと空の皿が増えます</td></tr>
@@ -104,7 +115,7 @@ tr:last-child th,tr:last-child td{border-bottom:none}
   <tr><th><span class="btn">削除</span></th><td>その献立を消します。確認が出ます。消すと戻せません</td></tr>
 </table>
 
-<h2>6. 印刷・お品書き・画像</h2>
+<h2>7. 印刷・お品書き・画像</h2>
 <p>履歴の各献立にあるボタンで作れます。</p>
 <table>
   <tr><th><span class="btn">🖨 印刷</span></th><td><b>献立メモ</b>（厨房用のA4・1枚）。左の料理名欄は白いので手書きもできます</td></tr>
@@ -113,7 +124,7 @@ tr:last-child th,tr:last-child td{border-bottom:none}
 </table>
 <div class="box">📱 iPhoneで印刷するとき：ボタンを押すと少し待ってから印刷画面が開きます。プリンタを選んで印刷、または「PDFとして保存」もできます。</div>
 
-<h2>7. クラウド（iPhoneとPCで同じデータを見る）</h2>
+<h2>8. クラウド（iPhoneとPCで同じデータを見る）</h2>
 <p>保存した献立は自動でクラウドにも送られます。別の端末で見るときは<span class="btn">📊 集計</span>タブの下の方にあるボタンを使います。</p>
 <table>
   <tr><th><span class="btn">💾 クラウドに保存する（この端末 → クラウド）</span></th><td>この端末のデータをクラウドへ送ります</td></tr>
@@ -122,7 +133,7 @@ tr:last-child th,tr:last-child td{border-bottom:none}
 </table>
 <div class="box">⚠️ アプリを開いただけではクラウドは読み込まれません（うっかり上書きを防ぐためです）。別の端末の最新データが見たいときは <span class="btn">📥 クラウドから読み込む</span> を押してください。</div>
 
-<h2>8. 言葉の意味</h2>
+<h2>9. 言葉の意味</h2>
 <table>
   <tr><th>ランチ</th><td>前菜3点盛り＋皿6枚のコース</td></tr>
   <tr><th>ディナー</th><td>皿9枚＋肉料理セレクト（4種から選ぶ）のコース</td></tr>
@@ -132,12 +143,14 @@ tr:last-child th,tr:last-child td{border-bottom:none}
   <tr><th>クラウド</th><td>インターネット上の保存場所。iPhoneとPCの橋渡し役</td></tr>
 </table>
 
-<h2>9. 困ったとき</h2>
+<h2>10. 困ったとき</h2>
 <table>
   <tr><th>「日付を入力してください」と出る</th><td>日付が空です。入力タブの一番上で日付を選んでから保存してください</td></tr>
   <tr><th>「⚠️ 内容を書いてください」と出る</th><td>ご意見箱の内容が空です。ひとこと書いてから送信してください</td></tr>
   <tr><th>「クラウドURLが未設定です」と出る</th><td>右上の <span class="btn">☁️ クラウド設定</span> からURLを登録してください（店主に聞けばURLが分かります）</td></tr>
   <tr><th>別の端末のデータが見えない</th><td>集計タブの <span class="btn">📥 クラウドから読み込む</span> を押してください</td></tr>
+  <tr><th>📷で「GEMINI_API_KEY not set」と出る</th><td>AI読み取りの鍵が未設定です。店主に伝えてください</td></tr>
+  <tr><th>📷の読み取りが間違う・空になる</th><td>真上から・明るい場所で撮り直してください。専用の手書き用紙＋黒ペンだと精度が上がります</td></tr>
   <tr><th>音声で話したのに皿に入らない</th><td><span class="btn g">⬇️ 各皿に振り分ける（話し終えたら必ず押す）</span> を押したか確認してください</td></tr>
   <tr><th>印刷が切れる・白紙になる</th><td>iPhoneはSafariで開いているか確認してください。一度タブを閉じて開き直すと直ることがあります</td></tr>
   <tr><th>画面が古いまま</th><td>ページを再読み込みしてください（PCは Ctrl＋Shift＋R）</td></tr>

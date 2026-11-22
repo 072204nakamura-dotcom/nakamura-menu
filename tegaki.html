@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>献立 手書き用紙 | 洋食だいにんぐ なかむら</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --green:#2a5c3f; --navy:#1a2e47; --orange:#b5651d;
+  --line:#2b2b2b; --label:#555;
+}
+body{font-family:'Zen Kaku Gothic New',sans-serif;background:#d8d4ca;color:#1a1a1a}
+
+/* ── 画面用ツールバー（印刷時は消える） ── */
+.toolbar{position:sticky;top:0;z-index:10;background:#2a5c3f;color:#fff;padding:12px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.toolbar .t-title{font-family:'Shippori Mincho B1',serif;font-weight:800;letter-spacing:.1em;margin-right:auto}
+.toolbar button{font-family:'Zen Kaku Gothic New',sans-serif;font-size:13px;font-weight:700;padding:8px 14px;border:none;border-radius:8px;cursor:pointer;background:#fff}
+.toolbar button.b-lunch{color:var(--green)}
+.toolbar button.b-dinner{color:var(--navy)}
+.toolbar button.b-takeout{color:var(--orange)}
+.toolbar button.b-all{background:#b8902a;color:#fff}
+.hint{max-width:210mm;margin:10px auto 0;font-size:12px;color:#444;padding:0 6px;line-height:1.7}
+
+/* ── 用紙 ── */
+.sheet{width:210mm;min-height:297mm;background:#fff;margin:12px auto;padding:9mm 10mm;position:relative;box-shadow:0 2px 14px rgba(0,0,0,.2)}
+.head{display:flex;align-items:flex-end;gap:5mm;border-bottom:1.2mm solid var(--line);padding-bottom:3mm;margin-bottom:4mm}
+.h-title{font-family:'Shippori Mincho B1',serif}
+.h-title .small{font-size:8pt;letter-spacing:.2em;color:#666}
+.h-title .big{font-size:16pt;font-weight:800;letter-spacing:.12em;line-height:1.1}
+.mode-tag{font-family:'Shippori Mincho B1',serif;font-size:15pt;font-weight:800;color:#fff;padding:2mm 6mm;letter-spacing:.2em;border-radius:2mm}
+.p-lunch  .mode-tag{background:var(--green)}
+.p-dinner .mode-tag{background:var(--navy)}
+.p-takeout .mode-tag{background:var(--orange)}
+.h-fields{margin-left:auto;display:flex;gap:5mm;align-items:flex-end}
+.h-field{font-size:9pt;font-weight:700}
+.h-field .wl{display:inline-block;border-bottom:.5mm solid var(--line);min-width:34mm;height:7mm;vertical-align:bottom}
+.h-note{font-size:7.5pt;color:#666;margin-bottom:3mm;line-height:1.5}
+
+/* 皿の行（表組み） */
+.rows{display:flex;flex-direction:column;gap:2mm}
+.dish{display:flex;border:.6mm solid var(--line);border-radius:1.5mm;overflow:hidden}
+.d-no{width:9mm;display:flex;align-items:center;justify-content:center;font-family:'Shippori Mincho B1',serif;font-size:13pt;font-weight:800;color:#fff;flex-shrink:0}
+.p-lunch  .d-no{background:var(--green)}
+.p-dinner .d-no{background:var(--navy)}
+.p-takeout .d-no{background:var(--orange)}
+.d-fields{flex:1;display:flex}
+.cell{border-left:.3mm solid var(--line);position:relative;padding:4.2mm 1.5mm 1mm}
+.cell:first-child{border-left:none}
+.cell .lb{position:absolute;top:.8mm;left:1.5mm;font-size:6pt;font-weight:700;color:var(--label);letter-spacing:.08em}
+.c-nm{width:24%}.c-ig{width:28%}.c-mt{width:15%}.c-sc{width:19%}.c-tp{width:14%}
+
+/* 前菜（ランチ）・肉料理（ディナー） */
+.wide{border:.6mm solid var(--line);border-radius:1.5mm;overflow:hidden;margin-bottom:2mm}
+.wide-hd{display:flex;align-items:center;gap:3mm;color:#fff;padding:1.6mm 3mm;font-family:'Shippori Mincho B1',serif;font-weight:800;font-size:10pt;letter-spacing:.1em}
+.p-lunch .wide-hd{background:var(--green)}
+.p-dinner .wide-hd{background:var(--navy)}
+.wide-hd .sub{font-size:7pt;font-weight:500;opacity:.85;letter-spacing:.05em}
+.wide-grid{display:flex}
+.wide-col{flex:1;border-left:.3mm solid var(--line)}
+.wide-col:first-child{border-left:none}
+.wc-hd{font-size:8pt;font-weight:700;text-align:center;padding:1mm 0;border-bottom:.3mm solid var(--line);background:#f2efe8}
+.wc-line{position:relative;padding:4.2mm 1.5mm 1mm;border-bottom:.2mm dashed #999}
+.wc-line:last-child{border-bottom:none}
+.wc-line .lb{position:absolute;top:.8mm;left:1.5mm;font-size:6pt;font-weight:700;color:var(--label)}
+
+.foot{position:absolute;left:10mm;right:10mm;bottom:5mm;display:flex;justify-content:space-between;font-size:6.5pt;color:#777;letter-spacing:.1em;border-top:.3mm solid #bbb;padding-top:1.5mm}
+
+/* 行の高さ */
+.p-lunch  .dish{height:30mm}
+.p-dinner .dish{height:21.5mm}
+.p-takeout .dish{height:16.2mm}
+.p-lunch  .wc-line{height:9.5mm}
+.p-dinner .wc-line{height:9mm}
+
+/* ── 印刷 ── */
+@media print{
+  @page{size:A4 portrait;margin:0}
+  body{background:#fff}
+  .toolbar,.hint{display:none}
+  .sheet{margin:0;box-shadow:none;page-break-after:always}
+  .sheet:last-child{page-break-after:auto}
+  body[data-only="lunch"]  .sheet:not(.p-lunch),
+  body[data-only="dinner"] .sheet:not(.p-dinner),
+  body[data-only="takeout"] .sheet:not(.p-takeout){display:none}
+  body[data-only] .sheet{page-break-after:auto}
+}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <span class="t-title">📄 献立 手書き用紙</span>
+  <button class="b-lunch"  onclick="printOne('lunch')">☀ ランチだけ印刷</button>
+  <button class="b-dinner" onclick="printOne('dinner')">🌙 ディナーだけ印刷</button>
+  <button class="b-takeout" onclick="printOne('takeout')">🍱 オードブルだけ印刷</button>
+  <button class="b-all" onclick="printOne('')">🖨 3枚すべて印刷</button>
+</div>
+<div class="hint">
+  書き終えたら、献立管理システムの「📷 手書きメモを読み取り（AI）」で撮影すると各皿に自動で入ります。
+  <b>はっきりした字で・枠の中に・黒いペン</b>で書くと読み取りやすくなります。まとめて印刷してコピーしておくと便利です。
+</div>
+
+<!-- ═══════════ ☀ ランチ ═══════════ -->
+<section class="sheet p-lunch">
+  <div class="head">
+    <div class="h-title">
+      <div class="small">YOUSHOKU DINING NAKAMURA</div>
+      <div class="big">献立 手書き用紙</div>
+    </div>
+    <div class="mode-tag">ランチ</div>
+    <div class="h-fields">
+      <div class="h-field">日付<span class="wl"></span></div>
+      <div class="h-field">お客様名<span class="wl"></span></div>
+    </div>
+  </div>
+  <div class="h-note">枠の中に、はっきりした字で書いてください。空欄の皿はそのままでOK。書き終えたらアプリの「📷 手書きメモを読み取り」で撮影します。</div>
+
+  <div class="wide">
+    <div class="wide-hd">オードブル盛り合わせ<span class="sub">3点盛り</span></div>
+    <div class="wide-grid">
+      <div class="wide-col">
+        <div class="wc-hd">① 一点目</div>
+        <div class="wc-line"><span class="lb">料理名</span></div>
+        <div class="wc-line"><span class="lb">食材</span></div>
+        <div class="wc-line"><span class="lb">調理法・ソース</span></div>
+      </div>
+      <div class="wide-col">
+        <div class="wc-hd">② 二点目</div>
+        <div class="wc-line"><span class="lb">料理名</span></div>
+        <div class="wc-line"><span class="lb">食材</span></div>
+        <div class="wc-line"><span class="lb">調理法・ソース</span></div>
+      </div>
+      <div class="wide-col">
+        <div class="wc-hd">③ 三点目</div>
+        <div class="wc-line"><span class="lb">料理名</span></div>
+        <div class="wc-line"><span class="lb">食材</span></div>
+        <div class="wc-line"><span class="lb">調理法・ソース</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rows">
+    <div class="dish"><div class="d-no">1</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+    <div class="dish"><div class="d-no">2</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+    <div class="dish"><div class="d-no">3</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+    <div class="dish"><div class="d-no">4</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+    <div class="dish"><div class="d-no">5</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+    <div class="dish"><div class="d-no">6</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+  </div>
+  <div class="foot"><span>洋食だいにんぐ なかむら ／ 献立 手書き用紙【ランチ】</span><span>撮影のコツ：真上から・明るく・1枚ずつ</span></div>
+</section>
+
+<!-- ═══════════ 🌙 ディナー ═══════════ -->
+<section class="sheet p-dinner">
+  <div class="head">
+    <div class="h-title">
+      <div class="small">YOUSHOKU DINING NAKAMURA</div>
+      <div class="big">献立 手書き用紙</div>
+    </div>
+    <div class="mode-tag">ディナー</div>
+    <div class="h-fields">
+      <div class="h-field">日付<span class="wl"></span></div>
+      <div class="h-field">お客様名<span class="wl"></span></div>
+    </div>
+  </div>
+  <div class="h-note">枠の中に、はっきりした字で書いてください。空欄の皿はそのままでOK。書き終えたらアプリの「📷 手書きメモを読み取り」で撮影します。</div>
+
+  <div class="rows" style="margin-bottom:2mm">
+    <div class="dish"><div class="d-no">1</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+    <div class="dish"><div class="d-no">2</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+    <div class="dish"><div class="d-no">3</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+    <div class="dish"><div class="d-no">4</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+    <div class="dish"><div class="d-no">5</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+    <div class="dish"><div class="d-no">6</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+    <div class="dish"><div class="d-no">7</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+    <div class="dish"><div class="d-no">8</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+    <div class="dish"><div class="d-no">9</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+  </div>
+
+  <div class="wide">
+    <div class="wide-hd">🥩 肉料理セレクト<span class="sub">4種類から選択</span></div>
+    <div class="wide-grid">
+      <div class="wide-col">
+        <div class="wc-hd">① 選択A</div>
+        <div class="wc-line"><span class="lb">料理名</span></div>
+        <div class="wc-line"><span class="lb">食材</span></div>
+      </div>
+      <div class="wide-col">
+        <div class="wc-hd">② 選択B</div>
+        <div class="wc-line"><span class="lb">料理名</span></div>
+        <div class="wc-line"><span class="lb">食材</span></div>
+      </div>
+      <div class="wide-col">
+        <div class="wc-hd">③ 選択C</div>
+        <div class="wc-line"><span class="lb">料理名</span></div>
+        <div class="wc-line"><span class="lb">食材</span></div>
+      </div>
+      <div class="wide-col">
+        <div class="wc-hd">④ 選択D</div>
+        <div class="wc-line"><span class="lb">料理名</span></div>
+        <div class="wc-line"><span class="lb">食材</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>洋食だいにんぐ なかむら ／ 献立 手書き用紙【ディナー】</span><span>撮影のコツ：真上から・明るく・1枚ずつ</span></div>
+</section>
+
+<!-- ═══════════ 🍱 オードブル ═══════════ -->
+<section class="sheet p-takeout">
+  <div class="head">
+    <div class="h-title">
+      <div class="small">YOUSHOKU DINING NAKAMURA</div>
+      <div class="big">献立 手書き用紙</div>
+    </div>
+    <div class="mode-tag">オードブル</div>
+    <div class="h-fields">
+      <div class="h-field">日付<span class="wl"></span></div>
+      <div class="h-field">お客様名<span class="wl"></span></div>
+    </div>
+  </div>
+  <div class="h-note">テイクアウトオードブル用（最大13品）。枠の中にはっきりした字で書いてください。空欄の皿はそのままでOK。書き終えたらアプリの「📷 手書きメモを読み取り」で撮影します。</div>
+
+  <div class="rows">
+    <div class="dish"><div class="d-no">1</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+    <div class="dish"><div class="d-no">2</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+    <div class="dish"><div class="d-no">3</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+    <div class="dish"><div class="d-no">4</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+    <div class="dish"><div class="d-no">5</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+    <div class="dish"><div class="d-no">6</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+    <div class="dish"><div class="d-no">7</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+    <div class="dish"><div class="d-no">8</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+    <div class="dish"><div class="d-no">9</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+    <div class="dish"><div class="d-no">10</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+    <div class="dish"><div class="d-no">11</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+    <div class="dish"><div class="d-no">12</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+    <div class="dish"><div class="d-no">13</div><div class="d-fields">
+      <div class="cell c-nm"><span class="lb">料理名</span></div><div class="cell c-ig"><span class="lb">食材</span></div><div class="cell c-mt"><span class="lb">調理法</span></div><div class="cell c-sc"><span class="lb">ソース</span></div><div class="cell c-tp"><span class="lb">トッピング</span></div>
+    </div></div>
+  </div>
+  <div class="foot"><span>洋食だいにんぐ なかむら ／ 献立 手書き用紙【オードブル】</span><span>撮影のコツ：真上から・明るく・1枚ずつ</span></div>
+</section>
+
+<script>
+function printOne(mode){
+  if(mode) document.body.dataset.only = mode;
+  else delete document.body.dataset.only;
+  window.print();
+}
+window.addEventListener('afterprint', () => { delete document.body.dataset.only; });
+</script>
+</body>
+</html>
