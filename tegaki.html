@@ -29,7 +29,7 @@ body{font-family:'Zen Kaku Gothic New',sans-serif;background:#d8d4ca;color:#1a1a
 .h-title{font-family:'Shippori Mincho B1',serif}
 .h-title .small{font-size:8pt;letter-spacing:.2em;color:#666}
 .h-title .big{font-size:16pt;font-weight:800;letter-spacing:.12em;line-height:1.1}
-.mode-tag{font-family:'Shippori Mincho B1',serif;font-size:15pt;font-weight:800;color:#fff;padding:2mm 6mm;letter-spacing:.2em;border-radius:2mm}
+.mode-tag{font-family:'Shippori Mincho B1',serif;font-size:15pt;font-weight:800;color:#fff;padding:2mm 6mm;letter-spacing:.2em;border-radius:2mm;white-space:nowrap}
 .p-lunch  .mode-tag{background:var(--green)}
 .p-dinner .mode-tag{background:var(--navy)}
 .p-takeout .mode-tag{background:var(--orange)}
@@ -69,17 +69,19 @@ body{font-family:'Zen Kaku Gothic New',sans-serif;background:#d8d4ca;color:#1a1a
 
 /* 行の高さ */
 .p-lunch  .dish{height:30mm}
-.p-dinner .dish{height:21.5mm}
+.p-dinner .dish{height:18.5mm}
 .p-takeout .dish{height:16.2mm}
 .p-lunch  .wc-line{height:9.5mm}
-.p-dinner .wc-line{height:9mm}
+.p-dinner .wc-line{height:8mm}
+.p-dinner .rows{gap:1.6mm}
+.p-dinner .h-note{margin-bottom:2mm}
 
 /* ── 印刷 ── */
 @media print{
   @page{size:A4 portrait;margin:0}
   body{background:#fff}
   .toolbar,.hint{display:none}
-  .sheet{margin:0;box-shadow:none;page-break-after:always}
+  .sheet{margin:0;box-shadow:none;page-break-after:always;height:297mm;overflow:hidden}
   .sheet:last-child{page-break-after:auto}
   body[data-only="lunch"]  .sheet:not(.p-lunch),
   body[data-only="dinner"] .sheet:not(.p-dinner),
